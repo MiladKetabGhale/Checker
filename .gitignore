@@ -1,0 +1,8 @@
+.HOLMK
+.hollogs
+*.ui
+*.uo
+*Theory.sig
+*Theory.sml
+*Theory.dat
+heap
