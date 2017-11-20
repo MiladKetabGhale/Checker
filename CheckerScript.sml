@@ -15,6 +15,10 @@ open relationTheory
 
 val _ = new_theory "Checker" ;
 
+val _ = ParseExtras.temp_loose_equality();
+
+val _ = Parse.set_grammar_ancestry["rat","sorting"];
+
 val _ = Hol_datatype ` Cand = cand of string ` ;
 
 val _ = Hol_datatype `judgement =
