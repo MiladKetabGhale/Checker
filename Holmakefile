@@ -1,4 +1,4 @@
-INCLUDES = $(CAKEMLDIR)/characteristic $(CAKEMLDIR)/basis $(CAKEMLDIR)/translator $(CAKEMLDIR)/misc $(HOLDIR)/examples/formal-languages/regular $(CAKEMLDIR)/semantics 
+INCLUDES = $(CAKEMLDIR)/basis $(CAKEMLDIR)/translator $(CAKEMLDIR)/misc
 OPTIONS = QUIT_ON_FAILURE
 
 THYFILES = $(patsubst %Script.sml,%Theory.uo,$(wildcard *.sml))
@@ -7,21 +7,16 @@ TARGETS = $(patsubst %.sml,%.uo,$(TARGETS0))
 all: $(TARGETS)
 .PHONY: all
 
-
 ifdef POLY
 HOLHEAP = heap
 PARENT_HOLHEAP = $(CAKEMLDIR)/characteristic/heap
 EXTRA_CLEANS = $(HOLHEAP) $(HOLHEAP).o
 all: $(HOLHEAP)
 
-PRE_BARE_THYS1 = basisProgTheory
-PRE_BARE_THYS3 = cfTacticsBaseLib cfTacticsLib
+BARE_DEPS = $(CAKEMLDIR)/basis/basis
 
-BARE_THYS1 =  $(patsubst %,$(CAKEMLDIR)/basis/%,$(PRE_BARE_THYS1))
-BARE_THYS3 =  $(patsubst %,$(CAKEMLDIR)/characteristic/%,$(PRE_BARE_THYS3))
-
-DEPS = $(patsubst %,%.uo,$(BARE_THYS1)) $(patsubst %,%.uo,$(BARE_THYS3)) $(PARENTHEAP)
+DEPS = $(patsubst %,%.uo,$(BARE_DEPS)) $(PARENTHEAP)
 
 $(HOLHEAP): $(DEPS)
-	$(protect $(HOLDIR)/bin/buildheap) -b $(PARENT_HOLHEAP) -o $(HOLHEAP) $(BARE_THYS1) $(BARE_THYS3)
+	$(protect $(HOLDIR)/bin/buildheap) -b $(PARENT_HOLHEAP) -o $(HOLHEAP) $(DEPS)
 endif
