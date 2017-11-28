@@ -332,6 +332,7 @@ val Elect_dec = Define `
                 /\ (t = t')
                 /\ (non_empty l1)
                 /\ (bigger_than_quota l1 t qu)
+                /\ (0 < qu)
                 /\ (LENGTH (l1 ++ e) <= st)
                 /\ (eqe_list_dec l1 h' h)
                 /\ (eqe_list_dec2 l1 h' h)
