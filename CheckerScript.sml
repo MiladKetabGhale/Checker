@@ -54,7 +54,8 @@ val Hwin_def = Define `
 
 val get_cand_tally_def = Define `
            (get_cand_tally (c: Cand) (h ::t) = (if  (c = FST h) then SND h
-                                            else (get_cand_tally c t))) `;
+                                            else (get_cand_tally c t))) /\
+           (get_cand_tally _ _ = -1:rat)`;
 
 val get_cand_pile_def = Define `
      (get_cand_pile (c : Cand) ([] : (Cand # (((Cand list) # rat) list)) list) = [])
