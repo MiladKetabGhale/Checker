@@ -210,11 +210,11 @@ val Transfer_dec_def = Define `
            /\ (non_empty l) /\ (no_dup l)
            /\ (no_dup (MAP FST t))
            /\ (less_than_quota qu h t)
-           /\ (bl = (HD bl) :: (TL bl))
-           /\ (bl' = (TL bl))
-           /\ (ba' = get_cand_pile (HD bl) p)
-           /\ (MEM (HD bl,[]) p')
-           /\ (subpile1 (HD bl) p p') /\ (subpile2 (HD bl) p' p))`;
+           /\ (case bl of [] => F | hbl::tbl =>
+                 (bl' = tbl)
+                 /\ (ba' = get_cand_pile hbl p)
+                 /\ (MEM (hbl,[]) p')
+                 /\ (subpile1 hbl p p') /\ (subpile2 hbl p' p)))`;
 
 
 val fcc_dec = Define `
