@@ -77,12 +77,12 @@ val elect_dec_side = Q.prove(
   ) |> update_precondition;
 
 val r = translate Checker_Aux2_dec_def;
-(*
-max_print_depth := 50
-f"update_cand_trans_val_side"
-f"update_cand_pile_side"
-f"elect_dec_side"
-f"checker_aux2_dec_side"
-*)
+
+val r = translate all_elem_nil_def;
+val r = translate all_elem_zero_def;
+
+val r = translate Initial_Judgement_dec_def;
+
+val r = translate Check_Parsed_Certificate_def;
 
 val _ = export_theory();

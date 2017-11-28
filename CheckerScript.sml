@@ -359,7 +359,7 @@ val Elect_dec = Define `
 
 val all_elem_zero = Define `
             (all_elem_zero ([]: rat list) = T)
-         /\ (all_elem_zero (t0::ts) = (t0 = rat_0) /\ (all_elem_zero ts))`;
+         /\ (all_elem_zero (t0::ts) = (t0 = 0) /\ (all_elem_zero ts))`;
 
 
 val all_elem_nil = Define `
@@ -418,5 +418,10 @@ val Checker_Aux2_dec = Define `
             /\ (Checker_Aux2_dec st qu l (j1::js))))`;
 
 
+val Check_Parsed_Certificate_def = Define`
+  (Check_Parsed_Certificate seats quota candidates [] = F) /\
+  (Check_Parsed_Certificate seats quota candidates (first_judgement::rest_judgements) =
+     Initial_Judgement_dec candidates first_judgement /\
+     Checker_Aux2_dec seats quota candidates (first_judgement::rest_judgements))`;
 
 val _ = export_theory();
