@@ -1,229 +1,90 @@
-open HolKernel bossLib boolLib pairLib integerTheory listTheory Parse boolSimps
-open stringLib
-open pairTheory
-open numLib
-open numTheory
-open ratTheory
-open bossLib
-open fracTheory
-open listLib
-open satTheory
-open sortingTheory
-open relationTheory
-;
+open preamble CheckerSpecTheory
+
+val _ = new_theory "Checker";
+
+val EWIN_dec_def = Define `
+  (EWIN_dec ((qu,st,l):params) (NonFinal (_,_,_,_,e,_)) (Final e')
+     ⇔ (e = e') /\ LENGTH e = st) ∧
+  (EWIN_dec _ _ _ ⇔ F)`;
+
+val HWIN_dec_def = Define `
+  (HWIN_dec ((qu,st,l):params) (NonFinal (_,_,_,_,e,h)) (Final e')
+    ⇔ (e' = e ++ h) ∧ (LENGTH (e++h) ≤ st)) ∧
+  (HWIN_dec _ _ _ = F)`;
+
+val equal_except_dec_def = Define `
+     (equal_except_dec (c :cand) [] = [])
+  /\ (equal_except_dec c (h::t) = (if c = h then t
+                                  else h:: equal_except_dec c t)) `;
+
+val Valid_PileTally_dec1_def = Define `
+        (Valid_PileTally_dec1 [] (l: cand list) ⇔ T)
+     /\ (Valid_PileTally_dec1 (h::t) l ⇔ (MEM (FST h) l) /\ (Valid_PileTally_dec1 t l)) `;
 
 
-val _ = new_theory "Checker" ;
-
-val _ = ParseExtras.temp_loose_equality();
-
-val _ = Parse.set_grammar_ancestry["rat","sorting"];
-
-val _ = Hol_datatype ` Cand = cand of string ` ;
-
-val _ = Hol_datatype `judgement =
-                                 state   of
-                                    ((Cand list) # rat) list
-                                  # (Cand # rat) list
-                                  # (Cand # (((Cand list) # rat) list)) list
-                                  # Cand list
-                                  # Cand list
-                                  # Cand list
-                               | winners of (Cand list) `;
-
-val sum_aux_def = Define ` ((sum_aux []) = 0) /\
-                          ( (sum_aux (h::t)) = ((SND h) + (sum_aux t)) )  `;
-
-
-
-(*The boolian function for deciding on ewin correct application*)
-val Ewin_def = Define `
-        (Ewin (qu : rat) st ((winners l), (j : judgement)) = F)
-        /\ (Ewin qu st (state p, state p') = F)
-        /\ (Ewin qu st (state (ba, t, p, bl, e, h), winners l) =
-                       ( (e =l) /\ (LENGTH e = st)))`;
-
-
-val Hwin_def = Define `
-        (Hwin (qu : rat) st (winners l, (j : judgement)) = F)
-        /\ (Hwin qu st (state p, state p') = F)
-        /\ (Hwin qu st (state (ba, t, p, bl, e, h), winners l) =
-            ((e ++ h) = l) /\ ((LENGTH (e ++ h)) <= st))`;
-
-
-
-val get_cand_tally_def = Define `
-           (get_cand_tally (c: Cand) (h ::t) = (if  (c = FST h) then SND h
-                                            else (get_cand_tally c t))) /\
-           (get_cand_tally _ _ = -1:rat)`;
-
-val get_cand_pile_def = Define `
-     (get_cand_pile (c : Cand) ([] : (Cand # (((Cand list) # rat) list)) list) = [])
-     /\ (get_cand_pile c (h ::t) = (if (c = FST h) then SND h
-                                     else get_cand_pile c t)) `;
-
-val empty_cand_pile_def = Define `
-   (empty_cand_pile (c : Cand) ([] : (Cand # (((Cand list) # rat) list)) list) = [])
-   /\ (empty_cand_pile c (h ::t) = (if (c = FST h) then ((c, []) :: t)
-                                    else h :: (empty_cand_pile c t))) `;
-
-
-
-val Legal_Tally_Cand_def = Define `
-      (Legal_Tally_Cand l ([]: (Cand # rat) list) (c:Cand) = F)
-   /\ (Legal_Tally_Cand l (h::t) c =  (MEM c l)
-                                   /\ (if (FST h = c) then (~ MEM c (MAP FST t))
-                                       else Legal_Tally_Cand l t c)) `;
-
-val remove_one_cand_def = Define `
-                         (remove_one_cand (c :Cand) [] = [])
-                      /\ (remove_one_cand c (h::t) = (if c = h then t
-                                                      else h:: remove_one_cand c t)) `;
-
- val not_elem = Define `   (not_elem a [] = T)
-                       /\ (not_elem a (h::t) = (if (a = h) then F
-                                               else (not_elem a t))) `;
-
-val no_dup = Define  `   (no_dup [] = T)
-                      /\ (no_dup (h::t) = (if (not_elem h t) then (no_dup t)
-                                           else F)) `;
-
-
-
-
-val Valid_PileTally_DEC1_def = Define `
-        (Valid_PileTally_DEC1 [] (l: Cand list) = T)
-     /\ (Valid_PileTally_DEC1 (h::t) l = (MEM (FST h) l) /\ (Valid_PileTally_DEC1 t l)) `;
-
-
-val Valid_PileTally_DEC2_def = Define `
-        (Valid_PileTally_DEC2 t ([]: Cand list) = T)
-     /\ (Valid_PileTally_DEC2 t (l0::ls) = if (MEM l0 (MAP FST t))
-                                                then (Valid_PileTally_DEC2 t ls)
+val Valid_PileTally_dec2_def = Define `
+        (Valid_PileTally_dec2 t ([]: cand list) ⇔ T)
+     /\ (Valid_PileTally_dec2 t (l0::ls) ⇔ if (MEM l0 (MAP FST t))
+                                                then (Valid_PileTally_dec2 t ls)
                                            else F) `;
 
+val list_MEM_dec_def = Define `
+      (list_MEM_dec [] l ⇔ T)
+   /\ (list_MEM_dec (h::t) l ⇔ (MEM h l) /\ (list_MEM_dec t l))`;
 
-val non_empty = Define ` (non_empty [] = F)
-                      /\ (non_empty _ = T) `;
+val list_not_MEM_dec_def = Define `
+        (list_not_MEM_dec  [] l ⇔ T)
+     /\ (list_not_MEM_dec (h::t) l ⇔ (~ MEM h l) /\ (list_not_MEM_dec t l))`;
 
+val ELIM_CAND_dec_def = Define `
+  (ELIM_CAND_dec c ((qu,st,l):params)
+       (NonFinal ([], t, p, [], e, h))
+       (NonFinal (ba', t', p', [], e',h')) ⇔
+   (t = t') /\ (e = e')
+   /\ (LENGTH (e ++ h) > st) /\ (LENGTH e < st)
+   /\ (¬(NULL l)) /\ (ALL_DISTINCT l)
+   /\ (list_MEM (h++e) l)
+   /\ (ALL_DISTINCT (h++e))
+   /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
+   /\ (Valid_PileTally_dec1 p' l) /\ (Valid_PileTally_dec2 p' l)
+   /\ ALL_DISTINCT (MAP FST t)
+   /\ (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)
+   /\ (MEM c h)
+   /\ (less_than_quota qu t h)
+   /\ (h' = equal_except_dec c h)
+   /\ (bigger_than_cand c t h)
+   /\ (ba' = get_cand_pile c p)
+   /\ (MEM (c,[]) p')
+   /\ (subpile1 c p p') /\ (subpile2 c p' p) ) ∧
+  (ELIM_CAND_dec _ _ _ _ = F)`;
 
-val empty_list_def = Define `
-                         (empty_list [] = T)
-                      /\ (empty_list _ = F) `;
+val TRANSFER_dec_def = Define `
+  (TRANSFER_dec ((qu,st,l):params)
+    (NonFinal ([], t, p, bl, e, h))
+    (NonFinal (ba', t', p', bl', e',h')) ⇔
+      (e = e') /\ (h = h') /\ (t = t')
+   /\ (LENGTH e < st)
+   /\ (list_MEM (h++e) l)
+   /\ ALL_DISTINCT (h++e)
+   /\ (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)
+   /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
+   /\ (Valid_PileTally_dec1 p' l) /\ (Valid_PileTally_dec2 p' l)
+   /\ (¬(NULL l)) /\ (ALL_DISTINCT l)
+   /\ (ALL_DISTINCT (MAP FST t))
+   /\ (less_than_quota qu t h)
+   /\ (case bl of [] => F | hbl::tbl =>
+         (bl' = tbl)
+         /\ (ba' = get_cand_pile hbl p)
+         /\ (MEM (hbl,[]) p')
+         /\ (subpile1 hbl p p') /\ (subpile2 hbl p' p))) ∧
+  (TRANSFER_dec _ _ _ = F)`;
 
-
-
-val less_than_quota_def = Define `
-                 (less_than_quota qu [] l = T)
-              /\ (less_than_quota qu (h ::tl ) l = (if (get_cand_tally h l < qu)
-                                                         then less_than_quota qu tl l
-                                                    else F)) `;
-
-
-
-val bigger_than_cand_def = Define `
-           (bigger_than_cand c t [] = T)
-        /\ (bigger_than_cand c t (h0::h1) = if (get_cand_tally c t) <= (get_cand_tally h0 t)
-                                                then (bigger_than_cand c t h1)
-                                             else F) `;
-
-
-
-
-val subpile1_def = Define `
-        (subpile1 c ([]: (Cand # (((Cand list) # rat) list)) list) p2 = T)
-     /\ (subpile1 c (p0::ps) p2 = if (c = FST p0) then (MEM (c,[]) p2) /\ (subpile1 c ps p2)
-                                 else
-                                     if (MEM p0 p2) then (subpile1 c ps p2)
-                                     else F) `;
-
-
-
-
-val subpile2_def = Define `
-      (subpile2 c ([]: (Cand # (((Cand list) # rat) list)) list) p1 = T)
-   /\ (subpile2 c (p0::ps) p1 = if (c = FST p0) then (subpile2 c ps p1)
-                                else
-                                    if (MEM p0 p1) then (subpile2 c ps p1)
-                                    else F)`;
-
-
-
-val no_dup_pile_def = Define `
-     (no_dup_pile x ([] : ((((Cand list) # rat) list) list)) = T)
-  /\ (no_dup_pile x (h::t) = if (x = h) then
-                               if (not_elem x t) then T else F
-                             else  no_dup_pile x t)`;
-
-
-val list_MEM_def = Define `
-      (list_MEM [] l = T)
-   /\ (list_MEM (h::t) l = (MEM h l) /\ (list_MEM t l))`;
-
-
-val list_not_MEM_def = Define `
-        (list_not_MEM  [] l = T)
-     /\ (list_not_MEM (h::t) l = (~ MEM h l) /\ (list_not_MEM t l))`;
-
-
-
-
-
-val Elim_cand_dec_def = Define `
-             (Elim_cand_dec st (qu : rat) (l: Cand list) (c:Cand) ((j: judgement), winners w) = F)
-          /\ (Elim_cand_dec st qu l c (winners w, (j: judgement)) = F)
-          /\ (Elim_cand_dec st qu l c (state (ba, t, p, bl, e, h), state (ba', t', p', bl', e',h')) =
-                  ((empty_list ba)
-               /\ (empty_list bl)
-               /\ (t = t') /\ (bl = bl') /\ (e = e')
-               /\ (LENGTH (e ++ h) > st) /\ (LENGTH e < st)
-               /\ (non_empty l) /\ (no_dup l)
-               /\ (list_MEM (h++e) l)
-               /\ (no_dup (h++e))
-               /\ (Valid_PileTally_DEC1 p l) /\ (Valid_PileTally_DEC2 p l)
-               /\ (Valid_PileTally_DEC1 p' l) /\ (Valid_PileTally_DEC2 p' l)
-               /\ no_dup (MAP FST t)
-               /\ (Valid_PileTally_DEC1 t l) /\ (Valid_PileTally_DEC2 t l)
-               /\ (MEM c h)
-               /\ (less_than_quota qu h t)
-               /\ (h' = remove_one_cand c h)
-               /\ (bigger_than_cand c t h)
-               /\ (ba' = get_cand_pile c p)
-               /\ (MEM (c,[]) p')
-               /\ (subpile1 c p p') /\ (subpile2 c p' p) )) `;
-
-
-
-
-
-val Transfer_dec_def = Define `
-         (Transfer_dec st (qu : rat) (l: Cand list) ((j: judgement), winners w) = F)
-          /\ (Transfer_dec st qu l (winners w, (j: judgement)) = F)
-          /\ (Transfer_dec st qu l (state (ba, t, p, bl, e, h), state (ba', t', p', bl', e',h')) =
-              (empty_list ba) /\ (e = e') /\ (h = h') /\ (t = t')
-           /\ (LENGTH e < st)
-           /\ (list_MEM (h++e) l)
-           /\ no_dup (h++e)
-           /\ (Valid_PileTally_DEC1 t l) /\ (Valid_PileTally_DEC2 t l)
-           /\ (Valid_PileTally_DEC1 p l) /\ (Valid_PileTally_DEC2 p l)
-           /\ (Valid_PileTally_DEC1 p' l) /\ (Valid_PileTally_DEC2 p' l)
-           /\ (non_empty l) /\ (no_dup l)
-           /\ (no_dup (MAP FST t))
-           /\ (less_than_quota qu h t)
-           /\ (case bl of [] => F | hbl::tbl =>
-                 (bl' = tbl)
-                 /\ (ba' = get_cand_pile hbl p)
-                 /\ (MEM (hbl,[]) p')
-                 /\ (subpile1 hbl p p') /\ (subpile2 hbl p' p)))`;
-
-
-val fcc_dec = Define `
-        (fcc (c:Cand) ([]: Cand list)  (h: Cand list) = F)
-     /\ (fcc c (b0::bs) h = if (c = b0) then T
-                              else if (~ MEM b0 h) /\ (fcc c bs h) then T
-                                   else F)`;
-
-
+val first_continuing_cand_dec_def = Define `
+  (first_continuing_cand_dec (c:cand) ([]: cand list)  (h: cand list) ⇔ F) /\
+  (first_continuing_cand_dec c (b0::bs) h =
+    if (c = b0) then T
+    else if (~ MEM b0 h) /\ (first_continuing_cand_dec c bs h) then T
+    else F)`;
 
 val Count_Dec_Aux = Define `
      (Count_Dec_Aux p np t nt ba h [] = T)
@@ -236,8 +97,6 @@ val Count_Dec_Aux = Define `
              (get_cand_pile l0 np = get_cand_pile l0 p)
           /\ (get_cand_tally l0 nt = get_cand_tally l0 t)
           /\ (Count_Dec_Aux p np t nt ba h ls))`;
-
-
 
  val Count_Aux_dec = Define `
     (Count_Aux_dec st (qu : rat) (l: Cand list) ((j: judgement), winners w) = F)
@@ -261,15 +120,10 @@ val Count_Dec_Aux = Define `
     /\ (ba' = []))`;
 
 
-
-
 val take_append = Define `
       (take_append [] _ = [])
    /\ (take_append (l0::ls) [] = l0::ls)
    /\ (take_append (l0::ls) (h::t) = (take_append ls t))`;
-
-
-
 
 
 val tally_comparison = Define `
@@ -277,24 +131,23 @@ val tally_comparison = Define `
                                                         then T else F)`;
 
 
-
-
 val eqe_list_dec = Define `
      (eqe_list_dec ([]: Cand list) l1 l2 = if (list_MEM l1 l2) then T else F)
   /\ (eqe_list_dec (l0::ls) l1 l2 = (~ MEM l0 l1) /\ (MEM l0 l2) /\ eqe_list_dec ls l1 l2)`;
-
-
 
 val eqe_list_dec2 = Define `
      (eqe_list_dec2 l0 l1 ([]: Cand list) = T)
   /\ (eqe_list_dec2 l0 l1 (l::ls) = (MEM l l0 \/ MEM l l1) /\ (eqe_list_dec2 l0 l1 ls))`;
 
+val bigger_than_quota = Define `
+  bigger_than_quota ls (t:tallies) qu =
+    EVERY (λl0. qu ≤ get_cand_tally l0 t) ls`;
 
+(*
 val bigger_than_quota = Define `
        (bigger_than_quota ([] :Cand list) t (qu :rat) = T)
     /\ (bigger_than_quota (l0::ls) t qu = (qu <= get_cand_tally l0 t) /\ (bigger_than_quota ls t qu))`;
-
-
+*)
 
 val piles_eq_list = Define `
        (piles_eq_list ([]: Cand list) l p1 p2 = T)
@@ -302,13 +155,6 @@ val piles_eq_list = Define `
             if ~ (MEM l0 l)
                 then (get_cand_pile l0 p1 = get_cand_pile l0 p2) /\ (piles_eq_list ls l p1 p2)
             else (piles_eq_list ls l p1 p2))`;
-
-
-
-val update_cand_trans_val = Define `
-    (update_cand_trans_val (qu: rat) (c: Cand) (t: (Cand # rat) list) (p: (Cand # (Cand list # rat) list) list) =
-        MAP (\ (r:rat). r * (((get_cand_tally c t) - qu) / (get_cand_tally c t))) (MAP SND (get_cand_pile c p)))`;
-
 
 
 val update_cand_pile = Define `
