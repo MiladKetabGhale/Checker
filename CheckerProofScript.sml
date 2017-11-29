@@ -2,11 +2,9 @@ open preamble CheckerSpecTheory CheckerTheory
 
 val _ = new_theory "CheckerProof";
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 3818470f8f48531e56e0f04d2c00a8d08948954d
+
 val EWIN_thm = Q.store_thm("EWIN_thm",
   `EWIN = EWIN_dec`,
   simp[FUN_EQ_THM]
@@ -16,39 +14,7 @@ val EWIN_thm = Q.store_thm("EWIN_thm",
   \\ rw[EWIN_def,EWIN_dec_def]
   \\ PairCases_on`p`
   \\ rw[EWIN_def,EWIN_dec_def]
-  \\ metis_tac[]);
-<<<<<<< HEAD
-
-
-val ewin_to_Ewin_thm = Q.store_thm ("ewin_to_Ewin",
- `!qu st j1 j2. (ewin qu st j1 j2) ==> (Ewin qu st (j1, j2) = T) `,
-   STRIP_TAC
-     >> STRIP_TAC
-       >> Cases_on `j1`
-         >> STRIP_TAC
-           >> Cases_on `j2`
-             >> rw[ewin_def]
-               >> rw[ewin_def, Ewin_def, ewin_def]) ;
-
-
-val Ewin_to_ewin = Q.store_thm ("Ewin_to_ewin",
- `!qu st j1 j2. (Ewin qu st (j1, j2) = T) ==> (ewin qu st j1 j2) `,
-    STRIP_TAC
-    >> STRIP_TAC
-      >> Cases_on `j1`
-        >> Cases_on `j2`
-    >- rw[Ewin_def]
-    >- (Cases_on `p`
-      >> Cases_on `r`
-        >> Cases_on `r'`
-          >> Cases_on `r`
-            >> Cases_on `r'`
-              >> rw[Ewin_def]
-                >> rw[ewin_def])
-    >- rw[Ewin_def]
-    >-  rw[Ewin_def])  ;
-=======
->>>>>>> 3818470f8f48531e56e0f04d2c00a8d08948954d
+  \\ metis_tac[]);`
 
 val hwin_to_Hwin = Q.store_thm ("hwin_to_Hwin",
   `!qu st j1 j2. (hwin qu st j1 j2) ==> (Hwin qu st (j1, j2) = T)`,
