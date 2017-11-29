@@ -1,3 +1,19 @@
+open preamble CheckerSpecTheory CheckerTheory
+
+val _ = new_theory "CheckerProof";
+
+
+
+val EWIN_thm = Q.store_thm("EWIN_thm",
+  `EWIN = EWIN_dec`,
+  simp[FUN_EQ_THM]
+  \\ qx_gen_tac`params`
+  \\ PairCases_on`params`
+  \\ Cases \\ Cases
+  \\ rw[EWIN_def,EWIN_dec_def]
+  \\ PairCases_on`p`
+  \\ rw[EWIN_def,EWIN_dec_def]
+  \\ metis_tac[]);
 
 
 val ewin_to_Ewin_thm = Q.store_thm ("ewin_to_Ewin",
@@ -1650,7 +1666,7 @@ val Checker_Aux_dec = Define `
                       /\ (Checker_Aux_dec st qu l js))`;
 
 val Logical_to_computational_checker= Q.store_thm("Logical_to_computatonal_checker",
- `! st qu l J. checker_aux2 st qu l J ==> Checker_Aux2_dec st qu l J`,
+ `! st qu l J. valid_judgement st qu l J ==> CHECKER_AUX_dec st qu l J`,
 
   Induct_on `J`
     >- rw [checker_aux2_def]
