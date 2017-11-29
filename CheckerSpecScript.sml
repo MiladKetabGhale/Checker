@@ -92,14 +92,6 @@ val Valid_Init_CandList = Define `
 val Valid_PileTally = Define `
   Valid_PileTally t (l: cand list) = (!c. (MEM c l) <=> (MEM c (MAP FST t))) `;
 
-val less_than_quota_def = Define `
-  less_than_quota qu l ls =
-    EVERY (λh. get_cand_tally h l < qu) ls`;
-
-val bigger_than_cand_def = Define `
-  bigger_than_cand c t ls =
-    EVERY (λh0. get_cand_tally c t <= get_cand_tally h0 t) ls`;
-
 val subpile1_def = Define `
   subpile1 c (p1:piles) p2 ⇔
     EVERY (λp. MEM (if c = FST p then (c,[]) else p) p2) p1`;
