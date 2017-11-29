@@ -27,6 +27,7 @@ val Valid_PileTally_dec2_def = Define `
      /\ (Valid_PileTally_dec2 t (l0::ls) ⇔ if (MEM l0 (MAP FST t))
                                                 then (Valid_PileTally_dec2 t ls)
                                            else F) `;
+
 val list_MEM_dec_def = Define `
       (list_MEM_dec [] l ⇔ T)
    /\ (list_MEM_dec (h::t) l ⇔ (MEM h l) /\ (list_MEM_dec t l))`;
@@ -50,7 +51,7 @@ val ELIM_CAND_dec_def = Define `
    (t = t') /\ (e = e')
    /\ (LENGTH (e ++ h) > st) /\ (LENGTH e < st)
    /\ (¬(NULL l)) /\ (ALL_DISTINCT l)
-   /\ (list_MEM (h++e) l)
+   /\ (list_MEM_dec (h++e) l)
    /\ (ALL_DISTINCT (h++e))
    /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
    /\ (Valid_PileTally_dec1 p' l) /\ (Valid_PileTally_dec2 p' l)
@@ -71,7 +72,7 @@ val TRANSFER_dec_def = Define `
     (NonFinal (ba', t', p', bl', e',h')) ⇔
       (e = e') /\ (h = h') /\ (t = t')
    /\ (LENGTH e < st)
-   /\ (list_MEM (h++e) l)
+   /\ (list_MEM_dec (h++e) l)
    /\ ALL_DISTINCT (h++e)
    /\ (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)
    /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
@@ -113,7 +114,7 @@ val COUNT_dec_def = Define `
     /\ (bl = bl') /\ (e = e') /\ (h = h')
     /\ ALL_DISTINCT (h++e)
     /\ ALL_DISTINCT (MAP FST p)
-    /\ (list_MEM (h++e) l)
+    /\ (list_MEM_dec (h++e) l)
     /\ (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)
     /\ (Valid_PileTally_dec1 t' l) /\ (Valid_PileTally_dec2 t' l)
     /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
@@ -129,10 +130,10 @@ val COUNT_dec_def = Define `
 
 val take_append_def = Define `
    (take_append (l0::ls) (h::t) = (take_append ls t)) ∧
-   (take_append l1 [] = l1)`;
+   (take_append l1 _ = l1)`;
 
 val eqe_list_dec_def = Define `
-     (eqe_list_dec ([]: cand list) l1 l2 ⇔ list_MEM l1 l2)
+     (eqe_list_dec ([]: cand list) l1 l2 ⇔ list_MEM_dec l1 l2)
   /\ (eqe_list_dec (l0::ls) l1 l2 ⇔ (~ MEM l0 l1) /\ (MEM l0 l2) /\ eqe_list_dec ls l1 l2)`;
 
 val eqe_list_dec2_def = Define `
@@ -188,8 +189,8 @@ val ELECT_dec = Define `
                 /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
                 /\ (Valid_PileTally_dec1 p' l) /\ (Valid_PileTally_dec2 p' l)
                 /\ (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)
-                /\ (list_MEM e' l)
-                /\ (list_MEM h l)
+                /\ (list_MEM_dec e' l)
+                /\ (list_MEM_dec h l)
                 /\ (update_cand_pile qu t l1 p p')) /\
      (ELECT_dec _ _ _ = F)`;
 
