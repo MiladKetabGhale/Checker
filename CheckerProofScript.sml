@@ -2,9 +2,6 @@ open preamble CheckerSpecTheory CheckerTheory
 
 val _ = new_theory "CheckerProof";
 
-
-
-
 val EWIN_thm = Q.store_thm("EWIN_thm",
   `EWIN = EWIN_dec`,
   simp[FUN_EQ_THM]
@@ -16,53 +13,37 @@ val EWIN_thm = Q.store_thm("EWIN_thm",
   \\ rw[EWIN_def,EWIN_dec_def]
   \\ metis_tac[]);
 
- 
 val HWIN_thm = Q.store_thm("HWIN_thm",
-    `HWIN = HWIN_dec`,
-    simp[FUN_EQ_THM]
-    \\ qx_gen_tac`params`
-    \\ PairCases_on`params`
-    \\ Cases \\ Cases \\ rw[HWIN_def,HWIN_dec_def]  
-    \\ PairCases_on`p`
-    \\ rw[HWIN_def,HWIN_dec_def]
-    \\ metis_tac[HWIN_def,HWIN_dec_def])    
- 
+  `HWIN = HWIN_dec`,
+  simp[FUN_EQ_THM]
+  \\ qx_gen_tac`params`
+  \\ PairCases_on`params`
+  \\ Cases \\ Cases \\ rw[HWIN_def,HWIN_dec_def]
+  \\ PairCases_on`p`
+  \\ rw[HWIN_def,HWIN_dec_def]
+  \\ metis_tac[HWIN_def,HWIN_dec_def])
 
-
-
-val CAND_EQ_DEC = Q.store_thm ("CAND_EQ_DEC",
-    `!(c1: Cand) c2. (c1 = c2) \/ (c1 <> c2) `,
-       REPEAT STRIP_TAC
-          >> Cases_on `c1 = c2`
-             >- (DISJ1_TAC >> METIS_TAC [])
-             >- (DISJ2_TAC >> METIS_TAC []));
-
-  
 val GET_CAND_TALLY_HEAD_REMOVAL_def = Q.store_thm ("GET_CAND_TALLY_HEAD_REM",
 `!(h: cand #rat) t c. (~(c = FST h)) ==> (get_cand_tally c (h::t) = get_cand_tally c t)`,
-          Induct_on `t `         
-               >- (rw[get_cand_tally_def] >> 
-                   Cases_on`h` >> fs[ALOOKUP_def])  	         
- 	           
+          Induct_on `t `
+               >- (rw[get_cand_tally_def] >>
+                   Cases_on`h` >> fs[ALOOKUP_def])
+
                >- (REPEAT STRIP_TAC
-                 >> first_assum (qspecl_then [`h`,`c`] strip_assume_tac)  
+                 >> first_assum (qspecl_then [`h`,`c`] strip_assume_tac)
                     >> rw[get_cand_tally_def] >>
-                    Cases_on`h'` >> fs[ALOOKUP_def]))   
- 
- 
-   
+                    Cases_on`h'` >> fs[ALOOKUP_def]))
+
 val GET_CAND_TALLY_MEM2 = Q.store_thm ("GET_CAND_TALLY_MEM",
  `!(t: (cand #rat) list) c. (MEM c (MAP FST t))
                                     ==> (MEM (c, get_cand_tally c t) t) `,
- 
+
     Induct_on `t`
         >- rw []
-      
+
         >- ((REPEAT STRIP_TAC >> Cases_on `h` >> Cases_on `c =q`)
           >- fs[get_cand_tally_def,ALOOKUP_def]
-	  >- fs[get_cand_tally_def,ALOOKUP_def])); 
-       
-
+	  >- fs[get_cand_tally_def,ALOOKUP_def]));
 
 
 val Legal_to_legal_tally_cand = Q.store_thm("Legal_to_legal_tally_cand",
@@ -116,96 +97,6 @@ val legal_to_Legal_tally_cand = Q.store_thm ("legal_to_Legal_tallt_cand",
                          >> rw []
                            >> METIS_TAC []))))) ;
 
-val not_elem_NOT_MEM = Q.store_thm ("not_elem_NOT_MEM",
-   `!h (c: Cand). (not_elem c h) <=> (~MEM c h)`,
-
-      Induct_on `h`
-           >- rw [not_elem]
-           >- rw[not_elem]);
-
-val no_dup_IMP_NO_DUP_PRED = Q.store_thm ("no_dup_IMP_NO_DUP",
-   ` !h (c :Cand). (no_dup h ) ==> (NO_DUP_PRED h c) `,
-
-     Induct_on `h`
-         >- rw [NO_DUP_PRED]
-         >- ((STRIP_TAC >> STRIP_TAC >> ASSUME_TAC CAND_EQ_DEC
-           >> first_x_assum (qspecl_then [`c`,`h'`] strip_assume_tac))
-              >- (first_assum (qspecl_then [`c`] strip_assume_tac)
-                >> RW_TAC bool_ss [NO_DUP_PRED,no_dup]
-                  >> DISJ2_TAC
-                    >> MAP_EVERY qexists_tac [`[]`,`h`]
-                      >> rw []
-                        >> ASSUME_TAC not_elem_NOT_MEM
-                          >> first_assum (qspecl_then [`h`,`c`] strip_assume_tac)
-                            >> FULL_SIMP_TAC bool_ss [])
-              >- ((first_x_assum (qspecl_then [`c`] strip_assume_tac)
-                >> STRIP_TAC
-                  >> FULL_SIMP_TAC bool_ss [NO_DUP_PRED,no_dup])
-                     >- (DISJ2_TAC >> rw [])
-                     >- (DISJ2_TAC >> rw [])
-                     >- (REPEAT DISJ2_TAC
-                       >> MAP_EVERY qexists_tac [`h'::h1`,`h2`]
-                         >> METIS_TAC [APPEND,MEM]))));
-
-val NO_DUP_HEAD_REMOVAL = Q.store_thm ("NO_DUP_HEAD_REMOVAL",
-    `!h h'. (!(c: Cand). NO_DUP_PRED (h'::h) c) ==> (!c. NO_DUP_PRED h c) `,
-
-        (rw [NO_DUP_PRED] >> first_assum (qspecl_then [`c`] strip_assume_tac))
-          >- (DISJ2_TAC >> DISJ1_TAC >> rw [])
-          >- ((ASSUME_TAC (INST_TYPE [alpha |-> ``:Cand``] list_nchotomy)
-            >> first_assum (qspecl_then [`h1`] strip_assume_tac))
-              >- (DISJ2_TAC
-                >> DISJ1_TAC
-                  >> FULL_SIMP_TAC bool_ss [APPEND,CONS_11])
-              >- (REPEAT DISJ2_TAC
-                 >> MAP_EVERY qexists_tac [`t`,`h2`]
-                   >> FULL_SIMP_TAC list_ss [CONS_11,MEM])));
-
-
-
-val NO_DUP_PRED_to_no_dup = Q.store_thm ("NO_DUP_PRED_to_no_dup",
-  `!h. (!(c: Cand). (NO_DUP_PRED h c)) ==> (no_dup h) `,
-
-     Induct_on `h`
-         >- rw [no_dup]
-         >- ((STRIP_TAC
-           >> STRIP_TAC
-             >> ASSUME_TAC NO_DUP_HEAD_REMOVAL
-               >> first_assum (qspecl_then [`h`,`h'`] strip_assume_tac)
-                 >> FULL_SIMP_TAC bool_ss []
-                   >> rw[no_dup]
-                     >> first_assum (qspecl_then [`h'`] strip_assume_tac)
-                       >> FULL_SIMP_TAC list_ss [NO_DUP_PRED,not_elem_NOT_MEM,MEM]
-                         >> ASSUME_TAC (INST_TYPE [alpha |-> ``:Cand``] list_nchotomy)
-                           >> first_assum (qspecl_then [`h1`] strip_assume_tac))
-                              >- FULL_SIMP_TAC list_ss [CONS_11,MEM]
-                              >- FULL_SIMP_TAC list_ss [CONS_11,MEM]));
-
-
-val NO_DUP_TAIL_ONE_CAND = Q.store_thm ("NO_DUP_TAIL_ONE_CAND",
-  `!h h' (c:Cand). (NO_DUP_PRED (h'::h) c) ==> (NO_DUP_PRED h c)`,
-
-     (REPEAT STRIP_TAC
-       >> ASSUME_TAC CAND_EQ_DEC
-         >> first_assum (qspecl_then [`c`,`h'`] strip_assume_tac))
-            >-  (FULL_SIMP_TAC bool_ss [NO_DUP_PRED]
-                >- rw[]
-                >-  METIS_TAC [MEM]
-                >- ((ASSUME_TAC (INST_TYPE [alpha |-> ``:Cand``] list_nchotomy)
-                  >> first_assum (qspecl_then [`h1`] strip_assume_tac))
-                     >- FULL_SIMP_TAC list_ss [MEM,CONS_11]
-                     >- FULL_SIMP_TAC list_ss [MEM,CONS_11]))
-            >-  (FULL_SIMP_TAC bool_ss [NO_DUP_PRED]
-                >- rw []
-                >- (DISJ2_TAC >> METIS_TAC [MEM])
-                >- ((REPEAT DISJ2_TAC
-                  >> ASSUME_TAC (INST_TYPE [alpha |-> ``:Cand``] list_nchotomy)
-                    >> first_assum (qspecl_then [`h1`] strip_assume_tac))
-                       >- FULL_SIMP_TAC list_ss [MEM,CONS_11]
-                       >- (FULL_SIMP_TAC list_ss [MEM,CONS_11]
-                         >> MAP_EVERY qexists_tac [`t`,`h2`]
-                           >> METIS_TAC [])))) ;
- 
 val PileTally_to_PileTally_DEC1 = Q.store_thm ("PileTally_to_PileTally_DEC1",
  `!l t. (!c. (MEM c (MAP FST t)) ==> (MEM c l)) ==> (Valid_PileTally_dec1 t l) `,
 
@@ -214,7 +105,7 @@ val PileTally_to_PileTally_DEC1 = Q.store_thm ("PileTally_to_PileTally_DEC1",
        >- (REPEAT STRIP_TAC
           >> first_assum (qspecl_then [`FST h`] strip_assume_tac)
             >> rfs[Valid_PileTally_dec1_def,MAP]));
- 
+
 val PileTally_DEC1_to_PileTally = Q.store_thm ("PileTally_DEC1_to_PileTally",
  `!l t. (Valid_PileTally_dec1 t l) ==> (!c. MEM c (MAP FST t) ==> (MEM c l))`,
 
@@ -243,7 +134,7 @@ val PileTally_to_PileTally_DEC2 = Q.store_thm ("PileTally_to_PileTally_DEC2",
         >- rw [Valid_PileTally_dec2_def]
         >- rfs [Valid_PileTally_dec2_def]);
 
- 
+
 val PileTally_DEC2_IMP_PileTally = Q.store_thm ("PileTally_DEC2_IMP_PileTally",
   `!l t. (Valid_PileTally_dec2 t l) ==> (!c. (MEM c l) ==> (MEM c (MAP FST t)))`,
 
@@ -254,7 +145,7 @@ val PileTally_DEC2_IMP_PileTally = Q.store_thm ("PileTally_DEC2_IMP_PileTally",
               >- FULL_SIMP_TAC list_ss [Valid_PileTally_dec2_def]
               >- rfs [Valid_PileTally_dec2_def]));
 
-   
+
 val REMOVE_ONE_CAND_APPEND = Q.store_thm ("REMOVE_ONE_CAND_APPEND",
  `! l1 l2 (c: cand). (~ MEM c l1) ==> (equal_except_dec c (l1 ++l2) = l1 ++ (equal_except_dec c l2))`,
 
@@ -263,7 +154,7 @@ val REMOVE_ONE_CAND_APPEND = Q.store_thm ("REMOVE_ONE_CAND_APPEND",
        >- (REPEAT STRIP_TAC
          >> first_assum (qspecl_then [`l2`,`c`] strip_assume_tac)
            >> FULL_SIMP_TAC list_ss [MEM,equal_except_dec_def]));
- 
+
 
 val REMOVE_ONE_CAND_NOTIN = Q.store_thm ("REMOVE_ONE_CAND_NOTIN",
  `!l (c: Cand). (~ MEM c l) ==> (remove_one_cand c l = l) `,
@@ -1682,5 +1573,4 @@ val Logical_to_computational_checker= Q.store_thm("Logical_to_computatonal_check
                      >> metis_tac [])
                        >> metis_tac []))));
 
-
-
+val _ = export_theory();
