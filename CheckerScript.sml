@@ -86,38 +86,39 @@ val first_continuing_cand_dec_def = Define `
     else if (~ MEM b0 h) /\ (first_continuing_cand_dec c bs h) then T
     else F)`;
 
-val Count_Dec_Aux = Define `
-     (Count_Dec_Aux p np t nt ba h [] = T)
-  /\ (Count_Dec_Aux p np t nt ba  h (l0::ls) =
+val COUNTAux_dec = Define `
+     (COUNTAux_dec p np t nt ba h [] = T)
+  /\ (COUNTAux_dec p np t nt ba  h (l0::ls) =
        if (MEM l0 h) then
         (get_cand_pile l0 np = (get_cand_pile l0 p) ++ FILTER (\ (b: (Cand list) # rat). (fcc l0 (FST b) h)) ba)
           /\ (get_cand_tally l0 nt = sum_aux (FILTER (\ (b: (Cand list) # rat). (fcc l0 (FST b) h)) ba))
-           /\ (Count_Dec_Aux p np t nt ba h ls)
+           /\ (COUNTAux_dec p np t nt ba h ls)
         else
              (get_cand_pile l0 np = get_cand_pile l0 p)
           /\ (get_cand_tally l0 nt = get_cand_tally l0 t)
-          /\ (Count_Dec_Aux p np t nt ba h ls))`;
+          /\ (COUNTAux_dec p np t nt ba h ls))`;
 
- val Count_Aux_dec = Define `
-    (Count_Aux_dec st (qu : rat) (l: Cand list) ((j: judgement), winners w) = F)
- /\ (Count_Aux_dec st qu l (winners w, (j: judgement)) = F)
- /\ (Count_Aux_dec st qu l (state (ba, t, p, bl, e, h), state (ba', t', p', bl', e',h')) =
-       (Count_Dec_Aux p p' t t' ba h l)
+ val COUNT_dec = Define `
+   (COUNT_dec ((st, qu, l): params)  
+       (NonFinal (ba, t, p, bl, e, h))
+       (NonFinal (ba', t', p', bl', e', h')) =
+       (COUNTAux_dec p p' t t' ba h l)
     /\ (bl = bl') /\ (e = e') /\ (h = h')
-    /\ (no_dup (h++e))
-    /\ no_dup (MAP FST p)
+    /\ ALL_DISTINCT (h++e)
+    /\ ALL_DISTINCT (MAP FST p)
     /\ (list_MEM (h++e) l)
     /\ (Valid_PileTally_DEC1 t l) /\ (Valid_PileTally_DEC2 t l)
     /\ (Valid_PileTally_DEC1 t' l) /\ (Valid_PileTally_DEC2 t' l)
     /\ (Valid_PileTally_DEC1 p l) /\ (Valid_PileTally_DEC2 p l)
     /\ (Valid_PileTally_DEC1 p' l) /\ (Valid_PileTally_DEC2 p' l)
-    /\ no_dup (MAP FST p')
-    /\ no_dup (MAP FST t')
-    /\ (non_empty l) /\ (no_dup l)
-    /\ (no_dup (MAP FST t))
-    /\ (non_empty ba)
-    /\ (non_empty h)
-    /\ (ba' = []))`;
+    /\ ALL_DISTINCT (MAP FST p')
+    /\ ALL_DISTINCT (MAP FST t')
+    /\ (~ (NULL l)) /\ (ALL_DISTINCT l)
+    /\ ALL_DISTINCT (MAP FST t)
+    /\ ~ (NULL ba)
+    /\ ~ (NULL h)
+    /\ (ba' = [])) /\
+   (COUNT_dec _ _ _ _ = F)`;
 
 
 val take_append = Define `
@@ -127,8 +128,7 @@ val take_append = Define `
 
 
 val tally_comparison = Define `
-     (tally_comparison (t: (Cand # rat) list) c1 c2 = if (get_cand_tally c1 t <= get_cand_tally c2 t)
-                                                        then T else F)`;
+     (tally_comparison (t: (Cand # rat) list) c1 c2 = (get_cand_tally c1 t <= get_cand_tally c2 t))`;
 
 
 val eqe_list_dec = Define `
@@ -166,40 +166,41 @@ val update_cand_pile = Define `
 
 
 
-val Elect_dec = Define `
-              (Elect_dec st (qu : rat) (l: Cand list) ((j: judgement), winners w) = F)
- /\ (Elect_dec st qu l (winners w, (j: judgement)) = F)
- /\ (Elect_dec st qu l (state (ba, t, p, bl, e, h), state (ba', t', p', bl', e',h')) =
+val ELECT_dec = Define `
+     (ELECT_dec ((st,qu,l): params)
+           (NonFinal (ba, t, p, bl, e, h))
+	   (NonFinal (ba', t', p', bl', e',h')) =
               let (l1 = (take_append bl' bl))
                  in
                    (SORTED (tally_comparison t) l1)
-                /\ (no_dup (l1 ++ e))
+                /\ (ALL_DISTINCT (l1 ++ e))
                 /\ (ba = []) /\ (ba' = [])
                 /\ (t = t')
-                /\ (non_empty l1)
+                /\ (~ (NULL l1))
                 /\ (bigger_than_quota l1 t qu)
                 /\ (0 < qu)
                 /\ (LENGTH (l1 ++ e) <= st)
                 /\ (eqe_list_dec l1 h' h)
                 /\ (eqe_list_dec2 l1 h' h)
-                /\ (no_dup h)
-                /\ (no_dup (l1 ++ h'))
-                /\ (no_dup e')
+                /\ ALL_DISTINCT h
+                /\ ALL_DISTINCT (l1 ++ h')
+                /\ ALL_DISTINCT e'
                 /\ (eqe_list_dec l1 e e')
                 /\ (eqe_list_dec2 l1 e e')
                 /\ (piles_eq_list h l1 p p')
-                /\ (no_dup (MAP FST p))
-                /\ (no_dup (MAP FST t))
-                /\ (no_dup (MAP FST p'))
-                /\ (non_empty l)
-                /\ (no_dup l)
+                /\ ALL_DISTINCT (MAP FST p)
+                /\ ALL_DISTINCT (MAP FST t)
+                /\ ALL_DISTINCT (MAP FST p')
+                /\ (~ (NULL l))
+                /\ ALL_DISTINCT l
                 /\ (bl' = bl ++ l1)
                 /\ (Valid_PileTally_DEC1 p l) /\ (Valid_PileTally_DEC2 p l)
                 /\ (Valid_PileTally_DEC1 p' l) /\ (Valid_PileTally_DEC2 p' l)
                 /\ (Valid_PileTally_DEC1 t l) /\ (Valid_PileTally_DEC2 t l)
                 /\ (list_MEM e' l)
                 /\ (list_MEM h l)
-                /\ (update_cand_pile qu t l1 p p'))`;
+                /\ (update_cand_pile qu t l1 p p')) /\
+     (ELECT_dec _ _ _ _ = F)`;
 
 
 
@@ -210,7 +211,7 @@ val all_elem_zero = Define `
 
 val all_elem_nil = Define `
             (all_elem_nil ([]: (((Cand list) # rat) list) list) = T)
-         /\ (all_elem_nil (p0::ps) = (p0 = []) /\ (all_elem_nil ps))`;
+         /\ (all_elem_nil (p0::ps) = (NULL p0) /\ (all_elem_nil ps))`;
 
 
 
@@ -226,16 +227,16 @@ val Initial_Judgement_dec = Define `
 
 
 val Final_Judgement_dec = Define `
-           (Final_Judgement_dec (state (ba,t,p,bl,e,h)) = F)
-        /\ (Final_Judgement_dec (winners l) = T)`;
+           (Final_Judgement_dec (state _) = F)
+        /\ (Final_Judgement_dec (winners _) = T)`;
 
 
 
 val Elim_dec = Define `
-         (Elim_dec st qu l (j1,j2) c = Elim_cand_dec st qu l c (j1,j2))`;
+         (Elim_dec (st,qu,l) (j1,j2) c = Elim_cand_dec c (s,qu,l) (j1,j2))`;
 
 
-
+(*
 val Checker_Aux_dec = Define `
           (Checker_Aux_dec st qu l ([] : judgement list) = F)
        /\ (Checker_Aux_dec st qu l (j0::js) =
@@ -245,29 +246,29 @@ val Checker_Aux_dec = Define `
                         then (Hwin qu st (j0,HD js) \/ Ewin qu st (j0,HD js))
                    else  ((Count_Aux_dec st qu l (j0,HD js))
                       \/ (Transfer_dec st qu l (j0,HD js))
-                      \/ (Elect_dec st qu l (j0,HD js))
+                      \/ (Elect_dec (st,qu,l) (j0,HD js))
                       \/ (EXISTS (Elim_dec st qu l (j0,HD js)) l))
                       /\ (Checker_Aux_dec st qu l js))`;
+*)
 
 
-
-val Checker_Aux2_dec = Define `
-             (Checker_Aux2_dec st qu l ([]:judgement list) = F)
-          /\ (Checker_Aux2_dec st qu l [j0] = Final_Judgement_dec j0)
-          /\ (Checker_Aux2_dec st qu l (j0::j1::js) =
-               ((Hwin qu st (j0,j1)
-            \/ (Ewin qu st (j0,j1))
-            \/ (Count_Aux_dec st qu l (j0,j1))
-            \/ (Transfer_dec st qu l (j0,j1))
-            \/ (Elect_dec st qu l (j0,j1))
-            \/ (EXISTS (Elim_dec st qu l (j0,j1)) l))
-            /\ (Checker_Aux2_dec st qu l (j1::js))))`;
+val CHECKER_AUX_dec = Define `
+             (CHECKER_AUX_dec ((qu,st,l): params) ([]:judgement list) = F)
+          /\ (CHECKER_AUX_dec (qu,st,l) [j0] = Final_Judgement_dec j0)
+          /\ (CHECKER_AUX_dec (qu,st,l) (j0::j1::js) =
+               ((HWIN (qu,st,l) (j0,j1)
+            \/ (EWIN (qu,st,l) (j0,j1))
+            \/ (COUNT_dec (qu,st,l) (j0,j1))
+            \/ (TRANSFER_dec (qu,st,l) (j0,j1))
+            \/ (ELECT_dec (qu,st,l) (j0,j1))
+            \/ (EXISTS (ELIM_CAND_dec (qu,st,l) (j0,j1)) l))
+            /\ (CHECKER_AUX_dec (qu,st,l) (j1::js))))`;
 
 
 val Check_Parsed_Certificate_def = Define`
   (Check_Parsed_Certificate seats quota candidates [] = F) /\
   (Check_Parsed_Certificate seats quota candidates (first_judgement::rest_judgements) =
      Initial_Judgement_dec candidates first_judgement /\
-     Checker_Aux2_dec seats quota candidates (first_judgement::rest_judgements))`;
+     CHECKER_AUX_dec (seats,quota,candidates) (first_judgement::rest_judgements))`;
 
 val _ = export_theory();
