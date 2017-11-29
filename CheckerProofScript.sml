@@ -14,33 +14,21 @@ val EWIN_thm = Q.store_thm("EWIN_thm",
   \\ rw[EWIN_def,EWIN_dec_def]
   \\ PairCases_on`p`
   \\ rw[EWIN_def,EWIN_dec_def]
-  \\ metis_tac[]);`
+  \\ metis_tac[]);
 
-val hwin_to_Hwin = Q.store_thm ("hwin_to_Hwin",
-  `!qu st j1 j2. (hwin qu st j1 j2) ==> (Hwin qu st (j1, j2) = T)`,
-   STRIP_TAC
-        >> STRIP_TAC
-          >> Cases_on `j1`
-   >- (rw[hwin_def]
-     >> rw[Hwin_def])
-   >- rw[hwin_def]);
+ 
+val HWIN_thm = Q.store_thm("HWIN_thm",
+    `HWIN = HWIN_dec`,
+    simp[FUN_EQ_THM]
+    \\ qx_gen_tac`params`
+    \\ PairCases_on`params`
+    \\ Cases \\ Cases \\ rw[HWIN_def,HWIN_dec_def]  
+    \\ PairCases_on`p`
+    \\ rw[HWIN_def,HWIN_dec_def]
+    \\ metis_tac[HWIN_def,HWIN_dec_def])    
+ 
 
-val Hwin_to_hwin = Q.store_thm ("Hwin_to_hwin",
-  `!qu st j1 j2. (Hwin qu st (j1, j2) = T) ==> (hwin qu st j1 j2)`,
-   STRIP_TAC
-        >> STRIP_TAC
-	  >> Cases_on `j1`
-	    >> Cases_on `j2`
-   >- rw[Hwin_def]
-   >- (Cases_on `p`
-      >> Cases_on `r`
-        >> Cases_on `r'`
-          >> Cases_on `r`
-            >> Cases_on `r'`
-              >> rw[Hwin_def]
-                >> rw[hwin_def])
-   >- rw[Hwin_def]
-   >- rw[Hwin_def]);
+
 
 val CAND_EQ_DEC = Q.store_thm ("CAND_EQ_DEC",
     `!(c1: Cand) c2. (c1 = c2) \/ (c1 <> c2) `,
@@ -49,24 +37,31 @@ val CAND_EQ_DEC = Q.store_thm ("CAND_EQ_DEC",
              >- (DISJ1_TAC >> METIS_TAC [])
              >- (DISJ2_TAC >> METIS_TAC []));
 
+  
 val GET_CAND_TALLY_HEAD_REMOVAL_def = Q.store_thm ("GET_CAND_TALLY_HEAD_REM",
-`!(h: Cand #rat) t c. (~(c = FST h)) ==> (get_cand_tally c (h::t) = get_cand_tally c t)`,  Induct_on `t`
-               >- rw [get_cand_tally_def]
+`!(h: cand #rat) t c. (~(c = FST h)) ==> (get_cand_tally c (h::t) = get_cand_tally c t)`,
+          Induct_on `t `         
+               >- (rw[get_cand_tally_def] >> 
+                   Cases_on`h` >> fs[ALOOKUP_def])  	         
+ 	           
                >- (REPEAT STRIP_TAC
-                 >> first_assum (qspecl_then [`h'`,`c`] strip_assume_tac)
-                   >> EVAL_TAC
-                     >> rw []));
-
-
-
+                 >> first_assum (qspecl_then [`h`,`c`] strip_assume_tac)  
+                    >> rw[get_cand_tally_def] >>
+                    Cases_on`h'` >> fs[ALOOKUP_def]))   
+ 
+ 
+   
 val GET_CAND_TALLY_MEM2 = Q.store_thm ("GET_CAND_TALLY_MEM",
- `!(t: (Cand #rat) list) c. (MEM c (MAP FST t))
+ `!(t: (cand #rat) list) c. (MEM c (MAP FST t))
                                     ==> (MEM (c, get_cand_tally c t) t) `,
-
+ 
     Induct_on `t`
         >- rw []
-        >- (EVAL_TAC
-          >> REPEAT STRIP_TAC >> rw []));
+      
+        >- ((REPEAT STRIP_TAC >> Cases_on `h` >> Cases_on `c =q`)
+          >- fs[get_cand_tally_def,ALOOKUP_def]
+	  >- fs[get_cand_tally_def,ALOOKUP_def])); 
+       
 
 
 
@@ -210,23 +205,23 @@ val NO_DUP_TAIL_ONE_CAND = Q.store_thm ("NO_DUP_TAIL_ONE_CAND",
                        >- (FULL_SIMP_TAC list_ss [MEM,CONS_11]
                          >> MAP_EVERY qexists_tac [`t`,`h2`]
                            >> METIS_TAC [])))) ;
-
+ 
 val PileTally_to_PileTally_DEC1 = Q.store_thm ("PileTally_to_PileTally_DEC1",
- `!l t. (!c. (MEM c (MAP FST t)) ==> (MEM c l)) ==> (Valid_PileTally_DEC1 t l) `,
+ `!l t. (!c. (MEM c (MAP FST t)) ==> (MEM c l)) ==> (Valid_PileTally_dec1 t l) `,
 
     Induct_on `t`
-       >- rw [Valid_PileTally_DEC1_def]
+       >- rw [Valid_PileTally_dec1_def]
        >- (REPEAT STRIP_TAC
           >> first_assum (qspecl_then [`FST h`] strip_assume_tac)
-            >> rfs[Valid_PileTally_DEC1_def,MAP]));
-
+            >> rfs[Valid_PileTally_dec1_def,MAP]));
+ 
 val PileTally_DEC1_to_PileTally = Q.store_thm ("PileTally_DEC1_to_PileTally",
- `!l t. (Valid_PileTally_DEC1 t l) ==> (!c. MEM c (MAP FST t) ==> (MEM c l))`,
+ `!l t. (Valid_PileTally_dec1 t l) ==> (!c. MEM c (MAP FST t) ==> (MEM c l))`,
 
     Induct_on `t`
         >- rw[]
         >- (REPEAT STRIP_TAC
-            >> rfs [Valid_PileTally_DEC1_def]));
+            >> rfs [Valid_PileTally_dec1_def]));
 
 val non_empty_IS_CORRECT = Q.store_thm ("non_empty_IS_CORRECT",
   `!(l: (Cand # rat) list). (non_empty l) ==> (?l0 ls. (l = l0::ls)) `,
@@ -242,33 +237,33 @@ val non_empty_IS_CORRECT = Q.store_thm ("non_empty_IS_CORRECT",
 
 
 val PileTally_to_PileTally_DEC2 = Q.store_thm ("PileTally_to_PileTally_DEC2",
-   `!l t. (!c. (MEM c l) ==> (MEM c (MAP FST t))) ==> (Valid_PileTally_DEC2 t l) `,
+   `!l t. (!c. (MEM c l) ==> (MEM c (MAP FST t))) ==> (Valid_PileTally_dec2 t l) `,
 
      Induct_on `l`
-        >- rw [Valid_PileTally_DEC2_def]
-        >- rfs [Valid_PileTally_DEC2_def]);
+        >- rw [Valid_PileTally_dec2_def]
+        >- rfs [Valid_PileTally_dec2_def]);
 
-
+ 
 val PileTally_DEC2_IMP_PileTally = Q.store_thm ("PileTally_DEC2_IMP_PileTally",
-  `!l t. (Valid_PileTally_DEC2 t l) ==> (!c. (MEM c l) ==> (MEM c (MAP FST t)))`,
+  `!l t. (Valid_PileTally_dec2 t l) ==> (!c. (MEM c l) ==> (MEM c (MAP FST t)))`,
 
       Induct_on `l`
          >- rw []
          >- ((REPEAT STRIP_TAC
            >> FULL_SIMP_TAC list_ss [MEM])
-              >- FULL_SIMP_TAC list_ss [Valid_PileTally_DEC2_def]
-              >- rfs [Valid_PileTally_DEC2_def]));
+              >- FULL_SIMP_TAC list_ss [Valid_PileTally_dec2_def]
+              >- rfs [Valid_PileTally_dec2_def]));
 
-
+   
 val REMOVE_ONE_CAND_APPEND = Q.store_thm ("REMOVE_ONE_CAND_APPEND",
- `! l1 l2 (c: Cand). (~ MEM c l1) ==> (remove_one_cand c (l1 ++l2) = l1 ++ (remove_one_cand c l2))`,
+ `! l1 l2 (c: cand). (~ MEM c l1) ==> (equal_except_dec c (l1 ++l2) = l1 ++ (equal_except_dec c l2))`,
 
    Induct_on `l1`
-       >- RW_TAC list_ss [APPEND_NIL,remove_one_cand_def]
+       >- RW_TAC list_ss [APPEND_NIL,equal_except_dec_def]
        >- (REPEAT STRIP_TAC
          >> first_assum (qspecl_then [`l2`,`c`] strip_assume_tac)
-           >> FULL_SIMP_TAC list_ss [MEM,remove_one_cand_def]));
-
+           >> FULL_SIMP_TAC list_ss [MEM,equal_except_dec_def]));
+ 
 
 val REMOVE_ONE_CAND_NOTIN = Q.store_thm ("REMOVE_ONE_CAND_NOTIN",
  `!l (c: Cand). (~ MEM c l) ==> (remove_one_cand c l = l) `,
