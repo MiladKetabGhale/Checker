@@ -957,7 +957,7 @@ Induct_on `b`
 
 
 
-val intermediate_count = Define `
+val intermediate_count_def = Define `
         (intermediate_count st qu l j1 j2 = ? ba t nt p np bl e h.
           (j1 = state (ba, t, p, bl, e, h))
        /\ (!d. MEM d (h++e) ==> MEM d l)
@@ -984,8 +984,8 @@ val intermediate_count = Define `
                                         /\ (get_cand_tally c nt = get_cand_tally c t))))
        /\ (j2 = state ([], nt, np, bl, e, h)))`;
 
-val Count_Aux_def = Define `
-         (Count_Aux st qu l j1 j2 = ? ba t nt p np bl e h.
+val COUNT_def = Define `
+         (Count st qu l j1 j2 = ? ba t nt p np bl e h.
           (j1 = state (ba, t, p, bl, e, h))
        /\ (!d. MEM d (h++e) ==> MEM d l)
        /\ (!d. NO_DUP_PRED (h++e) d)
@@ -1011,24 +1011,24 @@ val Count_Aux_def = Define `
                                         /\ (!r. MEM c l /\ MEM (c,r) t <=> MEM c l /\ MEM (c,r) nt))))
        /\ (j2 = state ([], nt, np, bl, e, h)))`;
 
-val Count_Dec_Aux = Define `
-     (Count_Dec_Aux p np t nt ba h [] = T)
-  /\ (Count_Dec_Aux p np t nt ba  h (l0::ls) =
+val COUNTAux_dec = Define `
+     (COUNTAux_dec p np t nt ba h [] = T)
+  /\ (COUNTAux_dec p np t nt ba  h (l0::ls) =
        if (MEM l0 h) then
         (get_cand_pile l0 np = (get_cand_pile l0 p) ++ FILTER (\ (b: (cand list) # rat). (fcc l0 (FST b) h)) ba)
           /\ (get_cand_tally l0 nt = SUM_RAT (MAP SND (FILTER (\ (b: (cand list) # rat). (fcc l0 (FST b) h)) ba)))
-           /\ (Count_Dec_Aux p np t nt ba h ls)
+           /\ (COUNTAux_dec p np t nt ba h ls)
         else
              (get_cand_pile l0 np = get_cand_pile l0 p)
           /\ (get_cand_tally l0 nt = get_cand_tally l0 t)
-          /\ (Count_Dec_Aux p np t nt ba h ls))`;
+          /\ (COUNTAux_dec p np t nt ba h ls))`;
 
 
- val Count_Aux_dec = Define `
-    (Count_Aux_dec st (qu : rat) (l: cand list) ((j: judgement), winners w) = F)
- /\ (Count_Aux_dec st qu l (winners w, (j: judgement)) = F)
- /\ (Count_Aux_dec st qu l (state (ba, t, p, bl, e, h), state (ba', t', p', bl', e',h')) =
-       (Count_Dec_Aux p p' t t' ba h l)
+ val COUNT_dec = Define `
+    (COUNT_dec st (qu : rat) (l: cand list) ((j: judgement), winners w) = F)
+ /\ (COUNT_dec st qu l (winners w, (j: judgement)) = F)
+ /\ (COUNT_dec st qu l (state (ba, t, p, bl, e, h), state (ba', t', p', bl', e',h')) =
+       (CountAux_dec p p' t t' ba h l)
     /\ (bl = bl') /\ (e = e') /\ (h = h')
     /\ (no_dup (h++e))
     /\ no_dup (MAP FST p)
@@ -1058,13 +1058,13 @@ val Logical_to_Functional_Count_Dec_Aux = Q.store_thm ("Logical_to_Functional_Co
                          /\ (~ MEM c h ==>
                                       (get_cand_pile c np = get_cand_pile c p)
                                       /\ (get_cand_tally c nt = get_cand_tally c t))))
-                                           ==> Count_Dec_Aux p np t nt ba h l`,
+                                           ==> COUNTAux_dec p np t nt ba h l`,
 
 
 Induct_on `l`
-  >- rw[Count_Dec_Aux]
+  >- rw[COUNTAux_dec]
   >- ((REPEAT STRIP_TAC
-      >> rw[Count_Dec_Aux])
+      >> rw[COUNTAux_dec])
 
     >- (first_assum (qspecl_then [`h`] strip_assume_tac)
      >> FULL_SIMP_TAC list_ss [MEM]
@@ -1084,7 +1084,7 @@ Induct_on `l`
 
 
 val Functional_to_Logical_Count_Dec_Aux = Q.store_thm ("Functional_to_Logical_Count_Dec_Aux",
-`!t nt p np ba h l. Count_Dec_Aux p np t nt ba h l ==>
+`!t nt p np ba h l. COUNTAux_dec p np t nt ba h l ==>
           (!c. MEM c l ==>
                  ((MEM c h ==>
                     ?(l: ((cand list) # rat) list).
@@ -1105,25 +1105,25 @@ Induct_on `l`
               by metis_tac [first_continuing_cand_IMP_fcc,fcc_to_first_continuing_cand]
               >>  STRIP_TAC)
                  >- metis_tac []
-                 >- metis_tac[Count_Dec_Aux])
+                 >- metis_tac[CountAux_dec])
            >- ((MAP_EVERY qexists_tac [`FILTER (\ (b: (cand list) # rat). (fcc c (FST b) h')) ba`]
             >> `!c h ba. first_continuing_cand c h ba <=> fcc c h ba`
               by metis_tac [first_continuing_cand_IMP_fcc,fcc_to_first_continuing_cand]
               >> STRIP_TAC)
                 >- metis_tac []
-                >- metis_tac [Count_Dec_Aux]))
-       >- metis_tac[Count_Dec_Aux,MEM]
-       >- metis_tac [Count_Dec_Aux,MEM]));
+                >- metis_tac [COUNTAux_dec]))
+       >- metis_tac[CountAux_dec,MEM]
+       >- metis_tac [COUNTAux_dec,MEM]));
 
 
 
 val intermediate_count_IMP_Count_Aux = Q.store_thm ("intermediate_count_IMP_Count_Aux",
- `! (st: num) (qu: rat) l j1 j2. intermediate_count st qu l j1 j2 ==> Count_Aux st qu l j1 j2`,
+ `! (st: num) (qu: rat) l j1 j2. intermediate_count st qu l j1 j2 ==> COUNT st qu l j1 j2`,
 
 
 (REPEAT STRIP_TAC
-  >> rw[Count_Aux_def]
-    >> rfs[intermediate_count]
+  >> rw[COUNT_def]
+    >> rfs[intermediate_count_def]
       >> STRIP_TAC)
   >- metis_tac []
   >- (REPEAT STRIP_TAC
@@ -1153,11 +1153,11 @@ val intermediate_count_IMP_Count_Aux = Q.store_thm ("intermediate_count_IMP_Coun
 
 
 val Count_Aux_IMP_intermediate_count = Q.store_thm ("Count_Aux_IMP_intermediate_count",
-`! (st: num) (qu: rat) l j1 j2. Count_Aux st qu l j1 j2 ==> intermediate_count st qu l j1 j2`,
+`! (st: num) (qu: rat) l j1 j2. COUNT st qu l j1 j2 ==> intermediate_count st qu l j1 j2`,
 
 (REPEAT STRIP_TAC
- >> rw[intermediate_count]
-  >> rfs[Count_Aux_def]
+ >> rw[intermediate_count_def]
+  >> rfs[COUNT_def]
    >> STRIP_TAC)
    >- metis_tac[]
    >- (REPEAT STRIP_TAC
@@ -1180,14 +1180,14 @@ val Count_Aux_IMP_intermediate_count = Q.store_thm ("Count_Aux_IMP_intermediate_
 
 
 val Count_Aux_IMP_Count_Aux_dec = Q.store_thm ("Count_Aux_IMP_Count_Aux_dec",
- `! (st: num) (qu: rat) l j1 j2. Count_Aux st qu l j1 j2 ==> Count_Aux_dec st qu l (j1,j2)`,
+ `! (st: num) (qu: rat) l j1 j2. COUNT st qu l j1 j2 ==> COUNT_dec st qu l (j1,j2)`,
 
   (ASSUME_TAC Count_Aux_IMP_intermediate_count
    >> REPEAT STRIP_TAC
-    >> `intermediate_count st qu l j1 j2` by metis_tac[Count_Aux_def,Count_Aux_IMP_intermediate_count]
-     >> rfs[Count_Aux_dec,Count_Aux_def]
+    >> `intermediate_count st qu l j1 j2` by metis_tac[COUNT_def,Count_Aux_IMP_intermediate_count]
+     >> rfs[COUNT_dec,COUNT_def]
       >> REPEAT STRIP_TAC)
-        >- (rfs [intermediate_count]
+        >- (rfs [intermediate_count_def]
          >> metis_tac [ Logical_to_Functional_Count_Dec_Aux])
         >- metis_tac[NO_DUP_PRED_to_no_dup]
         >- metis_tac[NO_DUP_PRED_to_no_dup]
@@ -1213,7 +1213,7 @@ val Count_Aux_IMP_Count_Aux_dec = Q.store_thm ("Count_Aux_IMP_Count_Aux_dec",
 
 
 val Count_Aux_dec_IMP_Count_Aux = Q.store_thm ("Count_Aux_dec_IMP_Count_Aux",
- `! (st : num) (qu:rat) l j1 j2. Count_Aux_dec st qu l (j1,j2) ==> Count_Aux st qu l j1 j2 `,
+ `! (st : num) (qu:rat) l j1 j2. COUNT_dec st qu l (j1,j2) ==> COUNT st qu l j1 j2 `,
 
  (ASSUME_TAC intermediate_count_IMP_Count_Aux
   >> REPEAT STRIP_TAC
@@ -1222,7 +1222,7 @@ val Count_Aux_dec_IMP_Count_Aux = Q.store_thm ("Count_Aux_dec_IMP_Count_Aux",
        >- (Cases_on `j2`
          >- ((Cases_on `p` >> Cases_on `r` >> Cases_on `r'` >> Cases_on `r` >> Cases_on `r'`
            >> Cases_on `p'` >> Cases_on `r'` >> Cases_on `r''` >> Cases_on `r'` >> Cases_on `r''`
-             >> rfs[intermediate_count,Count_Aux_dec]
+             >> rfs[intermediate_count_def,Count_dec]
               >> REPEAT STRIP_TAC)
             >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND]
             >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND]
@@ -1245,10 +1245,10 @@ val Count_Aux_dec_IMP_Count_Aux = Q.store_thm ("Count_Aux_dec_IMP_Count_Aux",
             >-  metis_tac [Functional_to_Logical_Count_Dec_Aux]
             >- metis_tac [Functional_to_Logical_Count_Dec_Aux]
             >- metis_tac [Functional_to_Logical_Count_Dec_Aux])
-         >- rfs [Count_Aux_dec])
+         >- rfs [COUNT_dec])
         >- (Cases_on `j2`
-         >- rfs [Count_Aux_dec]
-         >- rfs [Count_Aux_dec])))
+         >- rfs [COUNT_dec]
+         >- rfs [COUNT_dec])))
            >> metis_tac[]);
 
 
