@@ -11,8 +11,8 @@ val SUM_RAT_def = Define`
 
 (* The main datatypes *)
 
-(* A candidate is represented by a string *)
-val _ = Datatype`cand = Cand string`;
+(* A candidate is represented by a CakeML string *)
+val _ = Datatype`cand = Cand mlstring`;
 
 (* N.B. A more idiomatic approach might be to use records rather than tuples *)
 
