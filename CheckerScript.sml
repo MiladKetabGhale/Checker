@@ -203,18 +203,23 @@ val Initial_Judgement_dec_def = Define `
                              /\ (h = l)
                              /\ (EVERY NULL (MAP SND p)))`;
 
+val Valid_Step_def = Define`
+  Valid_Step params j0 j1 ⇔
+       HWIN_dec params j0 j1
+    \/ EWIN_dec params j0 j1
+    \/ COUNT_dec params j0 j1
+    \/ TRANSFER_dec params j0 j1
+    \/ ELECT_dec params j0 j1
+    \/ EXISTS (λc. ELIM_CAND_dec c params j0 j1) (SND(SND params))`;
+
 val valid_judgements_dec_def = Define `
        (valid_judgements_dec _ [] ⇔ F)
     /\ (valid_judgements_dec _ [Final _] ⇔ T)
     /\ (valid_judgements_dec _ [_] ⇔ F)
     /\ (valid_judgements_dec params (j0::j1::js) ⇔
-         (   HWIN_dec params j0 j1
-          \/ EWIN_dec params j0 j1
-          \/ COUNT_dec params j0 j1
-          \/ TRANSFER_dec params j0 j1
-          \/ ELECT_dec params j0 j1
-          \/ EXISTS (λc. ELIM_CAND_dec c params j0 j1) (SND(SND params)))
-      /\ (valid_judgements_dec params (j1::js)))`;
+        Valid_Step params j0 j1
+        /\ (valid_judgements_dec params (j1::js)))`;
+
 
 val Check_Parsed_Certificate_def = Define`
   (Check_Parsed_Certificate params [] ⇔ F) /\

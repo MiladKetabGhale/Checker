@@ -62,11 +62,15 @@ val elect_dec_side = Q.prove(
   \\ cheat (* wait for update to translator *)
   ) |> update_precondition;
 
-val r = translate valid_judgements_dec_def;
-
 val r = translate Initial_Judgement_dec_def;
 
+val r = translate Valid_Step_def;
+
+(*
+val r = translate valid_judgements_dec_def;
+
 val r = translate Check_Parsed_Certificate_def;
+*)
 
 (* To see the code:
 val () = astPP.enable_astPP()
