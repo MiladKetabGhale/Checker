@@ -1,3 +1,43 @@
+certificate :=
+  quota "\n"
+  seats "\n"
+  candidates "\n"
+  candidates "\n"
+  (judgement "\n")+
+
+quota := number space* "%" space* number
+
+seats := number
+
+candidate := upper+
+
+candidates := list{candidate}
+
+judgement :=
+  ballots ";" space*
+  tallies ";" space*
+  piles ";" space*
+  candidates ";" space*
+  candidates ";" space*
+  candidates
+
+ballots := list{pair{list{candidates} quota}}
+
+tallies := list{pair{candidate quota}}
+
+piles := list{pair{candidate ballots}}
+
+list{X} := number (space+ X)*
+  (where number represents the number of items in the *)
+
+number := Something for which Num.fromString returns SOME i
+
+upper := Something for which Char.isUpper returns true
+
+space := Something for which Char.isSpace returns true, but not newlines
+
+----
+
 Certificate file format:
 
 certificate :=
