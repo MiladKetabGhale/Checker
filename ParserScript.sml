@@ -25,7 +25,7 @@ val parse_quota_def = Define`
   parse_quota (line:mlstring) = SOME (0:rat)`;
 
 val parse_seats_def = Define`
-  parse_seats (line:mlstring) = SOME 3`;
+  parse_seats (line:mlstring) = SOME (3:num)`;
 
 val parse_candidates_def = Define`
   parse_candidates (line:mlstring) = SOME [Cand(strlit"A");Cand(strlit"B")]`;
