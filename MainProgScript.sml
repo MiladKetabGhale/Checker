@@ -21,6 +21,22 @@ val LRC_inv = Q.store_thm("LRC_inv",
   \\ CASE_TAC \\ fs[LRC_def,inv_DEF,LRC_APPEND]
   \\ metis_tac[]);
 
+val DROP_EQ_CONS_IMP = Q.store_thm("DROP_EQ_CONS_IMP",
+  `DROP n ls = x::xs ⇒ DROP (n+1) ls = xs`,
+  Cases_on`ls` \\ rw[]
+  \\ Cases_on`n` \\ fs[]
+  \\ simp[ADD1]
+  \\ ONCE_REWRITE_TAC[ADD_COMM]
+  \\ simp[GSYM DROP_DROP_T]);
+
+val OPT_MMAP_EQ_SOME = Q.store_thm("OPT_MMAP_EQ_SOME",
+  `∀xs ys.
+   OPT_MMAP f xs = SOME ys ⇔
+   EVERY (IS_SOME o f) xs ∧
+   ys = MAP (THE o f) xs`,
+  Induct \\ rw[OPT_MMAP_def,IS_SOME_EXISTS,PULL_EXISTS]
+  \\ metis_tac[THE_DEF]);
+
 val option_case_eq = prove_case_eq_thm{nchotomy=option_nchotomy,case_def=option_case_def};
 val list_case_eq = prove_case_eq_thm{nchotomy=list_nchotomy,case_def=list_case_def};
 
@@ -86,6 +102,41 @@ val get_stdin_forwardFD = Q.store_thm("get_stdin_forwardFD",
   \\ imp_res_tac stdin_get_stdin
   \\ rw[]);
 
+val linesFD_lineForwardFD = Q.store_thm("linesFD_lineForwardFD",
+  `linesFD (lineForwardFD fs fd) fd' =
+   if fd = fd' then
+     DROP 1 (linesFD fs fd)
+   else linesFD fs fd'`,
+  rw[linesFD_def,lineForwardFD_def]
+  >- (
+    CASE_TAC \\ fs[]
+    \\ CASE_TAC \\ fs[]
+    \\ CASE_TAC \\ fs[DROP_LENGTH_TOO_LONG]
+    \\ pairarg_tac \\ fs[]
+    \\ qmatch_asmsub_rename_tac`DROP x pos`
+    \\ Cases_on`splitlines (DROP x pos)` \\ fs[DROP_NIL]
+    \\ imp_res_tac splitlines_CONS_FST_SPLITP
+    \\ imp_res_tac splitlines_next
+    \\ rveq
+    \\ rw[NULL_EQ,DROP_DROP_T,ADD1]
+    \\ fs[SPLITP_NIL_SND_EVERY] \\ rw[]
+    \\ fs[o_DEF]
+    \\ drule SPLITP_EVERY
+    \\ strip_tac \\ fs[DROP_LENGTH_TOO_LONG])
+  \\ CASE_TAC \\ fs[]
+  \\ CASE_TAC \\ fs[]
+  \\ CASE_TAC \\ fs[]
+  \\ pairarg_tac \\ fs[]
+  \\ simp[get_file_content_def]
+  \\ simp[forwardFD_def,ALIST_FUPDKEY_ALOOKUP]
+  \\ CASE_TAC \\ fs[]);
+
+val linesFD_splitlines_get_stdin = Q.store_thm("linesFD_splitlines_get_stdin",
+  `stdin fs inp pos ⇒
+   MAP (λl. l ++ "\n") (splitlines (get_stdin fs)) = linesFD fs 0`,
+  rw[linesFD_def]
+  \\ imp_res_tac stdin_get_stdin
+  \\ fs[stdin_def,get_file_content_def]);
 (* -- *)
 
 val malformed_line_msg_def = Define`
@@ -99,7 +150,7 @@ val loop_def = Define`
      case ls of
      | [] => if Initial_Judgement_dec (SND(SND params)) j0
              then NONE
-             else SOME (strlit"Initial judgement malformed\n")
+             else SOME (strlit"Malformed initial judgement\n")
      | (line::ls) =>
         case parse_judgement line of
         | NONE => SOME (malformed_line_msg i)
@@ -147,7 +198,7 @@ val loop = process_topdecs`
           if initial_judgement_dec (snd (snd params)) j0 then
             TextIO.print "Certificate OK\n"
           else
-            TextIO.output TextIO.stdErr "Initial judgement malformed\n"
+            TextIO.output TextIO.stdErr "Malformed initial judgement\n"
       | SOME line =>
       case parse_judgement line of
         NONE => TextIO.output TextIO.stdErr (malformed_line_msg i)
@@ -205,7 +256,7 @@ val loop_spec = Q.store_thm("loop_spec",
       \\ simp[up_stdo_def,LENGTH_explode]
       \\ xsimpl )
     \\ reverse(Cases_on `∃inp pos. stdin fs inp pos`)
-    >- ( (* TODO: move this reasoning out into a separate theorem *)
+    >- ( (* TODO: Move this reasoning out into a separate theorem. Or just use linesFD instead. *)
       fs[stdin_def,STDIO_def,IOFS_def]
       \\ xpull
       \\ fs[wfFS_def,STD_streams_def]
@@ -414,49 +465,77 @@ val Check_Certificate_def = Define`
        | _ => F)
     | _ => F`;
 
-val main = process_topdecs`
-  fun main u =
-    case TextIO.inputLine TextIO.stdIn of
-      NONE => TextIO.output TextIO.stdErr "No quota line\n"
-    | SOME line =>
-    case parse_quota line of
-      NONE => TextIO.output TextIO.stdErr "Quota line malformed\n"
-    | SOME quota =>
-    case TextIO.inputLine TextIO.stdIn of
-      NONE => TextIO.output TextIO.stdErr "No seats line\n"
-    | SOME line =>
-    case parse_seats line of
-      NONE => TextIO.output TextIO.stdErr "Seats line malformed\n"
-    | SOME seats =>
-    case TextIO.inputLine TextIO.stdIn of
-      NONE => TextIO.output TextIO.stdErr "No candidates line\n"
-    | SOME line =>
-    case parse_candidates line of
-      NONE => TextIO.output TextIO.stdErr "Candidates line malformed\n"
-    | SOME candidates =>
-    case TextIO.inputLine TextIO.stdIn of
-      NONE => TextIO.output TextIO.stdErr "No final judgement line\n"
-    | SOME line =>
-    case parse_candidates line of
-      NONE => TextIO.output TextIO.stdErr "Final judgement line malformed\n"
-    | SOME winners =>
-    case TextIO.inputLine TextIO.stdIn of
-      NONE => TextIO.output TextIO.stdErr "No penultimate judgement line\n"
-    | SOME line =>
-    case parse_judgement line of
-      NONE => TextIO.output TextIO.stdErr "Penultimate judgement line malformed\n"
-    | SOME j0 => loop (quota,seats,candidates) 6 (Final winners) j0`;
+val line4_def = Define`
+  line4 quota seats candidates winners ls =
+    case OPT_MMAP parse_judgement ls of
+    | NONE => F
+    | SOME judgements =>
+      Check_Parsed_Certificate (quota,seats,candidates)
+        (REVERSE (Final winners::judgements))`;
 
-val _ = append_prog main;
+val line3_def = Define`
+  line3 quota seats candidates ls =
+    case ls of
+    | [] => F
+    | winners_line::ls =>
+      (case parse_candidates winners_line of
+       | NONE => F
+       | SOME winners => line4 quota seats candidates winners ls)`;
 
-val main_spec = Q.store_thm("main_spec",
-  `app (p:'ffi ffi_proj) ^(fetch_v"main"(get_ml_prog_state())) [Conv NONE []]
+val line2_def = Define`
+  line2 quota seats ls =
+    case ls of
+    | [] => F
+    | candidates_line::ls =>
+      (case parse_candidates candidates_line of
+       | NONE => F
+       | SOME candidates => line3 quota seats candidates ls)`;
+
+val line1_def = Define`
+  line1 quota ls =
+    case ls of
+    | [] => F
+    | seats_line::ls =>
+      (case parse_seats seats_line of
+       | NONE => F
+       | SOME seats => line2 quota seats ls)`;
+
+val missing_msg_def = Define`
+  missing_msg name = concat[strlit"No ";name;strlit" line\n"]`;
+val malformed_msg_def = Define`
+  malformed_msg name = concat[strlit"Malformed ";name;strlit" line\n"]`;
+
+val r = translate missing_msg_def;
+val r = translate malformed_msg_def;
+
+val test_line = process_topdecs`
+  fun test_line parse name k =
+    case TextIO.inputLine TextIO.stdIn of
+      NONE => TextIO.output TextIO.stdErr (missing_msg name)
+    | SOME line =>
+    case parse line of
+      NONE => TextIO.output TextIO.stdErr (malformed_msg name)
+    | SOME x => k x`;
+
+val _ = append_prog test_line;
+
+val test_line_spec = Q.store_thm("test_line_spec",
+  `∀A parser name.
+   (STRING_TYPE --> OPTION_TYPE A) parser parserv ∧
+   STRING_TYPE name namev ∧
+   (∀x xv. A x xv ⇒ app p kv [xv] (STDIO (lineForwardFD fs 0)) (POSTv v. &UNIT_TYPE () v * Q x))
+   ⇒
+   app (p:'ffi ffi_proj) ^(fetch_v"test_line"(get_ml_prog_state()))
+   [parserv;namev;kv]
      (STDIO fs)
-     (POSTv uv. &UNIT_TYPE () uv *
-                if Check_Certificate (MAP (λl. implode (STRCAT l "\n")) (splitlines (get_stdin fs)))
-                then STDIO (add_stdout (fastForwardFD fs 0) "Certificate OK\n")
-                else SEP_EXISTS n err. STDIO (add_stderr (forwardFD fs 0 n) err))`,
-  xcf "main" (get_ml_prog_state())
+     (POSTv v. &UNIT_TYPE () v *
+       case linesFD fs 0 of
+       | [] => STDIO (add_stderr (lineForwardFD fs 0) (explode(missing_msg name)))
+       | (line::_) =>
+         (case parser (implode line) of
+          | NONE => STDIO (add_stderr (lineForwardFD fs 0) (explode(malformed_msg name)))
+          | SOME x => Q x))`,
+  xcf "test_line" (get_ml_prog_state())
   \\ reverse(Cases_on `∃inp pos. stdin fs inp pos`)
   >- ( (* TODO: move this reasoning out into a separate theorem *)
     fs[stdin_def,STDIO_def,IOFS_def]
@@ -474,8 +553,6 @@ val main_spec = Q.store_thm("main_spec",
     \\ metis_tac[] )
   \\ reverse(Cases_on`STD_streams fs`) >- (simp[STDIO_def] \\ xpull)
   \\ fs[]
-
-  \\ imp_res_tac stdin_get_stdin
   \\ `get_file_content fs 0 = SOME (inp,pos)` by fs[stdin_def,get_file_content_def]
   \\ `IS_SOME (get_file_content fs 0)` by metis_tac[IS_SOME_EXISTS]
   \\ xlet_auto >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
@@ -483,9 +560,8 @@ val main_spec = Q.store_thm("main_spec",
   \\ Cases_on`lineFD fs 0` \\ fs[OPTION_TYPE_def]
   >- (
     reverse conj_tac >- (EVAL_TAC \\ rw[])
-    \\ rfs[lineFD_def,UNCURRY]
-    \\ fs[DROP_LENGTH_TOO_LONG]
-    \\ simp[Check_Certificate_def]
+    \\ fs[GSYM linesFD_nil_lineFD_NONE]
+    \\ xlet_auto >- xsimpl
     \\ xapp_spec output_STDIO_spec
     \\ xsimpl
     \\ `STD_streams (lineForwardFD fs 0)` by simp[STD_streams_lineForwardFD]
@@ -498,30 +574,25 @@ val main_spec = Q.store_thm("main_spec",
     \\ xsimpl
     \\ simp[insert_atI_end]
     \\ simp[add_stdo_def] \\ rw[]
-    \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
-    \\ qexists_tac `n`
     \\ SELECT_ELIM_TAC
     \\ conj_tac >- metis_tac[]
     \\ rw[] \\ fs[]
     \\ imp_res_tac stdo_UNICITY_R \\ rveq
     \\ simp[up_stdo_def,LENGTH_explode]
-    \\ qmatch_goalsub_abbrev_tac`out ++ err`
-    \\ qexists_tac`err` \\ simp[Abbr`err`]
     \\ xsimpl )
-
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ qmatch_goalsub_abbrev_tac`STDIO fs1`
   \\ `STD_streams fs1` by simp[STD_streams_lineForwardFD,Abbr`fs1`]
-  \\ rfs[lineFD_def,UNCURRY] \\ rveq
-  \\ Cases_on`splitlines (DROP pos inp)` \\ fs[DROP_NIL]
-  \\ imp_res_tac splitlines_CONS_FST_SPLITP \\ rveq
+  \\ CASE_TAC \\ fs[linesFD_nil_lineFD_NONE]
+  \\ imp_res_tac linesFD_cons_imp \\ fs[] \\ rveq
   \\ xlet_auto >- xsimpl
   \\ xmatch
-  \\ qmatch_asmsub_abbrev_tac`parse_quota (implode ln)`
-  \\ Cases_on`parse_quota (implode ln)` \\ fs[OPTION_TYPE_def]
+  \\ qmatch_asmsub_rename_tac`parser (implode ln)`
+  \\ Cases_on`parser (implode ln)` \\ fs[OPTION_TYPE_def]
   >- (
     reverse conj_tac >- (EVAL_TAC \\ rw[])
+    \\ xlet_auto >- xsimpl
     \\ xapp_spec output_STDIO_spec
     \\ drule STD_streams_stderr \\ strip_tac
     \\ first_assum mp_tac
@@ -531,149 +602,328 @@ val main_spec = Q.store_thm("main_spec",
     \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
     \\ xsimpl
     \\ simp[insert_atI_end]
-    \\ simp[Check_Certificate_def]
-    \\ IF_CASES_TAC >- (every_case_tac \\ fs[])
-    \\ pop_assum kall_tac
-    \\ xsimpl
     \\ simp[add_stdo_def]
-    \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
-    \\ qexists_tac`n`
-    \\ qmatch_goalsub_abbrev_tac`out ++ err`
-    \\ qexists_tac`err` \\ fs[]
     \\ SELECT_ELIM_TAC
     \\ conj_tac >- metis_tac[]
     \\ rw[]
     \\ imp_res_tac stdo_UNICITY_R \\ rw[]
-    \\ simp[up_stdo_def,Abbr`err`]
-    \\ xsimpl )
-
-  \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
-  \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
-  \\ `IS_SOME (get_file_content fs1 0)` by simp[IS_SOME_get_file_content_lineForwardFD,Abbr`fs1`]
-  \\ Cases_on`linesFD fs 0` \\ fs[linesFD_nil_lineFD_NONE] \\ rfs[lineFD_def,UNCURRY]
-  \\ imp_res_tac linesFD_cons_imp
-  \\ xlet_auto >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
-  \\ imp_res_tac splitlines_next
-  \\ drule get_file_content_lineForwardFD_forwardFD
-  \\ qmatch_goalsub_abbrev_tac`forwardFD fs 0 n`
-  \\ strip_tac
-  \\ fs[DROP_DROP_T]
-  \\ fs[NULL_EQ,SND_EQ_EQUIV,SPLITP_NIL_SND_EVERY]
-  \\ qmatch_asmsub_abbrev_tac`DROP (pos + n') inp`
-  \\ `n ≤ n'` by rw[Abbr`n`,Abbr`n'`]
-  \\ xmatch
-  \\ Cases_on`lineFD fs1 0` \\ fs[OPTION_TYPE_def]
-  >- (
-    reverse conj_tac >- (EVAL_TAC \\ rw[])
-    \\ rfs[lineFD_def,UNCURRY] \\ fs[]
-    \\ fs[Abbr`fs1`] \\ rfs[] \\ rveq \\ fs[]
-    \\ qmatch_goalsub_abbrev_tac`STDIO (lineForwardFD fs1 0)`
-    \\ qpat_x_assum`_ = fs1`kall_tac
-    \\ fs[DROP_LENGTH_TOO_LONG]
-    \\ simp[Check_Certificate_def]
-    \\ xapp_spec output_STDIO_spec
-    \\ xsimpl
-    \\ `STD_streams (lineForwardFD fs1 0)` by simp[STD_streams_lineForwardFD,STD_streams_forwardFD,Abbr`fs1`]
-    \\ drule STD_streams_stderr \\ strip_tac
-    \\ first_assum mp_tac
-    \\ simp_tac(srw_ss())[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ strip_tac
-    \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[add_stdo_def] \\ rw[]
-    \\ qspecl_then[`fs1`,`0`](qx_choose_then`z`strip_assume_tac) lineForwardFD_forwardFD
-    \\ qexists_tac `n+z`
-    \\ simp[GSYM forwardFD_o]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[]
-    \\ rw[] \\ fs[]
-    \\ imp_res_tac stdo_UNICITY_R \\ rveq
     \\ simp[up_stdo_def,LENGTH_explode]
-    \\ qmatch_goalsub_abbrev_tac`out ++ err`
-    \\ qexists_tac`err` \\ simp[Abbr`err`]
     \\ xsimpl )
-
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
-  \\ qmatch_goalsub_abbrev_tac`STDIO fs2`
-  \\ `STD_streams fs2` by simp[STD_streams_lineForwardFD,Abbr`fs2`]
-  \\ fs[Abbr`fs1`]
-  \\ rfs[lineFD_def,UNCURRY] \\ rveq
-  \\ qmatch_asmsub_abbrev_tac`_::splitlines(DROP pos2 inp)`
-  \\ Cases_on`splitlines (DROP pos2 inp)` >- (fs[DROP_NIL] \\ rfs[Abbr`pos2`])
+  \\ xapp
+  \\ xsimpl);
 
-  \\ imp_res_tac splitlines_CONS_FST_SPLITP \\ rveq
-  \\ xlet_auto >- xsimpl
-  \\ xmatch
-  \\ qmatch_asmsub_abbrev_tac`parse_quota (implode ln)`
-  \\ Cases_on`parse_quota (implode ln)` \\ fs[OPTION_TYPE_def]
+val main = process_topdecs`
+  fun main u =
+    test_line parse_quota "quota" (fn quota =>
+    test_line parse_seats "seats" (fn seats =>
+    test_line parse_candidates "candidates" (fn candidates =>
+    test_line parse_candidates "final judgement" (fn winners =>
+    test_line parse_judgement "penultimate judgement" (fn j0 =>
+      loop (quota,(seats,candidates)) 6 (Final winners) j0)))))`;
+
+val _ = append_prog main;
+
+val main_spec = Q.store_thm("main_spec",
+  `app (p:'ffi ffi_proj) ^(fetch_v"main"(get_ml_prog_state())) [Conv NONE []]
+     (STDIO fs)
+     (POSTv uv. &UNIT_TYPE () uv *
+                if Check_Certificate (MAP implode (linesFD fs 0))
+                then STDIO (add_stdout (fastForwardFD fs 0) "Certificate OK\n")
+                else SEP_EXISTS n err. STDIO (add_stderr (forwardFD fs 0 n) err))`,
+  xcf "main" (get_ml_prog_state())
+  \\ reverse(Cases_on `∃inp pos. stdin fs inp pos`)
+  >- ( (* TODO: move this reasoning out into a separate theorem *)
+    fs[stdin_def,STDIO_def,IOFS_def]
+    \\ xpull_core
+    \\ conj_tac >- (
+      REWRITE_TAC cf_defs
+      \\ CONV_TAC (DEPTH_CONV BETA_CONV)
+      \\ REWRITE_TAC[local_is_local] )
+    \\ rpt strip_tac
+    \\ `F` suffices_by rw[]
+    \\ fs[wfFS_def,STD_streams_def]
+    \\ last_assum(qspecl_then[`0`,`inp`]mp_tac)
+    \\ simp_tac std_ss [] \\ strip_tac
+    \\ fs[]
+    \\ imp_res_tac ALOOKUP_MEM
+    \\ last_x_assum(qspec_then`0`mp_tac)
+    \\ simp[MEM_MAP,EXISTS_PROD]
+    \\ Cases_on`ALOOKUP fs.files (IOStream (strlit"stdin"))` \\ fs[]
+    \\ fs[ALOOKUP_FAILS]
+    \\ metis_tac[] )
+  \\ xfun`quota_fun`
+  \\ xapp_spec (Q.ISPECL[`RAT_TYPE`,`parse_quota`]test_line_spec)
+  \\ simp[STRING_TYPE_def,parse_quota_v_thm]
+  \\ qexists_tac`emp`
+  \\ xsimpl
+  \\ qexists_tac`fs`
+  \\ xsimpl
+  \\ qmatch_goalsub_abbrev_tac`if _ then Qval else Qerr`
+  \\ qexists_tac`λquota. if line1 quota (MAP implode (DROP 1 (linesFD fs 0))) then Qval else Qerr`
+  \\ reverse conj_tac
   >- (
-    reverse conj_tac >- (EVAL_TAC \\ rw[])
-    \\ xapp_spec output_STDIO_spec
-    \\ drule STD_streams_stderr \\ strip_tac
-    \\ first_assum mp_tac
-    \\ simp_tac(srw_ss())[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ strip_tac
-    \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[Check_Certificate_def]
-    \\ IF_CASES_TAC >- (every_case_tac \\ fs[])
-    \\ pop_assum kall_tac
-    \\ xsimpl
-    \\ simp[add_stdo_def]
-    \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
-    \\ qexists_tac`n`
-    \\ qmatch_goalsub_abbrev_tac`out ++ err`
-    \\ qexists_tac`err` \\ fs[]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[]
-    \\ rw[]
-    \\ imp_res_tac stdo_UNICITY_R \\ rw[]
-    \\ simp[up_stdo_def,Abbr`err`]
+    CASE_TAC
+    >- (
+      fs[Check_Certificate_def,Abbr`Qerr`]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n`
+      \\ qexists_tac`err`
+      \\ xsimpl )
+    \\ CASE_TAC
+    >- (
+      fs[Check_Certificate_def,Abbr`Qerr`]
+      \\ IF_CASES_TAC >- (every_case_tac \\ fs[])
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n`
+      \\ qexists_tac`err`
+      \\ xsimpl )
+    \\ simp[line1_def]
+    \\ CASE_TAC >- (fs[Check_Certificate_def] \\ xsimpl)
+    \\ CASE_TAC >- (
+      fs[Check_Certificate_def]
+      \\ IF_CASES_TAC \\ xsimpl
+      \\ every_case_tac \\ fs[] )
+    \\ simp[line2_def]
+    \\ CASE_TAC >- (fs[Check_Certificate_def] \\ xsimpl)
+    \\ CASE_TAC >- (
+      fs[Check_Certificate_def]
+      \\ IF_CASES_TAC \\ xsimpl
+      \\ every_case_tac \\ fs[] )
+    \\ simp[line3_def]
+    \\ CASE_TAC >- (fs[Check_Certificate_def] \\ xsimpl)
+    \\ CASE_TAC >- (
+      fs[Check_Certificate_def]
+      \\ xsimpl )
+    \\ simp[line4_def]
+    \\ CASE_TAC >- (fs[Check_Certificate_def] \\ xsimpl)
+    \\ CASE_TAC >- (
+      fs[Check_Certificate_def]
+      \\ xsimpl )
+    \\ fs[Check_Certificate_def]
     \\ xsimpl )
-
-  \\ `IS_SOME (get_file_content fs2 0)` by metis_tac[IS_SOME_get_file_content_lineForwardFD]
-  \\ Cases_on`linesFD fs1 0` \\ fs[linesFD_nil_lineFD_NONE]
-  \\ imp_res_tac linesFD_cons_imp
-  \\ rfs[lineFD_def,UNCURRY] \\ rveq
-  \\ Cases_on`splitlines (DROP pos inp)` \\ fs[DROP_NIL]
-  \\ imp_res_tac splitlines_CONS_FST_SPLITP \\ rveq
-  \\ xlet_auto >- xsimpl
-  \\ xmatch
-  \\ qmatch_asmsub_abbrev_tac`parse_quota (implode ln)`
-  \\ Cases_on`parse_quota (implode ln)` \\ fs[OPTION_TYPE_def]
+  \\ qx_gen_tac`quota`
+  \\ rpt strip_tac \\ fs[]
+  \\ first_x_assum match_mp_tac
+  \\ xfun`seats_fun`
+  \\ xapp_spec (Q.ISPECL[`NUM`,`parse_seats`]test_line_spec)
+  \\ simp[STRING_TYPE_def,parse_seats_v_thm]
+  \\ qexists_tac`emp`
+  \\ xsimpl
+  \\ qexists_tac`lineForwardFD fs 0`
+  \\ xsimpl
+  \\ simp[linesFD_lineForwardFD]
+  \\ qexists_tac`λseats. if line2 quota seats (MAP implode (DROP 2 (linesFD fs 0))) then Qval else Qerr`
+  \\ reverse conj_tac
   >- (
-    reverse conj_tac >- (EVAL_TAC \\ rw[])
-    \\ xapp_spec output_STDIO_spec
-    \\ `STD_streams fs1` by simp[STD_streams_lineForwardFD,Abbr`fs1`]
-    \\ drule STD_streams_stderr \\ strip_tac
-    \\ first_assum mp_tac
-    \\ simp_tac(srw_ss())[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ strip_tac
-    \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[Check_Certificate_def]
+    CASE_TAC
+    >- (
+      fs[line1_def,Abbr`Qerr`]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ CASE_TAC
+    >- (
+      fs[line1_def,Abbr`Qerr`]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ simp[line1_def]
+    \\ Cases_on`linesFD fs 0` \\ fs[]
+    \\ xsimpl )
+  \\ qx_gen_tac`seats`
+  \\ rpt strip_tac \\ fs[]
+  \\ first_x_assum match_mp_tac
+  \\ xfun`candidates_fun`
+  \\ xapp_spec (Q.ISPECL[`LIST_TYPE CHECKERSPEC_CAND_TYPE`,`parse_candidates`]test_line_spec)
+  \\ simp[STRING_TYPE_def,parse_candidates_v_thm]
+  \\ qexists_tac`emp`
+  \\ xsimpl
+  \\ qexists_tac`lineForwardFD (lineForwardFD fs 0) 0`
+  \\ xsimpl
+  \\ simp[linesFD_lineForwardFD,DROP_DROP_T]
+  \\ qexists_tac`λcandidates. if line3 quota seats candidates (MAP implode (DROP 3 (linesFD fs 0))) then Qval else Qerr`
+  \\ reverse conj_tac
+  >- (
+    CASE_TAC
+    >- (
+      fs[line2_def,Abbr`Qerr`]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD fs 0) 0`,`0`](qx_choose_then`n3`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2+n3`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ CASE_TAC
+    >- (
+      fs[line2_def,Abbr`Qerr`]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD fs 0) 0`,`0`](qx_choose_then`n3`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2+n3`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ simp[line2_def]
+    \\ imp_res_tac DROP_EQ_CONS_IMP \\ fs[]
+    \\ xsimpl )
+  \\ qx_gen_tac`candidates`
+  \\ rpt strip_tac \\ fs[]
+  \\ first_x_assum match_mp_tac
+  \\ xfun`winners_fun`
+  \\ xapp_spec (Q.ISPECL[`LIST_TYPE CHECKERSPEC_CAND_TYPE`,`parse_candidates`]test_line_spec)
+  \\ simp[STRING_TYPE_def,parse_candidates_v_thm]
+  \\ qexists_tac`emp`
+  \\ xsimpl
+  \\ qexists_tac`lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0`
+  \\ xsimpl
+  \\ simp[linesFD_lineForwardFD,DROP_DROP_T]
+  \\ qexists_tac`λwinners. if line4 quota seats candidates winners (MAP implode (DROP 4 (linesFD fs 0))) then Qval else Qerr`
+  \\ reverse conj_tac
+  >- (
+    CASE_TAC
+    >- (
+      fs[line3_def,Abbr`Qerr`]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD fs 0) 0`,`0`](qx_choose_then`n3`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0`,`0`](qx_choose_then`n4`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2+n3+n4`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ CASE_TAC
+    >- (
+      fs[line3_def,Abbr`Qerr`]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD fs 0) 0`,`0`](qx_choose_then`n3`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0`,`0`](qx_choose_then`n4`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2+n3+n4`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ simp[line3_def]
+    \\ imp_res_tac DROP_EQ_CONS_IMP \\ fs[]
+    \\ xsimpl )
+  \\ qx_gen_tac`winners`
+  \\ rpt strip_tac \\ fs[]
+  \\ first_x_assum match_mp_tac
+  \\ xfun`j_fun`
+  \\ xapp_spec (Q.ISPECL[`CHECKERSPEC_JUDGEMENT_TYPE`,`parse_judgement`]test_line_spec)
+  \\ simp[STRING_TYPE_def,parse_judgement_v_thm]
+  \\ qexists_tac`emp`
+  \\ xsimpl
+  \\ qexists_tac`lineForwardFD (lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0) 0`
+  \\ xsimpl
+  \\ simp[linesFD_lineForwardFD,DROP_DROP_T]
+  \\ qexists_tac`λj0.
+      if loop (quota,seats,candidates) 6 (Final winners) j0 (MAP implode (DROP 5 (linesFD fs 0))) = NONE
+      then Qval else Qerr`
+  \\ reverse conj_tac
+  >- (
+    CASE_TAC
+    >- (
+      fs[line4_def,Abbr`Qerr`,OPT_MMAP_def,Check_Parsed_Certificate_def,Initial_Judgement_dec_def]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD fs 0) 0`,`0`](qx_choose_then`n3`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0`,`0`](qx_choose_then`n4`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0) 0`,`0`](qx_choose_then`n5`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2+n3+n4+n5`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ CASE_TAC
+    >- (
+      fs[line4_def,Abbr`Qerr`,OPT_MMAP_def]
+      \\ xsimpl
+      \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD fs 0) 0`,`0`](qx_choose_then`n3`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0`,`0`](qx_choose_then`n4`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0) 0`,`0`](qx_choose_then`n5`strip_assume_tac) lineForwardFD_forwardFD
+      \\ qmatch_goalsub_abbrev_tac`add_stderr _ err`
+      \\ qexists_tac`n1+n2+n3+n4+n5`
+      \\ qexists_tac`err`
+      \\ simp[GSYM forwardFD_o]
+      \\ xsimpl )
+    \\ simp[line4_def]
+    \\ imp_res_tac DROP_EQ_CONS_IMP \\ fs[OPT_MMAP_def]
+    \\ simp[loop_thm]
     \\ IF_CASES_TAC
-    >- (every_case_tac \\ fs[])
-    \\ pop_assum kall_tac
-    \\ xsimpl
-    \\ simp[add_stdo_def]
-    \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
-    \\ qexists_tac`n`
-    \\ qmatch_goalsub_abbrev_tac`out ++ err`
-    \\ qexists_tac`err` \\ fs[]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[]
-    \\ rw[]
-    \\ imp_res_tac stdo_UNICITY_R \\ rw[]
-    \\ simp[up_stdo_def,Abbr`err`]
+    >- (
+      Q.ISPEC_THEN`parse_judgement`mp_tac(Q.GEN`f` OPT_MMAP_EQ_SOME)
+      \\ disch_then(qspec_then`MAP implode t`mp_tac)
+      \\ simp[] \\ strip_tac
+      \\ fsrw_tac[DNF_ss][EQ_IMP_THM] \\ xsimpl )
+    \\ CASE_TAC >- xsimpl
+    \\ pop_assum mp_tac \\ simp[]
+    \\ simp_tac bool_ss [OPT_MMAP_EQ_SOME]
+    \\ strip_tac
+    \\ rveq
+    \\ simp[]
+    \\ full_simp_tac std_ss []
     \\ xsimpl )
-
+  \\ qx_gen_tac`j0`
+  \\ rpt strip_tac \\ fs[]
+  \\ first_x_assum match_mp_tac
+  \\ xlet_auto >- (xcon \\ xsimpl)
+  \\ xlet_auto >- (xcon \\ xsimpl)
+  \\ xlet_auto >- (xcon \\ xsimpl)
+  \\ xapp
+  \\ instantiate
+  \\ qexists_tac`emp`
+  \\ qexists_tac`(quota,seats,candidates)`
+  \\ qexists_tac`Final winners`
+  \\ qmatch_goalsub_abbrev_tac`STDIO fsn`
+  \\ qexists_tac`fsn`
+  \\ xsimpl
+  \\ conj_tac >- (EVAL_TAC \\ simp[])
+  \\ conj_tac >- (simp[PAIR_TYPE_def])
+  \\ simp[Abbr`Qerr`]
+  \\ xsimpl
+  \\ simp[GSYM (Q.ISPEC`implode`o_DEF),GSYM MAP_MAP_o]
+  \\ `∃inp pos. stdin fsn inp pos` by metis_tac[stdin_forwardFD,lineForwardFD_forwardFD]
+  \\ imp_res_tac linesFD_splitlines_get_stdin
+  \\ simp[]
+  \\ simp[Abbr`fsn`,linesFD_lineForwardFD,DROP_DROP_T]
+  \\ qspecl_then[`fs`,`0`](qx_choose_then`n1`strip_assume_tac) lineForwardFD_forwardFD
+  \\ qspecl_then[`lineForwardFD fs 0`,`0`](qx_choose_then`n2`strip_assume_tac) lineForwardFD_forwardFD
+  \\ qspecl_then[`lineForwardFD (lineForwardFD fs 0) 0`,`0`](qx_choose_then`n3`strip_assume_tac) lineForwardFD_forwardFD
+  \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0`,`0`](qx_choose_then`n4`strip_assume_tac) lineForwardFD_forwardFD
+  \\ qspecl_then[`lineForwardFD (lineForwardFD (lineForwardFD (lineForwardFD fs 0) 0) 0) 0`,`0`](qx_choose_then`n5`strip_assume_tac) lineForwardFD_forwardFD
+  \\ simp[forwardFD_o]
+  \\ CASE_TAC \\ xsimpl
+  \\ qx_gen_tac`n`
+  \\ qexists_tac`n+n1+n2+n3+n4+n5`
+  \\ qexists_tac`explode x`
+  \\ xsimpl);
 
 val _ = export_theory();
