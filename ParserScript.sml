@@ -33,6 +33,15 @@ val parse_candidates_def = Define`
 val parse_judgement_def = Define`
   parse_judgement (line:mlstring) = SOME (NonFinal([],[],[],[],[],[]))`;
 
+(* maybe...
+
+bare_parse_quota str pos ---> SOME (quota, pos')
+
+parse_quota line =
+  case bare_parse_quota line 0
+  | NONE => NONE
+  | SOME (q,pos') => if pos' = strlen line then SOME q else NONE
+*)
 
 (* parser type:
   string -> position -> ('a * position) option
