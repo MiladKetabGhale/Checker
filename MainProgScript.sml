@@ -4,7 +4,7 @@ val _ = new_theory"MainProg";
 
 val _ = translation_extends"ParserProg";
 
-(* TODO: move to HOL and CakeML repos *)
+(* TODO: move to HOL *)
 
 val LRC_APPEND = Q.store_thm("LRC_APPEND",
   `∀l1 l2 x y.
@@ -37,106 +37,6 @@ val OPT_MMAP_EQ_SOME = Q.store_thm("OPT_MMAP_EQ_SOME",
   Induct \\ rw[OPT_MMAP_def,IS_SOME_EXISTS,PULL_EXISTS]
   \\ metis_tac[THE_DEF]);
 
-val option_case_eq = prove_case_eq_thm{nchotomy=option_nchotomy,case_def=option_case_def};
-val list_case_eq = prove_case_eq_thm{nchotomy=list_nchotomy,case_def=list_case_def};
-
-val lineForwardFD_forwardFD = Q.store_thm("lineForwardFD_forwardFD",
-  `∀fs fd. ∃n. lineForwardFD fs fd = forwardFD fs fd n`,
-  rw[forwardFD_def,lineForwardFD_def]
-  \\ CASE_TAC
-  >- (
-    qexists_tac`0`
-    \\ simp[IO_fs_component_equality]
-    \\ match_mp_tac (GSYM ALIST_FUPDKEY_unchanged)
-    \\ simp[FORALL_PROD] )
-  \\ CASE_TAC
-  \\ pairarg_tac \\ fs[]
-  \\ rw[]
-  >- metis_tac[]
-  >- metis_tac[]
-  >- (
-    qexists_tac`0`
-    \\ simp[IO_fs_component_equality]
-    \\ match_mp_tac (GSYM ALIST_FUPDKEY_unchanged)
-    \\ simp[FORALL_PROD] ));
-
-val get_file_content_lineForwardFD_forwardFD = Q.store_thm("get_file_content_lineForwardFD_forwardFD",
-  `∀fs fd. get_file_content fs fd = SOME (x,pos) ⇒
-     lineForwardFD fs fd = forwardFD fs fd (LENGTH(FST(SPLITP((=)#"\n")(DROP pos x))) +
-                                            if NULL(SND(SPLITP((=)#"\n")(DROP pos x))) then 0 else 1)`,
-  simp[forwardFD_def,lineForwardFD_def]
-  \\ ntac 3 strip_tac
-  \\ pairarg_tac \\ fs[]
-  \\ reverse IF_CASES_TAC \\ fs[DROP_LENGTH_TOO_LONG,SPLITP]
-  \\ rw[IO_fs_component_equality]
-  \\ match_mp_tac (GSYM ALIST_FUPDKEY_unchanged)
-  \\ simp[FORALL_PROD] );
-
-val stdin_forwardFD = Q.store_thm("stdin_forwardFD",
-  `stdin fs inp pos ⇒
-   stdin (forwardFD fs fd n) inp (if fd = 0 then pos+n else pos)`,
-  rw[stdin_def,forwardFD_def]
-  \\ simp[ALIST_FUPDKEY_ALOOKUP]);
-
-val stdin_get_stdin = Q.store_thm("stdin_get_stdin",
-  `stdin fs inp pos ⇒ get_stdin fs = DROP pos inp`,
-  rw[get_stdin_def]
-  \\ SELECT_ELIM_TAC
-  \\ rw[EXISTS_PROD,FORALL_PROD]
-  >- metis_tac[]
-  \\ pairarg_tac \\ fs[]
-  \\ imp_res_tac stdin_11 \\ fs[]);
-
-val get_stdin_forwardFD = Q.store_thm("get_stdin_forwardFD",
-  `stdin fs inp pos ⇒
-   get_stdin (forwardFD fs fd n) =
-   if fd = 0 then
-     DROP n (get_stdin fs)
-   else get_stdin fs`,
-  strip_tac
-  \\ imp_res_tac stdin_get_stdin
-  \\ imp_res_tac stdin_forwardFD
-  \\ first_x_assum(qspecl_then[`n`,`fd`]mp_tac)
-  \\ strip_tac
-  \\ simp[DROP_DROP_T]
-  \\ imp_res_tac stdin_get_stdin
-  \\ rw[]);
-
-val linesFD_lineForwardFD = Q.store_thm("linesFD_lineForwardFD",
-  `linesFD (lineForwardFD fs fd) fd' =
-   if fd = fd' then
-     DROP 1 (linesFD fs fd)
-   else linesFD fs fd'`,
-  rw[linesFD_def,lineForwardFD_def]
-  >- (
-    CASE_TAC \\ fs[]
-    \\ CASE_TAC \\ fs[]
-    \\ CASE_TAC \\ fs[DROP_LENGTH_TOO_LONG]
-    \\ pairarg_tac \\ fs[]
-    \\ qmatch_asmsub_rename_tac`DROP x pos`
-    \\ Cases_on`splitlines (DROP x pos)` \\ fs[DROP_NIL]
-    \\ imp_res_tac splitlines_CONS_FST_SPLITP
-    \\ imp_res_tac splitlines_next
-    \\ rveq
-    \\ rw[NULL_EQ,DROP_DROP_T,ADD1]
-    \\ fs[SPLITP_NIL_SND_EVERY] \\ rw[]
-    \\ fs[o_DEF]
-    \\ drule SPLITP_EVERY
-    \\ strip_tac \\ fs[DROP_LENGTH_TOO_LONG])
-  \\ CASE_TAC \\ fs[]
-  \\ CASE_TAC \\ fs[]
-  \\ CASE_TAC \\ fs[]
-  \\ pairarg_tac \\ fs[]
-  \\ simp[get_file_content_def]
-  \\ simp[forwardFD_def,ALIST_FUPDKEY_ALOOKUP]
-  \\ CASE_TAC \\ fs[]);
-
-val linesFD_splitlines_get_stdin = Q.store_thm("linesFD_splitlines_get_stdin",
-  `stdin fs inp pos ⇒
-   MAP (λl. l ++ "\n") (splitlines (get_stdin fs)) = linesFD fs 0`,
-  rw[linesFD_def]
-  \\ imp_res_tac stdin_get_stdin
-  \\ fs[stdin_def,get_file_content_def]);
 (* -- *)
 
 val malformed_line_msg_def = Define`

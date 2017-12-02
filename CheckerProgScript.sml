@@ -8,10 +8,6 @@ val _ = new_theory "CheckerProg";
 
 val _ = translation_extends"basisProg";
 
-(* TODO: this should be moved to CakeML *)
-val r = translate NULL;
-(* -- *)
-
 val r = translate SUM_RAT_def;
 
 val r = translate get_cand_tally_def;
