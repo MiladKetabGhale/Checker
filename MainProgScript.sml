@@ -50,12 +50,12 @@ val loop_def = Define`
      case ls of
      | [] => if Initial_Judgement_dec (SND(SND params)) j0
              then NONE
-             else SOME (strlit"Malformed initial judgement\n")
+             else SOME (strlit"Malformed initial judgement\n",i)
      | (line::ls) =>
         case parse_judgement line of
-        | NONE => SOME (malformed_line_msg i)
+        | NONE => SOME (malformed_line_msg i,i+1)
         | SOME j => loop params (i+1) j0 j ls
-   else SOME (invalid_step_msg i)`;
+   else SOME (invalid_step_msg i,i)`;
 
 val loop_ind = theorem"loop_ind";
 
@@ -86,6 +86,16 @@ val loop_thm = Q.store_thm("loop_thm",
   >- metis_tac[]
   \\ fs[SWAP_REVERSE_SYM,LRC_APPEND,PULL_EXISTS,LRC_def]
   \\ metis_tac[]);
+
+val loop_inc = Q.store_thm("loop_inc",
+  `∀a i b c d e j. loop a i b c d = SOME (e,j) ⇒ i ≤ j`,
+  recInduct loop_ind
+  \\ rpt gen_tac \\ strip_tac
+  \\ rw[Once loop_def]
+  \\ FULL_CASE_TAC \\ fs[]
+  \\ FULL_CASE_TAC \\ fs[]
+  \\ rw[] \\ rfs[]
+  \\ intLib.COOPER_TAC);
 
 val r = translate malformed_line_msg_def;
 val r = translate invalid_step_msg_def;
@@ -121,12 +131,14 @@ val loop_spec = Q.store_thm("loop_spec",
    app (p:'ffi ffi_proj) ^(fetch_v"loop"(get_ml_prog_state()))
      [pv;iv;j1v;j0v]
      (STDIO fs)
-     (POSTv uv. &UNIT_TYPE () uv *
-                case loop params i j1 j0 (MAP (λl. implode(l++"\n")) (splitlines (get_stdin fs))) of
-                | NONE => (STDIO (add_stdout (fastForwardFD fs 0) "Certificate OK\n"))
-                | SOME err => (SEP_EXISTS n. STDIO (add_stderr (forwardFD fs 0 n) (explode err))))`,
-  Induct_on`splitlines (get_stdin fs)` \\ rw[]
-  \\ qpat_x_assum`_ = splitlines _`(assume_tac o SYM) \\ fs[]
+     (POSTv uv.
+       &UNIT_TYPE () uv *
+       STDIO (
+         case loop params i j1 j0 (MAP implode (linesFD fs 0)) of
+         | NONE => add_stdout (fastForwardFD fs 0) "Certificate OK\n"
+         | SOME (err,j) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num(j-i)) fs) (explode err)))`,
+  Induct_on`linesFD fs 0` \\ rw[]
+  \\ qpat_x_assum`_ = linesFD _ _`(assume_tac o SYM) \\ fs[]
   \\ simp[Once loop_def]
   (* base case: no more lines left on stdin *)
   >- (
@@ -147,8 +159,6 @@ val loop_spec = Q.store_thm("loop_spec",
       \\ xsimpl
       \\ simp[insert_atI_end]
       \\ simp[add_stdo_def] \\ rw[]
-      \\ qexists_tac `0`
-      \\ simp[forwardFD_0]
       \\ SELECT_ELIM_TAC
       \\ conj_tac >- metis_tac[STD_streams_stderr]
       \\ rw[]
@@ -156,7 +166,7 @@ val loop_spec = Q.store_thm("loop_spec",
       \\ simp[up_stdo_def,LENGTH_explode]
       \\ xsimpl )
     \\ reverse(Cases_on `∃inp pos. stdin fs inp pos`)
-    >- ( (* TODO: Move this reasoning out into a separate theorem. Or just use linesFD instead. *)
+    >- ( (* TODO: Move this reasoning out into a separate theorem. *)
       fs[stdin_def,STDIO_def,IOFS_def]
       \\ xpull
       \\ fs[wfFS_def,STD_streams_def]
@@ -170,62 +180,44 @@ val loop_spec = Q.store_thm("loop_spec",
       \\ Cases_on`ALOOKUP fs.files (IOStream (strlit"stdin"))` \\ fs[]
       \\ fs[ALOOKUP_FAILS]
       \\ metis_tac[] )
-    \\ qhdtm_x_assum`get_stdin`mp_tac
-    \\ fs[get_stdin_def]
-    \\ SELECT_ELIM_TAC
-    \\ simp[EXISTS_PROD]
-    \\ conj_tac >- metis_tac[]
-    \\ gen_tac \\ strip_tac
-    \\ pairarg_tac \\ fs[] \\ rveq
-    \\ imp_res_tac stdin_11 \\ rveq
-    \\ strip_tac
-    \\ `get_file_content fs 0 = SOME (inp,pos)`
-    by ( fs[stdin_def,get_file_content_def] )
+    \\ fs[]
+    \\ imp_res_tac stdin_get_file_content
     \\ `IS_SOME (get_file_content fs 0)` by metis_tac[IS_SOME_EXISTS]
-    \\ xlet_auto
-    >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
+    \\ xlet_auto >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
     \\ xmatch
-    \\ Cases_on`lineFD fs 0` \\ fs[OPTION_TYPE_def]
+    \\ rfs[linesFD_nil_lineFD_NONE,OPTION_TYPE_def]
+    \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
+    \\ xlet_auto >- xsimpl
+    \\ xlet_auto >- xsimpl
+    \\ xlet_auto >- xsimpl
+    \\ xif
     >- (
-      reverse conj_tac >- (EVAL_TAC \\ rw[])
-      \\ xlet_auto >- xsimpl
-      \\ xlet_auto >- xsimpl
-      \\ xlet_auto >- xsimpl
-      \\ xif
-      >- (
-        xapp
-        \\ simp[lineFD_NONE_lineForwardFD_fastForwardFD]
-        \\ rfs[lineFD_def,UNCURRY,DROP_LENGTH_TOO_LONG]
-        \\ xsimpl \\ rw[]
-        \\ CONV_TAC SWAP_EXISTS_CONV
-        \\ qexists_tac`fastForwardFD fs 0`
-        \\ xsimpl )
-      \\ xapp_spec output_STDIO_spec
-      \\ xsimpl
+      xapp
       \\ simp[lineFD_NONE_lineForwardFD_fastForwardFD]
-      \\ rfs[lineFD_def,UNCURRY,DROP_LENGTH_TOO_LONG]
-      \\ xsimpl \\ rw[]
-      \\ `STD_streams (fastForwardFD fs 0)` by simp[STD_streams_fastForwardFD]
-      \\ drule STD_streams_stderr \\ strip_tac
-      \\ fs[stdo_def,get_file_content_def,PULL_EXISTS]
-      \\ instantiate
-      \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
       \\ xsimpl
-      \\ simp[insert_atI_end]
-      \\ simp[add_stdo_def]
-      \\ DEP_REWRITE_TAC[fastForwardFD_0]
-      \\ simp[get_file_content_def]
-      \\ rw[]
-      \\ qexists_tac `0`
-      \\ simp[forwardFD_0]
-      \\ SELECT_ELIM_TAC
-      \\ conj_tac >- metis_tac[STD_streams_stderr]
-      \\ rw[]
-      \\ fs[stdo_def]
-      \\ simp[up_stdo_def,LENGTH_explode]
+      \\ CONV_TAC SWAP_EXISTS_CONV
+      \\ qexists_tac`fastForwardFD fs 0`
       \\ xsimpl )
-    \\ rfs[lineFD_def]
-    \\ fs[DROP_NIL] )
+    \\ xapp_spec output_STDIO_spec
+    \\ xsimpl
+    \\ simp[lineFD_NONE_lineForwardFD_fastForwardFD]
+    \\ `STD_streams (fastForwardFD fs 0)` by simp[STD_streams_fastForwardFD]
+    \\ drule STD_streams_stderr \\ strip_tac
+    \\ fs[stdo_def,get_file_content_def,PULL_EXISTS]
+    \\ instantiate
+    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
+    \\ xsimpl
+    \\ simp[insert_atI_end]
+    \\ simp[add_stdo_def]
+    \\ DEP_REWRITE_TAC[fastForwardFD_0]
+    \\ fs[lineFD_def,get_file_content_def,UNCURRY]
+    \\ rw[]
+    \\ SELECT_ELIM_TAC
+    \\ conj_tac >- metis_tac[STD_streams_stderr]
+    \\ rw[]
+    \\ fs[stdo_def]
+    \\ simp[up_stdo_def,LENGTH_explode]
+    \\ xsimpl )
   (* inductive case: read a line from stdin *)
   \\ xcf "loop" (get_ml_prog_state())
   \\ reverse(Cases_on`STD_streams fs`) >- (simp[STDIO_def] \\ xpull)
@@ -243,8 +235,6 @@ val loop_spec = Q.store_thm("loop_spec",
     \\ xsimpl
     \\ simp[insert_atI_end]
     \\ simp[add_stdo_def] \\ rw[]
-    \\ qexists_tac `0`
-    \\ simp[forwardFD_0]
     \\ SELECT_ELIM_TAC
     \\ conj_tac >- metis_tac[STD_streams_stderr]
     \\ rw[]
@@ -266,25 +256,13 @@ val loop_spec = Q.store_thm("loop_spec",
     \\ Cases_on`ALOOKUP fs.files (IOStream (strlit"stdin"))` \\ fs[]
     \\ fs[ALOOKUP_FAILS]
     \\ metis_tac[] )
-  \\ qpat_x_assum`splitlines (get_stdin fs) = _`mp_tac
-  \\ simp[get_stdin_def]
-  \\ SELECT_ELIM_TAC
-  \\ simp[EXISTS_PROD,FORALL_PROD] \\ rw[]
-  \\ imp_res_tac stdin_11 \\ rveq
-  \\ imp_res_tac splitlines_CONS_FST_SPLITP
-  \\ imp_res_tac splitlines_next
-  \\ qmatch_assum_rename_tac`stdin fs inp pos`
-  \\ `get_file_content fs 0 = SOME (inp,pos)`
-  by ( fs[stdin_def,get_file_content_def] )
+  \\ fs[]
+  \\ imp_res_tac stdin_get_file_content
   \\ `IS_SOME (get_file_content fs 0)` by metis_tac[IS_SOME_EXISTS]
-  \\ xlet_auto
-  >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
+  \\ xlet_auto >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
   \\ xmatch
   \\ Cases_on`lineFD fs 0` \\ fs[OPTION_TYPE_def]
-  >- (
-    fs[GSYM linesFD_nil_lineFD_NONE]
-    \\ rfs[linesFD_def] )
-  \\ Cases_on`linesFD fs 0` \\ fs[linesFD_nil_lineFD_NONE]
+  >- ( fs[GSYM linesFD_nil_lineFD_NONE] )
   \\ imp_res_tac linesFD_cons_imp
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
@@ -303,10 +281,6 @@ val loop_spec = Q.store_thm("loop_spec",
     \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
     \\ xsimpl
     \\ simp[insert_atI_end]
-    \\ rfs[lineFD_def,get_file_content_def,UNCURRY]
-    \\ xsimpl
-    \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
-    \\ qexists_tac`n`
     \\ simp[add_stdo_def]
     \\ SELECT_ELIM_TAC
     \\ conj_tac >- metis_tac[STD_streams_stderr,STD_streams_forwardFD]
@@ -323,31 +297,14 @@ val loop_spec = Q.store_thm("loop_spec",
   \\ CONV_TAC SWAP_EXISTS_CONV
   \\ qexists_tac`lineForwardFD fs 0`
   \\ rveq \\ fs[] \\ xsimpl
-  \\ qmatch_goalsub_abbrev_tac`splitlines s1 = splitlines s2`
-  \\ `s1 = s2`
-  by (
-    simp[Abbr`s1`,Abbr`s2`]
-    \\ simp[lineForwardFD_def,UNCURRY]
-    \\ IF_CASES_TAC \\ fs[DROP_LENGTH_TOO_LONG]
-    \\ IF_CASES_TAC
-    >- (
-      fs[NULL_EQ,SPLITP_NIL_SND_EVERY,SND_EQ_EQUIV]
-      \\ fs[o_DEF]
-      \\ fs[SPLITP_EVERY,DROP_LENGTH_TOO_LONG]
-      \\ DEP_REWRITE_TAC[get_stdin_forwardFD]
-      \\ imp_res_tac stdin_get_stdin
-      \\ simp[DROP_DROP_T,DROP_NIL] )
-    \\ DEP_REWRITE_TAC[get_stdin_forwardFD]
-    \\ simp[ADD1]
-    \\ imp_res_tac stdin_get_stdin
-    \\ simp[] )
-  \\ simp[Abbr`s1`,Abbr`s2`] \\ fs[]
-  \\ rfs[lineFD_def,UNCURRY]
-  \\ CASE_TAC \\ xsimpl
-  \\ qspecl_then[`fs`,`0`]strip_assume_tac lineForwardFD_forwardFD
-  \\ qx_gen_tac`m`
-  \\ qexists_tac`n+m`
-  \\ simp[forwardFD_o]
+  \\ CASE_TAC >- xsimpl
+  \\ CASE_TAC
+  \\ imp_res_tac loop_inc
+  \\ qmatch_goalsub_abbrev_tac`Num x`
+  \\ `0 ≤ x ∧ r - i = 1 + x` by (fs[Abbr`x`] \\ intLib.COOPER_TAC)
+  \\ pop_assum SUBST_ALL_TAC
+  \\ imp_res_tac integerTheory.NUM_POSINT_EXISTS
+  \\ rw[integerTheory.INT_ADD,GSYM ADD1,FUNPOW]
   \\ xsimpl);
 
 val Check_Certificate_def = Define`
