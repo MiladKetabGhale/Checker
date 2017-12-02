@@ -55,22 +55,29 @@ val r = translate update_cand_trans_val_def;
 val r = translate update_cand_pile_def;
 val r = translate ELECT_dec_def;
 
+val update_cand_trans_val_side_def = fetch"-""update_cand_trans_val_side_def";
+val update_cand_pile_side_def = fetch"-""update_cand_pile_side_def";
+
+val update_cand_pile_side = Q.prove(
+  `∀c a b d e.
+    EVERY(λx. get_cand_tally x b ≠ 0) c ⇒
+    update_cand_pile_side a b c d e`,
+  Induct
+  \\ rw[Once update_cand_pile_side_def,update_cand_trans_val_side_def]);
+
 val elect_dec_side = Q.prove(
   `elect_dec_side a b c = T`,
   rw[definition"elect_dec_side_def"]
-  (* fetch"-""update_cand_pile_side_def" *)
-  \\ cheat (* wait for update to translator *)
-  ) |> update_precondition;
+  \\ match_mp_tac update_cand_pile_side
+  \\ fs[bigger_than_quota_def,EVERY_MEM]
+  \\ rw[] \\ res_tac
+  \\ strip_tac \\ fs[]
+  \\ imp_res_tac ratTheory.RAT_LES_LEQ_TRANS
+  \\ fs[]) |> update_precondition;
 
 val r = translate Initial_Judgement_dec_def;
 
 val r = translate Valid_Step_def;
-
-(*
-val r = translate valid_judgements_dec_def;
-
-val r = translate Check_Parsed_Certificate_def;
-*)
 
 (* To see the code:
 val () = astPP.enable_astPP()
