@@ -6,4 +6,7 @@
 *Theory.sml
 *Theory.dat
 heap
-*.S
+compilation/*.S
+compilation/*.o
+compilation/*.c
+compilation/check_count
