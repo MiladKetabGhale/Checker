@@ -1,7 +1,7 @@
 INCLUDES = .. $(CAKEMLDIR)/compiler $(CAKEMLDIR)/basis
 OPTIONS = QUIT_ON_FAILURE
 
-all: check_count
+all: check_count check_countCompileTheory.uo
 .PHONY: all
 
 check_count: check_count.S basis_ffi.c Makefile
