@@ -1,6 +1,6 @@
 open preamble basis CheckerTheory ParserProgTheory
 
-val _ = new_theory"MainProg";
+val _ = new_theory"check_countProg";
 
 val _ = translation_extends"ParserProg";
 
@@ -497,15 +497,15 @@ val line1_def = Define`
     of INR err => SOME (err, 2) | INL (seats,ls) =>
       line2 quota seats ls`;
 
-val main_def = Define`
-  main ls =
+val check_count_def = Define`
+  check_count ls =
     case parse_line parse_quota (strlit"quota") ls
     of INR err => SOME (err, 1) | INL (quota,ls) =>
       line1 quota ls`;
 
-val main_thm = Q.store_thm("main_thm",
-  `main ls = NONE ⇔ Check_Certificate ls`,
-  rw[main_def,Check_Certificate_def,parse_line_def]
+val check_count_thm = Q.store_thm("check_count_thm",
+  `check_count ls = NONE ⇔ Check_Certificate ls`,
+  rw[check_count_def,Check_Certificate_def,parse_line_def]
   \\ CASE_TAC \\ CASE_TAC >- every_case_tac
   \\ rw[line1_def,parse_line_def]
   \\ CASE_TAC \\ CASE_TAC >- every_case_tac
@@ -522,8 +522,8 @@ val main_thm = Q.store_thm("main_thm",
   \\ CASE_TAC \\ fs[OPT_MMAP_EQ_NONE,o_DEF,OPT_MMAP_EQ_SOME]
   \\ rw[]);
 
-val main = process_topdecs`
-  fun main u =
+val check_count = process_topdecs`
+  fun check_count u =
     parse_line parse_quota "quota" (fn quota =>
     parse_line parse_seats "seats" (fn seats =>
     parse_line parse_candidates "candidates" (fn candidates =>
@@ -531,25 +531,25 @@ val main = process_topdecs`
     parse_line parse_judgement "penultimate judgement" (fn j0 =>
       loop (quota,(seats,candidates)) 5 (Final winners) j0)))))`;
 
-val _ = append_prog main;
+val _ = append_prog check_count;
 
-val main_spec = Q.store_thm("main_spec",
-  `app (p:'ffi ffi_proj) ^(fetch_v"main"(get_ml_prog_state())) [Conv NONE []]
+val check_count_spec = Q.store_thm("check_count_spec",
+  `app (p:'ffi ffi_proj) ^(fetch_v"check_count"(get_ml_prog_state())) [Conv NONE []]
      (STDIO fs)
      (POSTv uv.
        &UNIT_TYPE () uv *
        STDIO
-         (case main (MAP implode (linesFD fs 0)) of
+         (case check_count (MAP implode (linesFD fs 0)) of
           | NONE => add_stdout (fastForwardFD fs 0) "Certificate OK\n"
           | SOME (err,n) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num n) fs)
                               (explode err)))`,
-  xcf "main" (get_ml_prog_state())
+  xcf "check_count" (get_ml_prog_state())
   \\ xfun`quota_fun`
   \\ xapp_spec (Q.ISPECL[`RAT_TYPE`,`parse_quota`]parse_line_spec)
   \\ simp[STRING_TYPE_def,parse_quota_v_thm]
   \\ qexists_tac`emp` \\ xsimpl
   \\ qexists_tac`fs` \\ xsimpl
-  \\ simp[main_def]
+  \\ simp[check_count_def]
   \\ simp[Once option_case_rand]
   \\ qmatch_goalsub_abbrev_tac`option_CASE _ Qval Qerr`
   \\ qexists_tac`λquota. option_CASE (line1 quota (DROP 1 (MAP implode (linesFD fs 0)))) Qval Qerr`
@@ -665,8 +665,8 @@ val main_spec = Q.store_thm("main_spec",
   \\ xsimpl);
 
 val (sem_thm,prog_tm) =
-  call_thm (get_ml_prog_state()) "main" (
-    main_spec
+  call_thm (get_ml_prog_state()) "check_count" (
+    check_count_spec
     |> CONV_RULE(RAND_CONV(SIMP_CONV
        std_ss [Once (SEP_CLAUSES |> SPEC_ALL |> CONJUNCTS |> last |> GSYM)]))
     |> SIMP_RULE std_ss [STDIO_def] |> add_basis_proj)
@@ -679,33 +679,33 @@ val stdo_FUNPOW_lineForwardFD_0 = Q.store_thm("stdo_FUNPOW_lineForwardFD_0",
   `∀n fs. fd ≠ fd' ⇒ (stdo fd nm (FUNPOW (combin$C lineForwardFD fd') n fs) out ⇔ stdo fd nm fs out)`,
   Induct \\ rw[stdo_lineForwardFD,FUNPOW]);
 
-val main_prog_def = Define`main_prog = ^prog_tm`;
+val check_count_prog_def = Define`check_count_prog = ^prog_tm`;
 
-val main_sem =
-  sem_thm |> REWRITE_RULE[GSYM main_prog_def] |> DISCH_ALL
+val check_count_sem =
+  sem_thm |> REWRITE_RULE[GSYM check_count_prog_def] |> DISCH_ALL
   |> CONV_RULE(LAND_CONV EVAL)
   |> SIMP_RULE std_ss [AND_IMP_INTRO,Once option_case_rand]
   |> SIMP_RULE std_ss [STD_streams_add_stdout,STD_streams_fastForwardFD,Once pair_CASE_def]
   |> SIMP_RULE std_ss [STD_streams_add_stderr,STD_streams_FUNPOW_lineForwardFD_0,Once pair_CASE_def]
   |> SIMP_RULE std_ss [Once option_case_compute]
-  |> curry save_thm "main_sem";
+  |> curry save_thm "check_count_sem";
 
-val main_correct = Q.store_thm("main_correct",
+val check_count_correct = Q.store_thm("check_count_correct",
   `wfFS fs ∧ STD_streams fs ∧ stdout fs init_out ⇒
    ∃io_events fs'.
-     semantics_prog (init_state (basis_ffi cls fs)) init_env main_prog
+     semantics_prog (init_state (basis_ffi cls fs)) init_env check_count_prog
        (Terminate Success io_events) ∧
      extract_fs fs io_events = SOME fs' ∧
      (stdout fs' (init_out ++ "Certificate OK\n")
       ⇔ Check_Certificate (MAP implode (linesFD fs 0)))`,
   rw[]
-  \\ imp_res_tac main_sem
+  \\ imp_res_tac check_count_sem
   \\ first_x_assum(qspec_then`cls`strip_assume_tac)
   \\ asm_exists_tac \\ rw[]
   \\ CASE_TAC
   >- (
     simp[stdo_numchars,stdo_add_stdo,stdo_fastForwardFD]
-    \\ fs[main_thm] )
+    \\ fs[check_count_thm] )
   \\ qmatch_goalsub_abbrev_tac`add_stderr fs'`
   \\ `STD_streams fs'` by metis_tac[STD_streams_FUNPOW_lineForwardFD_0]
   \\ simp[stdo_numchars]
@@ -713,7 +713,7 @@ val main_correct = Q.store_thm("main_correct",
   \\ simp[]
   \\ conj_tac >- metis_tac[STD_streams_stderr]
   \\ simp[stdo_FUNPOW_lineForwardFD_0,Abbr`fs'`]
-  \\ simp[GSYM main_thm]
+  \\ simp[GSYM check_count_thm]
   \\ strip_tac
   \\ imp_res_tac stdo_UNICITY_R
   \\ fs[]);
