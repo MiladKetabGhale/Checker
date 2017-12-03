@@ -4,6 +4,21 @@ val _ = new_theory"MainProg";
 
 val _ = translation_extends"ParserProg";
 
+(* TODO: move to CakeML *)
+val stdo_add_other_stdo = Q.store_thm("stdo_add_other_stdo",
+  `fd <> fd' ∧ nm ≠ nm' ∧ stdo fd' nm' fs z ⇒
+   (stdo fd nm (add_stdo fd' nm' fs x) y ⇔ stdo fd nm fs y)`,
+  rw[add_stdo_def]
+  \\ SELECT_ELIM_TAC \\ rw[] >- metis_tac[]
+  \\ imp_res_tac stdo_UNICITY_R \\ rveq
+  \\ fs[up_stdo_def,stdo_def,fsupdate_def,ALIST_FUPDKEY_ALOOKUP]
+  \\ CASE_TAC \\ CASE_TAC);
+
+val stdo_lineForwardFD = Q.store_thm("stdo_lineForwardFD",
+  `fd ≠ fd' ⇒ (stdo fd' nm (lineForwardFD fs fd) out ⇔ stdo fd' nm fs out)`,
+  metis_tac[stdo_forwardFD,lineForwardFD_forwardFD]);
+(* -- *)
+
 (* TODO: move to HOL *)
 val LRC_APPEND = Q.store_thm("LRC_APPEND",
   `∀l1 l2 x y.
@@ -648,5 +663,59 @@ val main_spec = Q.store_thm("main_spec",
   \\ `r = &(n + 5)` by (simp[GSYM integerTheory.INT_ADD] \\ intLib.COOPER_TAC)
   \\ rw[]
   \\ xsimpl);
+
+val (sem_thm,prog_tm) =
+  call_thm (get_ml_prog_state()) "main" (
+    main_spec
+    |> CONV_RULE(RAND_CONV(SIMP_CONV
+       std_ss [Once (SEP_CLAUSES |> SPEC_ALL |> CONJUNCTS |> last |> GSYM)]))
+    |> SIMP_RULE std_ss [STDIO_def] |> add_basis_proj)
+
+val STD_streams_FUNPOW_lineForwardFD_0 = Q.store_thm("STD_streams_FUNPOW_lineForwardFD_0",
+  `∀n fs. STD_streams fs ⇒ STD_streams (FUNPOW (combin$C lineForwardFD 0) n fs)`,
+  Induct \\ rw[STD_streams_lineForwardFD,FUNPOW]);
+
+val stdo_FUNPOW_lineForwardFD_0 = Q.store_thm("stdo_FUNPOW_lineForwardFD_0",
+  `∀n fs. fd ≠ fd' ⇒ (stdo fd nm (FUNPOW (combin$C lineForwardFD fd') n fs) out ⇔ stdo fd nm fs out)`,
+  Induct \\ rw[stdo_lineForwardFD,FUNPOW]);
+
+val main_prog_def = Define`main_prog = ^prog_tm`;
+
+val main_sem =
+  sem_thm |> REWRITE_RULE[GSYM main_prog_def] |> DISCH_ALL
+  |> CONV_RULE(LAND_CONV EVAL)
+  |> SIMP_RULE std_ss [AND_IMP_INTRO,Once option_case_rand]
+  |> SIMP_RULE std_ss [STD_streams_add_stdout,STD_streams_fastForwardFD,Once pair_CASE_def]
+  |> SIMP_RULE std_ss [STD_streams_add_stderr,STD_streams_FUNPOW_lineForwardFD_0,Once pair_CASE_def]
+  |> SIMP_RULE std_ss [Once option_case_compute]
+  |> curry save_thm "main_sem";
+
+val main_correct = Q.store_thm("main_correct",
+  `wfFS fs ∧ STD_streams fs ∧ stdout fs init_out ⇒
+   ∃io_events fs'.
+     semantics_prog (init_state (basis_ffi cls fs)) init_env main_prog
+       (Terminate Success io_events) ∧
+     extract_fs fs io_events = SOME fs' ∧
+     (stdout fs' (init_out ++ "Certificate OK\n")
+      ⇔ Check_Certificate (MAP implode (linesFD fs 0)))`,
+  rw[]
+  \\ imp_res_tac main_sem
+  \\ first_x_assum(qspec_then`cls`strip_assume_tac)
+  \\ asm_exists_tac \\ rw[]
+  \\ CASE_TAC
+  >- (
+    simp[stdo_numchars,stdo_add_stdo,stdo_fastForwardFD]
+    \\ fs[main_thm] )
+  \\ qmatch_goalsub_abbrev_tac`add_stderr fs'`
+  \\ `STD_streams fs'` by metis_tac[STD_streams_FUNPOW_lineForwardFD_0]
+  \\ simp[stdo_numchars]
+  \\ DEP_REWRITE_TAC[GEN_ALL stdo_add_other_stdo]
+  \\ simp[]
+  \\ conj_tac >- metis_tac[STD_streams_stderr]
+  \\ simp[stdo_FUNPOW_lineForwardFD_0,Abbr`fs'`]
+  \\ simp[GSYM main_thm]
+  \\ strip_tac
+  \\ imp_res_tac stdo_UNICITY_R
+  \\ fs[]);
 
 val _ = export_theory();
