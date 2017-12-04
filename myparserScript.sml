@@ -197,7 +197,7 @@ EVAL ``parse_quota (strlit"32%50\n")``;
 *)
 
 val parse_seats_def = Define`
-  parse_seats line = SOME (parse_number (extract line 0 (SOME (strlen line - 1))))`;
+  parse_seats line = parse_number (extract line 0 (SOME (strlen line - 1)))`;
 (*
 EVAL ``parse_seats (strlit"30\n")``;
 *)
