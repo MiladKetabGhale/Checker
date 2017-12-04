@@ -1,7 +1,7 @@
 open preamble
 
 val _ = new_theory "CheckerSpec";
-
+ 
 (* Helper functions that have nothing to do with vote counting *)
 (* Sum a list of rational numbers *)
 val SUM_RAT_def = Define`
@@ -99,9 +99,12 @@ val subpile1_def = Define `
 val subpile2_def = Define`
   subpile2 c (ps:piles) p1 ⇔
     EVERY (λp. if c = FST p then T else MEM p p1) ps`;
+(*
 
 val _ = overload_on("list_MEM",``λl1 l2. set l1 ⊆ set l2``);
 val _ = overload_on("list_not_MEM",``λl1 l2. DISJOINT (set l1) (set l2)``);
+
+*)
 
 val equal_except_def = Define `
  ((equal_except (c: cand) l nl ) =
@@ -164,6 +167,7 @@ val first_continuing_cand_def = Define `
    first_continuing_cand (c: cand) (b: cand list)  (h: cand list) =
       (?l1 l2. (b = l1 ++ c::l2) /\ (!d. MEM d l1 ==> ~ MEM d h))`;
 
+(*
 val COUNT_def = Define	`
   COUNT ((qu,st,l):params) j1 j2 =
     ? ba t nt p np bl e h.
@@ -187,6 +191,37 @@ val COUNT_def = Define	`
                                          (!l'. MEM (c,l') np <=> MEM (c,l') p)
                                       /\ (!r. MEM (c,r) t <=> MEM (c,r) nt))))
      /\ (j2 = NonFinal ([], nt, np, bl, e, h))`;
+*)
+ 
+ 
+val COUNT_def = Define `
+         (COUNT (qu,st,l) j1 j2 = ? ba t nt p np bl e h.
+          (j1 = NonFinal (ba, t, p, bl, e, h))
+       /\ (!d. MEM d (h++e) ==> MEM d l)
+       /\ ALL_DISTINCT (h++e)
+       /\ (Valid_PileTally t l)
+       /\ (Valid_PileTally nt l)
+       /\ (Valid_PileTally p l)
+       /\ (Valid_PileTally np l)
+       /\ (Valid_Init_CandList l)
+       /\ ALL_DISTINCT (MAP FST p)
+       /\ ALL_DISTINCT (MAP FST t)
+       /\ ALL_DISTINCT (MAP FST np)
+       /\ ALL_DISTINCT (MAP FST nt)
+       /\ (ba <> [])
+       /\ (h <> [])
+       /\ (!c. MEM c l ==>
+                            ((MEM c h ==>
+                             ?(l: ((cand list) # rat) list).
+                               (l = FILTER (\ (b: (cand list) # rat). (first_continuing_cand c (FST b) h)) ba)
+                            /\ (!l'. MEM (c,l') np ==> (l' = (get_cand_pile c p) ++ l))
+                            /\ (!r. MEM (c,r) nt ==> (r = SUM_RAT (MAP SND l))))
+                            /\ (~ MEM c h ==>
+                                           (!l'. MEM c l /\ MEM (c,l') np <=> MEM c l /\ MEM (c,l') p)
+                                        /\ (!r. MEM c l /\ MEM (c,r) t <=> MEM c l /\ MEM (c,r) nt))))
+       /\ (j2 = NonFinal ([], nt, np, bl, e, h)))`;
+ 
+ 
 
 (* ELECT rule *)
 
