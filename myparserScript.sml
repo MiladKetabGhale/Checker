@@ -190,4 +190,29 @@ parse_whole_line str =
 EVAL ``parse_whole_line "[([A,B,C],1%1),([C,B,A],1%1),([B,A,C],1%1),([C,A,B],1%1),([A,B,C],1%1),([A,B,C],1%1),([C,B,A],1%1),([A,C,B],1%1),([B,C,A],1%1),([A,B,C],1%1)]; A{0%1} B{0%1} C{0%1}; A{[]} B{[]} C{[]}; []; []; [A,B,C]"``
 *)
 
+val parse_quota_def = Define`
+  parse_quota line = SOME (parse_rational (explode line))`;
+(*
+EVAL ``parse_quota (strlit"3%5\n")``;
+EVAL ``parse_quota (strlit"32%50\n")``;
+*)
+
+val parse_seats_def = Define`
+  parse_seats line = SOME (parse_number (explode (extract line 0 (SOME (strlen line - 1)))))`;
+(*
+EVAL ``parse_seats (strlit"30\n")``;
+*)
+
+val parse_candidates_def = Define`
+  parse_candidates line = SOME (parse_rest (explode (extract line 0 (SOME (strlen line - 1)))))`;
+(*
+EVAL ``parse_candidates (strlit"[A,B,C]\n")``;
+*)
+
+val parse_judgement_def = Define`
+  parse_judgement line = SOME (parse_whole_line (explode (extract line 0 (SOME (strlen line - 1)))))`;
+(*
+EVAL ``parse_judgement (strlit"[]; A{5%1} B{2%1} C{3%1}; A{[([A,B,C],0%1),([A,B,C],0%1),([A,B,C],0%1),([A,C,B],0%1),([A,B,C],0%1)]} B{[([B,A,C],0%1),([B,C,A],0%1)]} C{[([C,B,A],1%1),([C,A,B],1%1),([C,B,A],1%1)]}; [A]; [A]; [B,C]\n")``;
+*)
+
 val _ = export_theory ()
