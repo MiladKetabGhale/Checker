@@ -24,6 +24,7 @@ val r = translate Valid_PileTally_dec1_def;
 val r = translate Valid_PileTally_dec2_def;
 val r = translate subpile1_def;
 val r = translate subpile2_def;
+val r = translate NULL;
 val r = translate ELIM_CAND_dec_def;
 
 val r = translate first_continuing_cand_dec_def;
