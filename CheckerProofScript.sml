@@ -10,7 +10,7 @@ val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
 
 
 val EWIN_thm = Q.store_thm("EWIN_thm",
-  `EWIN = EWIN_dec`,
+  `EWIN_dec = EWIN`,
   simp[FUN_EQ_THM]
   \\ qx_gen_tac`params`
   \\ PairCases_on`params`
@@ -21,7 +21,7 @@ val EWIN_thm = Q.store_thm("EWIN_thm",
   \\ metis_tac[]);
 
 val HWIN_thm = Q.store_thm("HWIN_thm",
-  `HWIN = HWIN_dec`,
+  `HWIN_dec = HWIN`,
   simp[FUN_EQ_THM]
   \\ qx_gen_tac`params`
   \\ PairCases_on`params`
@@ -41,7 +41,7 @@ val GET_CAND_TALLY_HEAD_REMOVAL_def = Q.store_thm ("GET_CAND_TALLY_HEAD_REM",
                     >> rw[get_cand_tally_def] >>
                     Cases_on`h'` >> fs[ALOOKUP_def]))
 
-val GET_CAND_TALLY_MEM2 = Q.store_thm ("GET_CAND_TALLY_MEM",
+val GET_CAND_TALLY_MEM = Q.store_thm ("GET_CAND_TALLY_MEM",
  `!(t: (cand #rat) list) c. (MEM c (MAP FST t))
                                     ==> (MEM (c, get_cand_tally c t) t) `,
 
@@ -584,6 +584,28 @@ val Logical_list_MEM_VICE_VERCA_TheFunctional = Q.store_thm("Logical_list_MEM_VI
       >- (REPEAT STRIP_TAC >> fs[]
         >> metis_tac[MEM]));
 
+val Valid_PileTally_thm = Q.store_thm("Valid_PileTally_thm",
+  `∀x y. Valid_PileTally x y ⇔ Valid_PileTally_dec1 x y ∧ Valid_PileTally_dec2 x y`,
+  simp[Valid_PileTally_def,EQ_IMP_THM]
+  \\ metis_tac[
+       PileTally_to_PileTally_DEC1,PileTally_DEC1_to_PileTally,
+       PileTally_to_PileTally_DEC2,PileTally_DEC2_IMP_PileTally]);
+
+(*
+val ELIM_CAND_thm = Q.store_thm("ELIM_CAND_thm",
+  `ELIM_CAND_dec = ELIM_CAND`,
+  simp[FUN_EQ_THM]
+  \\ qx_genl_tac[`c`,`p`,`j1`,`j2`]
+  \\ PairCases_on`p`
+  \\ map_every qid_spec_tac [`j2`,`j1`,`p2`,`p1`,`p0`,`c`]
+  \\ recInduct ELIM_CAND_dec_ind
+  \\ rw[ELIM_CAND_def,ELIM_CAND_dec_def,Valid_PileTally_thm,
+        list_MEM_dec_thm,Valid_Init_CandList_def,NULL_EQ,
+        SUBSET_DEF]
+  \\ rw[EQ_IMP_THM]
+  \\ imp_res_tac Valid_PileTally_thm
+  \\ fs[Valid_PileTally_def]
+*)
 
 (*
 val Elim_cand_dec_def = Define `
