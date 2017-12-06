@@ -10,3 +10,13 @@ compilation/*.S
 compilation/*.o
 compilation/*.c
 compilation/check_count
+paper/paper.tex
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.pdf
+paper/*.aux
+paper/munge.exe
+paper/holtexbasic.sty

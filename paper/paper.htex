@@ -1,0 +1,19 @@
+\documentclass{llncs}
+\usepackage{url}
+\begin{document}
+\title{(draft) Verified Certificate Checking for Vote Counting}
+\author{
+Milad~K.~Ghale\inst{1}\and
+Dirk~Pattison\inst{1}\and
+Ramana~Kumar\inst{2}}
+\institute{Australian National University\and
+Data61, CSIRO and UNSW}
+\maketitle
+\begin{abstract}
+Abstract goes here
+\end{abstract}
+\section{Introduction}\label{sec:intro}
+\bibliographystyle{splncs03}
+\bibliography{paper}
+\end{document}
+% vim: ft=tex
