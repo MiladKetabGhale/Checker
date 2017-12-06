@@ -1,0 +1,13 @@
+paper.pdf : paper.tex holtexbasic.sty llncs.cls splncs03.bst aliascnt.sty remreset.sty
+	latexmk -pdf paper
+
+INCLUDES = ..
+
+munge.exe : ../CheckerProofTheory.uo
+	$(protect $(HOLDIR)/bin/mkmunge.exe) ../CheckerProofTheory
+
+paper.tex : paper.htex munge.exe
+	./munge.exe -m';' < $< > $@
+
+holtexbasic.sty: $(HOLDIR)/src/TeX/holtexbasic.sty
+	$(CP) $< $@

@@ -32,14 +32,20 @@ val Valid_PileTally_dec2_def = Define `
 val _ = overload_on("list_MEM",``λl1 l2. set l1 ⊆ set l2``);
 val _ = overload_on("list_not_MEM",``λl1 l2. DISJOINT (set l1) (set l2)``);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f65cdf8b627cf9d7c780a19be8d336d97299ce62
 val list_MEM_dec_def = Define `
       (list_MEM_dec [] l ⇔ T)
    /\ (list_MEM_dec (h::t) l ⇔ (MEM h l) /\ (list_MEM_dec t l))`;
 
+<<<<<<< HEAD
 
 (*
 
+=======
+>>>>>>> f65cdf8b627cf9d7c780a19be8d336d97299ce62
 val list_not_MEM_dec_def = Define `
         (list_not_MEM_dec  [] l ⇔ T)
      /\ (list_not_MEM_dec (h::t) l ⇔ (~ MEM h l) /\ (list_not_MEM_dec t l))`;
