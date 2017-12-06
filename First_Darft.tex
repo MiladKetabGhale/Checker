@@ -1,0 +1,741 @@
+%% For double-blind review submission, w/o CCS and ACM Reference (max submission space)
+%\documentclass[sigplan,10pt,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+%% For double-blind review submission, w/ CCS and ACM Reference
+%\documentclass[sigplan,10pt,review,anonymous]{acmart}\settopmatter{printfolios=true}
+%% For single-blind review submission, w/o CCS and ACM Reference (max submission space)
+%\documentclass[sigplan,10pt,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+%% For single-blind review submission, w/ CCS and ACM Reference
+%\documentclass[sigplan,10pt,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+%% For final camera-ready submission, w/ required CCS and ACM Reference
+\documentclass[sigplan,10pt]{acmart}\settopmatter{}
+
+
+%% Conference information
+%% Supplied to authors by publisher for camera-ready submission;
+%% use defaults for review submission.
+
+\acmConference{}{}{}
+\acmYear{}
+\acmISBN{} \acmISBN{}
+\acmDOI{}  \acmDOI{}
+\startPage{}
+
+%% Copyright information
+%% Supplied to authors (based on authors' rights management selection;
+%% see authors.acm.org) by publisher for camera-ready submission;
+%% use 'none' for review submission.
+\setcopyright{none}
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+%\setcopyright{rightsretained}
+%\copyrightyear{2017}           %% If different from \acmYear
+
+%% Bibliography style
+\bibliographystyle{ACM-Reference-Format}
+%% Citation style
+%\citestyle{acmauthoryear}  %% For author/year citations
+%\citestyle{acmnumeric}     %% For numeric citations
+%\setcitestyle{nosort}      %% With 'acmnumeric', to disable automatic
+                            %% sorting of references within a single citation;
+                            %% e.g., \cite{Smith99,Carpenter05,Baker12}
+                            %% rendered as [14,5,2] rather than [2,5,14].
+%\setcitesyle{nocompress}   %% With 'acmnumeric', to disable automatic
+                            %% compression of sequential references within a
+                            %% single citation;
+                            %% e.g., \cite{Baker12,Baker14,Baker16}
+                            %% rendered as [2,3,4] rather than [2-4].
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Note: Authors migrating a paper from traditional SIGPLAN
+%% proceedings format to PACMPL format must update the
+%% '\documentclass' and topmatter commands above; see
+%% 'acmart-pacmpl-template.tex'.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Some recommended packages.
+\usepackage{booktabs}   %% For formal tables:
+                        %% http://ctan.org/pkg/booktabs
+\usepackage{subcaption} %% For complex figures with subfigures/subcaptions
+                        %% http://ctan.org/pkg/subcaption
+
+
+
+\begin{document}
+
+%% Title information
+\title[]{Verified Checking of Certified Vote Counting Computations}         %% [Short Title] is optional;
+                                        %% when present, will be used in
+                                        %% header instead of Full Title.
+%\titlenote{with title note}             %% \titlenote is optional;
+                                        %% can be repeated if necessary;
+                                        %% contents suppressed with 'anonymous'
+%\subtitle{Subtitle}                     %% \subtitle is optional
+%\subtitlenote{with subtitle note}       %% \subtitlenote is optional;
+                                        %% can be repeated if necessary;
+                                        %% contents suppressed with 'anonymous'
+
+
+%% Author information
+%% Contents and number of authors suppressed with 'anonymous'.
+%% Each author should be introduced by \author, followed by
+%% \authornote (optional), \orcid (optional), \affiliation, and
+%% \email.
+%% An author may have multiple affiliations and/or emails; repeat the
+%% appropriate command.
+%% Many elements are not rendered, but should be provided for metadata
+%% extraction tools.
+
+%% Author with single affiliation.
+\author{}
+%\authornote{with author1 note}          %% \authornote is optional;
+                                        %% can be repeated if necessary
+%\orcid{nnnn-nnnn-nnnn-nnnn}             %% \orcid is optional
+\affiliation{
+  %\position{Position1}
+  \department{}              %% \department is recommended
+  \institution{}            %% \institution is required
+  %\streetaddress{Street1 Address1}
+  \city{}
+  %\state{State1}
+ % \postcode{Post-Code1}
+  \country{}                    %% \country is recommended
+}
+\email{}          %% \email is recommended
+
+%% Author with two affiliations and emails.
+%\author{Dirk Pattinson}
+%\authornote{with author2 note}          %% \authornote is optional;
+                                        %% can be repeated if necessary
+%\orcid{nnnn-nnnn-nnnn-nnnn}             %% \orcid is optional
+%\affiliation{
+ % \position{Position2a}
+ % \department{Research School of Computer Science}             %% \department is recommended
+  %\institution{The Australian National University}           %% \institution is required
+  %\streetaddress{Street2a Address2a}
+  %\city{Canberra}
+  %\state{State2a}
+  %\postcode{Post-Code2a}
+  %\country{Australia}                   %% \country is recommended
+%}
+%\email{Dirk.Pattinson@anu.edu.au}         %% \email is recommended
+%\affiliation{
+ % \position{Position2b}
+  %\department{Department2b}             %% \department is recommended
+ % \institution{Institution2b}           %% \institution is required
+ % \streetaddress{Street3b Address2b}
+ % \city{City2b}
+ % \state{State2b}
+ % \postcode{Post-Code2b}
+ % \country{Country2b}                   %% \country is recommended
+%}
+%\email{first2.last2@inst2b.org}         %% \email is recommended
+
+
+%% Abstract
+%% Note: \begin{abstract}...\end{abstract} environment must come
+%% before \maketitle command
+\begin{abstract}
+ We approach computing an election's result as a sequence of logical rule applications applied to stages of the count, together with a certificate for the computation of the end result. A certificate for the election, then, is a visualisation of the trace of rule applications applied to an initial stage of the count to reach a final stage, where winners are announced. Verifying the certificate of the count amounts to checking that transitions between stages by means of rule applications have occurred correctly. 
+
+We verify the certificate produced for computing the outcome of elections which are based on a Single Transferable Vote scheme with fractional values. For this, we formalise the election's protocol as logical rules inside the theorem prover HOL4. Then, we obtain a verified checker for validating a certificate of such an election. By means of a parser defined in HOL4, we translate data of the certificate into the data structure of the formalised election. Consequently, we would finally extract a CakeML program which checks the certificate for correctness.  
+ 
+\end{abstract}
+
+%% 2012 ACM Computing Classification System (CSS) concepts
+%% Generate at 'http://dl.acm.org/ccs/ccs.cfm'.
+%\begin{CCSXML}
+%<ccs2012>
+%<concept>
+%<concept_id>10011007.10011006.10011008</concept_id>
+%<concept_desc>Software and its engineering~General programming languages</concept_desc>
+%<concept_significance>500</concept_significance>
+%</concept>
+%<concept>
+%<concept_id>10003456.10003457.10003521.10003525</concept_id>
+%<concept_desc>Social and professional topics~History of programming languages</concept_desc>
+%<concept_significance>300</concept_significance>
+%</concept>
+%</ccs2012>
+%\end{CCSXML}
+
+%\ccsdesc[500]{Software and its engineering~General programming languages}
+%\ccsdesc[300]{Social and professional topics~History of programming languages}
+%% End of generated code
+
+
+%% Keywords
+%% comma separated list
+\keywords{keyword1, keyword2, keyword3}  %% \keywords are mandatory in final camera-ready submission
+
+
+%% \maketitle
+%% Note: \maketitle command must come after title commands, author
+%% commands, abstract environment, Computing Classification System
+%% environment and commands, and keywords command.
+\maketitle
+
+
+\section{Introduction}
+
+Elections stand at the centre of a democracy, where people cast their preferences to elect those whom they perceive as fittest. Therefore, establishing public's trust in authenticity of the announced result and providing them with the means for independent verification of this result is crucial. Universal verifiability is a measure for evaluation of the degree in which an election count can be examined by any member of the general public. Unfortunately, the popular methods for counting election ballots do not even come close to satisfaction of this factor. Usually, election committees invite members  of the parties and public to observe the process in order to witness  trustworthiness of the final result. Moreover, scrutiny sheets are published to provide detailed evidence as to how the counting has been processed. 
+
+
+However in practice, scrutiny sheets are deficient. For example costly mistakes have occurred in an election for Senate in Western Australia. Because of such flaws in hand counting an election, the heavy cost which they have along with time consumption of this method, computers have recently been employed to perform the task. But these programs merely output the final result of the election without specifying the process of the computation. Moreover, the source code of these program is kept secret under the \lq\lq commercial in confidence\rq\rq excuse. Unfortunately, since there are corner cases in complex protocols such as Single Transferable Vote scheme which the legislation leaves open to interpretation, it is difficult for an independent evaluator to design a program that always returns the result of these commercial programs. Therefore, there is no efficient means for not only an ordinary member of the public, but also experts of the field to convince themselves about correctness of the outcome. Hence, quality indexes such as universal verifiability remain inadequately addressed.
+
+
+Our approach offers a remedial for this situation. We understand the counting process as a certified computation which formalises the count as a sequence of logical rule applications to stages of the count, together with a certificate that is a visualisation of the trace of rule applications to the ballots cast in the election. Stages of the count, are formalised as typing judgements which are of two kind; non-final and final. The former is constituted of six components that put together provide all the necessary information to know what the current status of the count is. It informs the scrutineers of the ballots which (possible) need to be counted, tally of each candidate, pile of the votes allocated to each candidate according to the preferences, list of candidates whose votes may be distributed later, and list of elected and continuing candidates at this stage. The latter judgement is a terminal stage of the process whereby winners of the election are announced. 
+
+
+The election protocol implicitly specifies steps for advancing the counting process. These steps which tell us when and how to move from one stage of the count (judgement) to another are formalised as logical rules. These rules have side conditions that must be met before such transitions can happen. Side conditions are, essentially, the formal counterpart of the protocol laid down by the legislation. By satisfying these side conditions, one makes sure that the process has proceeded in accordance to the protocol of the election. Moreover, it becomes possible to output, along announcement of the winners, a trace of rule applications specifying as to how this result is obtained. A  visualisation of this trace is called the certificate for the count. Such a certificate has the advantage of providing thorough detail of the counting process. The certificate is independent of the means used to produce it, so that one does not need to invest trust in the election committee, the program which output it, and possible intervening malfunctions of hardware. The certificate is independently checkable for correctness by various tools, which the scrutineers have trust in. The side conditions of rules enforce unique applicability of the rules. Therefore, to check the certificate for correctness, one merely needs to verify that given a judgement visualised in the certificate, the transition occurred to reach to the next judgement in the certificate accords with one of the rules.   
+
+
+
+This paper specialises the above generic approach to vote counting, for a specific Single Transferable Vote scheme called ANU-Union. We present a verified checker for certificates  produced for elections which are based on the ANU-Union scheme. In our past work, we formalised the ANU-Union protocol as a system of logical rules, and proved some properties of the specification. The formalised rules put together determine how to count ballots, elect a candidate as one of the winners, transfer surplus votes, eliminate weak candidates from the election, and eventually terminate the whole election by announcing all of the winners. A Haskell program capable of computing real elections was extracted. This program, for any given input ballots, number of vacancies and a list of competing candidates, produces a certificate, such a the one in \ref{ref;Figure}, which is a visualisation of a sequence of applications of those rules for obtaining the output. However, to check these certificates, we do not rely on any   such formalisation or implementation of the ANU-Union scheme. Our mere assumption is that the certificate given, is claimed to be an output of a computational process which realises the ANU-Union counting protocol as the set of logical rules specified in the protocol. The task, then, is to verify authenticity of a certificate against the protocol directly rather than by referring to any previous formalisation of the ANU-Union scheme.  
+
+
+For checking task, we formalise the ANU-Union STV scheme in HOL4. 
+The scheme is captured as six independent predicates that are the formal specification of the protocol as rules of counting. The predicates themselves, are conjuncts of some stand-alone sub-predicates. These sub-predicates which match against clauses of the protocol, are the logical specification of auxiliary computational functions that are guaranteed to meet expectations of their specification. For each counting rule defined as a predicate, a computational twin is given. This computational counterpart is basically the conjunction of the auxiliary computational functions mentioned above. Therefore, each rule as a predicate is proven equivalent to the rule captured as a computational entity. Finally, the predicative checker is defined to be a disjunction over predicative counting rules and the computational checker is, also, formalised as disjunction of the computational counting rules. Since components of the predicative and computational checker are shown to be equivalent, we achieve perfect match between the logical and functional checker as well.
+
+
+
+
+
+
+\section{The Protocol and its Logical Specification}
+First, we lay down the counting algorithm of the ANU-Union. Then for the ease of communication and pedagogical intentions, we give a mathematical specification of the protocol. However, we make no essential use of this to capture the protocol later as formalised rules in HOL4. 
+
+
+The ANU-Union STV is a scheme which is very close to the STV used for the Australian Senate election. It has three distinctive characteristics.
+\begin{description} 
+\item[Step-by-step surplus transfer.] Surplus
+votes of already elected candidates, who are awaiting for their
+surplus to be transferred, are dealt with, one at a time, in order of
+first preferences.
+\item[Electing after each
+transfer.] After each transfer of values, candidates that reach
+the quota are elected immediately. 
+\item[Fractional transfer.] The
+value of vote transfer is a fractional number determined by a
+specific formula.\end{description}
+
+The protocol proceeds as follows.
+\begin{center}
+\begin{enumerate} \item decide which ballots are
+\emph{formal}.  \item determine what the quota exactly is.  \item
+count the first preference for each \emph{formal} ballot paper and
+place the vote in the pile of the  votes of the preferred candidate.
+\item if there are vacancies, any candidate that reaches
+the quota is declared elected.  \item if all
+the vacancies have been filled, counting terminates and the result
+is announced. 
+\item if the number of vacancies exceeds the number of continuing
+candidates, all of them are declared elected and the result is
+announced. 
+\item if there are still vacancies and all ballots are counted, and
+there is
+an elected candidate with surplus,
+go to step $8$ otherwise go to step $9$.  
+\item In case of surplus
+votes, transfer them to the next continuing preference appearing on
+each of those votes at a fractional value according to the following
+formula:
+
+\begin{equation}  \label{eq:tv}
+\mbox{new value} = \frac{\mbox{number of votes of elected
+candidate} - \mbox{quota}}{\mbox{number of votes of elected
+candidate}}
+\end{equation}
+
+\noindent
+Subsequent transfer values are computed as the product of the current value with previous transfer value.
+\item if there are still vacancies and all ballots are counted, and
+all surplus votes are transferred, choose the candidate with the
+least amount of votes and exclude them from the list of continuing
+candidates. Also transfer all of their votes according to the next
+preference appearing on each of the votes in his pile. The transfer
+value of the ballots shall remain unchanged. 
+\item if there is more than one elected candidate, first transfer
+the surplus of the candidate who has the largest surplus. If after a
+transfer of surplus, a continuing candidate exceeds the quota, declare them elected and transfer their surplus, only after all of the earlier elected candidates' surpluses have been dealt with.
+\item at transfer stage, candidates who are already elected or eliminated receive no vote. 
+\end{enumerate}
+\end{center}
+
+
+\subsection{The Logical specification}
+The count is constituted of some key components, all of which appear in a comprehensive certificate for the counting process:
+\begin{enumerate}
+\item candidates competing in the election
+\item number of vacancies
+\item quota of the election
+\item ballots consisting of a list of candidates to be ranked and a fractional value of the ballot
+\item stages of the counting (or computation)
+\end{enumerate}
+At every non-final stage of the counting, we need to know that if there are ballots to be counted, how the votes have been distributed up to now, what is the tally of each candidate, and if any candidate was elected or eliminated from the election. Therefore, for stages of the count to thoroughly inform the scrutineers of how the situation of the count is at the moment, it is necessary and sufficient to contain the following components:
+\begin{enumerate}
+\item the (possibly) uncounted ballots
+\item a group of candidates called \emph{elected} candidates
+\item a group of candidates called \emph{continuing} candidates
+\item a group of candidates already elected who have exceeded the quota
+\item the tally of votes of each candidate
+\item the set of ballots that have been counted for each individual candidate.
+\end{enumerate}
+In order to specify the protocol in a precise formal language, we introduce symbols that characterise these integral parts of the computation. Below is the list of mathematical symbols together with the intended concepts that they represent.
+\begin{center}
+\begin{tabular}{l c c l}
+$C$& & &a set of candidates\\
+$\mathbb{Q}$ & & & the set of rational numbers\\
+\textsf{List}$(C)$ & & & the set of all possible list of candidates\\
+\textsf{List}$(C)\times\mathbb{Q}$ & & & the set of all (possible) ballots\\
+$B$ & & & shorthand for \textsf{List}$(C)\times\mathbb{Q}$\\
+
+$A$& & &initial list of all of the candidates\\
+$st$& & &initial number of vacancies\\
+$bs$& & &initial list of ballots cast to be counted\\
+$bl$ & & & backlog of elected candidates\\
+$b$, $d$ & & & to represent a ballot\\
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{l c c l}
+$ba,ba'$ & & & list of ballots\\
+$ba_{\epsilon}$ &  & & empty list of ballots\\
+$c$, $c'$ & & &to represent a candidate\\
+$t,nt,t'$ & & & tally function, from $C$ into $\mathbb{Q}$\\
+$p,np$ & & & pile function, from $C$ into $B$\\
+$e, ne$ & & & list of elected candidates so far\\
+$[]$ & & & representing empty list of candidates\\
+$l_1$\mbox{$++$}$l_2$ & & & list $l_2$ is appended to the end of list $l_1$\\
+$h,nh$ & & & list of continuing candidates in the election\\
+$qu$ & & & quota of the election as a rational number\\
+\end{tabular}
+\end{center} 
+Here a ballot $b$ $\in$ $B$ has two parts: one part is a list of candidates and the other is the value that the ballot has. So a ballot $b$ is a pair $(l,q)$, for some $l\in$ \textsf{List} $(C)$ and a number $q\in$ $\mathbb{Q}$.  
+The character $ba\in B$, is reserved to show the set of ballots
+which require to be counted in each single state of the count
+($\mathit{ba}$ for ``ballots requiring attention''). The tallying
+operation done in a hand-count election is formalised by function
+$t$. Item 9 above is expressed by the function pile $p$. At each
+stage of the count for any candidate $c$, $p(c)$ determines which
+votes are given to the candidate $c$. The list $bl\in$
+\textsf{List}$(C)$ which is the backlog, is the list of already
+elected candidates whose votes are yet to be transferred. The
+notation $e$ (for ``elected'') and $h$ (for ``hopeful'', as $c$
+already represents candidates) respectively represent the list of elected and continuing candidates at each stage. 
+
+
+We should note that the use of lists, instead of sets, for ballots, and continuing or elected candidates is simply for the convenience of formalisation in a theorem prover. But the counting rules ,defined shortly afterwards, make no essential use of this representation. 
+
+
+Moreover, we must encapsulate the concept of stages of the count mathematically. For this end, we use two kind of judgements, called non-final and final judgements.\\
+
+
+\noindent\textbf{Non-final Judgement.}
+$bs,st,A   \vdash  \mathsf{state}(ba,t,p,bl,e,h)$ :
+
+\begin{small}
+In an election, assuming we have an initial list of ballots $bs$, initial number of vacancies $st$, and a list $A$ of all candidates competing in the election, \textsf{state}$(ba,t,p,bl,e,h)$ is an intermediate stage of the computation, where $ba$ is the list of uncounted ballots at this point, for a candidate $c$, $t(c)$ is the tally recording the number of votes $c$ has received up to this point, $p (c)$ computes the pile of votes for the candidate $c$, $bl$ is the list of elected whose surplus have not yet been transferred, $e$ is the list of elected candidates by this point, and $h$ is the list of continuing candidates up to this stage.
+\end{small}\\
+
+
+\noindent\textbf{Final Judgement.}
+$bs,st,A   \vdash  \mathsf{winners}(w)$:
+
+\begin{small}
+In an election, assuming we have an initial list of ballots $bs$, initial number of vacancies $st$, and a list $A$ of all candidates competing in the election, \textsf{winners}$(w)$ is a final stage of the computation, where $w$ is the final list consisting of all of the declared elected candidates. 
+\end{small}
+
+The formalised protocol has six rules which specify how count ballots, when to elect a candidate as one of the winners, who to eliminate from the election, and where to terminate the count by declaring all of the winners. We begin by the rule \emph{count} which determines when and how to count ballots. 
+
+\begin{definition}[count]
+Suppose for $ba\in$\textsf{List}$(B)$, $t: C\rightarrow\mathbb{Q}$, $p: C\rightarrow$\textsf{List}$(B)$, $bl\in$\textsf{List}$(C)$, $e, h\in$\textsf{List}$(C)$, and the non-final judgement \textsf{state}$(ba, t, p, bl, e, h)$ is the current stage of the computation. Then we can move to  \textsf{state}$(ba_{\epsilon}, nt, np, bl, e, h)$ as the next stage of the computation if the conditions below are met.
+\begin{center}
+\begin{tabular}{c}
+\textsf{state}$(ba, t, p, bl, e, h)$\\
+\hline
+\textsf{state}$(ba_{\epsilon}, nt, np, bl, e, h)$
+\end{tabular}
+$count$
+\end{center}  
+\begin{enumerate}
+\item $ba$ is not empty, i.e. $ba \neq []$
+\item if a candidate $c$ is not continuing, then $c$'s pile and tally remain the same,i.e. $\forall c\notin h,$ $np(c)= p(c)$ and $nt(c)= t(c)$
+\item if a candidate $c$ is continuing, then find all of the ballots which have $c$ as their first continuing preference and put them in the pile of $c$, i.e. $\forall c\in h,$ $np (c) = p (c) \mbox{++}$ $l_c$, and $nt(c)$ equals to the sum of values of the ballots in the updated pile\\
+%\textsf{sum}$:$ \textsf{List} $(B)\rightarrow\mathbb{Q}$ such that \textsf{sum} $(L) = \sum_{b\in L}$ \textsf{snd} $(b)$,\\ 
+\end{enumerate}
+\end{definition}
+
+As the definition above shows, counting of ballots happens according to \emph{first continuing preferences}. This means that in the first component of each ballots, which is a list, we look for the candidate who is neither elected nor eliminated and their name precedes all the other whose name appears in the list part of the ballot. Then we count such a ballot for this candidate.
+
+
+When counting the first preferences is dealt with, we elect all of those candidates who have reached the quota and announce them as elected. Subsequently, a new fractional value is computed according to formula (\ref{eq:tv}) for the each of these candidates' surpluses. The candidates are removed from the list of continuing candidates and appended to the backlog in order of the amount of their tallies. 
+\begin{definition}[elect]
+Assume \textsf{state} $(ba_{\epsilon}, t, p, bl, e, h)$ is a judgement and $ba_{\epsilon}$ is the empty list of ballots. Then we have the following rule whenever there exists $l\in$\textsf{List} $(C)$, a list of candidates to be elected, such that each of the conditions below hold:
+
+\begin{center}
+\begin{tabular}{c}
+\textsf{state} $(ba_{\epsilon}, t, p, bl, e, h)$\\
+\hline
+\textsf{state} $(ba_{\epsilon}, t, np, nbl, ne, nh)$
+\end{tabular}
+$elect$
+\end{center} 
+\begin{center}
+\begin{enumerate}
+\item length of the list $l$ is less than or equal to $st$ $-$
+\textsf{length}$(e)$ (there are enough vacant seats)
+\item every candidate in the list $l$ has reached (or exceeded) the
+quota $qu$
+\item the list $l$ is ordered with respect to the number of votes each elected candidate (whose name appears in $l$) has received.
+\item the updated list of elected candidates $ne$, contains every already elected candidates (in $e$) plus the ones appearing in the list $l$
+\item the updated list $nh$ has every continuing candidate whose name is in $h$, except those whose name also exists in $l$
+\item $nbl$ equals to $bl$ appended by the list $l$,i.e. $nbl$ $=$ $bl$ \mbox{$++$} $l$
+\item if a candidate $c$ is not in the list $l$, then pile of $c$ is kept the same,i.e. $\forall c\notin l,  np(c) =p(c)$
+\item if a candidate $c$ is in $l$, then update their pile by
+keeping the votes already attributed to them, but changing the value
+of those votes to a new fractional value according to formula
+(\ref{eq:tv}).
+
+\end{enumerate}
+\end{center}
+\end{definition}
+If the number of the elected candidates equals to vacancies, then the computation terminates and all of the winners are declared by the rule \emph{ewin}.
+
+\begin{definition}[ewin]
+Let \textsf{state} $(ba, t, p, bl, e, h)$ be a stage of the computation. The inference rule \emph{ewin} asserts that \textsf{winners} $(e)$ is the next judgement, provided that \textsf{length} $(e) =$ \textsf{st}.
+\begin{center}
+\begin{tabular}{c}
+\textsf{state} $(ba, t, p, bl, e, h)$\\
+\hline
+\textsf{winners} $(e)$
+\end{tabular}
+$ewin$
+\end{center}
+\end{definition}
+In case where the number of elected candidates and those who are still continuing put together does not exceeds the quota, then we announce all of them as winners and finish the count.
+ \begin{definition}[hwin]
+If \textsf{state} $(ba, t, p, bl ,e, h)$ is a judgement and $($\textsf{length} $(e)$ $+$ \textsf{length} $(h) \leq$ \textsf{st}$)$, then we can transit to the stage \textsf{winners} $(e$ $\mbox{++}$ $h)$.
+\begin{center}
+\begin{tabular}{c}
+\textsf{state} $(ba, t, p, bl ,e, h)$\\
+\hline
+\textsf{winners} $(e$ $\mbox{++}$ $h)$
+\end{tabular}
+$hwin$
+\end{center}
+\end{definition}
+
+We may reach a stage of the computation where there is no ballot left to count, no one has exceeded the quota, the number of elected candidates is strictly less than the vacancies, and there is at least one candidate who has already been elected but their surplus votes awaits to be distributed. Then the rule \emph{transfer} takes the first candidate in the backlog out and places their votes into the list of ballots to be dealt with later.  
+\begin{definition}[transfer]
+Suppose \textsf{state} $(ba_{\epsilon}, t, p, bl, e, h)$ is the current judgement. Then the rule \emph{transfer} asserts \textsf{state} $(nba, t, np, nbl, e, h)$ is the judgement we reach to:
+\begin{center}
+\begin{tabular}{c}
+\textsf{state} $(ba_{\epsilon}, t, p, bl, e, h)$\\
+\hline
+\textsf{state} $(nba, t, np, nbl, e, h)$
+\end{tabular}
+$transfer$
+\end{center}
+
+\noindent and the side conditions for applying the rule are
+\begin{enumerate}
+\item there are still seats to fill, i.e. \textsf{length} $(e) < st$
+\item no candidate has reached the quota,i.e. $\forall c', c'\in h\rightarrow (t (c) < qu)$
+\item there exist a list $l\in$\textsf{List}$(C)$ and a candidate $c'$ such that 
+\begin{enumerate}
+\item[3.1] $c'$ is the first candidate in the backlog and $l$ is the tail of $bl$, i.e. $bl= c'::l$
+\item[3.2] remove $c'$ from the backlog $bl$ and update it, i.e. $nbl= $ $l$
+\item[3.3] move the votes in the pile of $c'$ to the list of uncounted ballots, $nba$ $= p(c')$
+\item[3.4] empty the pile of $c'$, i.e. $np(c')=$ $ba_{\epsilon}$
+\item[3.5] do not tamper with pile of candidates other than $c'$, i.e. $\forall c'', c''\neq c'\rightarrow np(c'') = p(c'')$.
+\end{enumerate}
+\end{enumerate}
+\end{definition}
+
+Finally, it is possible that we obtain a situation where one candidate has to be eliminated from the counting process. The rule \emph{elim} specifies when and how to proceed in such conditions.
+\begin{definition}[elim]\label{elimrule}
+Suppose \textsf{state} $(ba_{\epsilon}, t, p, [], e, h)$ is the current stage of computation. If  \textsf{st} $< ($\textsf{length} $(e)$ $+$ \textsf{length} $(h))$, and no candidate has reached the quota  then subject to below conditions by the rule \emph{elim},  we move to the judgement \textsf{state} $(nba, t, np, [], e, h)$. 
+\begin{center}
+\begin{tabular}{c}
+\textsf{state} $(ba_{\epsilon}, t, p, [], e, h)$\\
+\hline
+\textsf{state} $(nba, t, np, [], e, h)$
+\end{tabular}
+$elim$
+\end{center}
+
+\begin{enumerate}
+\item All continuing candidates are below the quota
+\item there exists a weakest candidate $c'$ such that
+\begin{enumerate}
+\item[2.1] other continuing candidates have strictly more votes than $c'$ 
+\item[2.2] exclude $c'$ from current continuing list of candidates (namely $h$) and update it to $nh$
+\item[2.3] remove the ballots in the pile of $c'$ without changing the value of those ballots and put them in the list of uncounted ballots, i.e. $nba= p(c')$ and $np(c')= ba_{\epsilon}$.
+\item[2.4] do not tamper with the pile of other candidates, i.e. $\forall c'', c''\neq c'\rightarrow np(c'')= p(c'')$ 
+\end{enumerate}
+\end{enumerate}  
+\end{definition}
+\noindent \emph{Remark 1.}
+Note that in the definition of \emph{elim}, it does not specify how to decide on exclusion of some candidates whose tallies are tied at the least amount. Therefore, the specification of \emph{elim} allows for any tie breaking method between candidates as long as their tallies are equal and less than other continuing candidates. 
+
+
+\section{The Formalisation in HOL4}
+Figure \ref{fig;fig.1} depicts the formalisation of judgements in HOL4. Every component of each constructor of the data type judgement is of type $\alpha$list, for some particular $\alpha$. The advantage of such formalisation is that it makes judgements to be an instance of equality type  class. This, in turn, makes it easier to formalise rules and reason about them inside HOL4. Moreover, it leaves no gap between formalisation of rules and checking certificates for correctness. What understandably appears in a certificate, are some association lists of ballots, candidates, tally of candidates, and pile of those candidates. Therefore for the task of certificate verification, one has to only deal with association lists. 
+
+
+
+\begin{figure}
+\begin{small}
+{\fontfamily{qcr}\selectfont
+\begin{tabular}{l}
+val \_ = Hol\_datatype `judgement =\\  
+
+  \hspace*{0.2cm} state   of \\
+  \hspace*{0.4cm} ((Cand list) \# rat) list\\
+  \hspace*{0.4cm}  \# (Cand \# rat) list\\
+ \hspace*{0.4cm} \# (Cand \# (((Cand list) \# rat) list)) list\\
+  \hspace*{0.4cm} \# Cand list \\
+  \hspace*{0.4cm}     \# Cand list\\
+  \hspace*{0.4cm}    \# Cand list \\
+   \hspace*{0.2cm}    | winners of (Cand list) `;     
+\end{tabular}
+}
+\caption{judgement data type}
+\label{fig;fig.1}
+\end{small}
+\end{figure}
+
+The type of tallies is {\fontfamily{qcr}\selectfont (Cand \# rat) list}, where {\fontfamily{qcr}\selectfont Cand} is the type of candidates and {\fontfamily{qcr}\selectfont rat} is the HOL4 native type for fractional numbers. Also the type of piles is {\fontfamily{qcr}\selectfont (Cand \#(((Cand list)\# rat) list)} so that a pile $p$ is a list of pair values which are candidates and the ballots attributed to them.
+
+For formalising rules of the count, we need to define auxiliary predicates. Some of these predicates are explicit formalisations of the side conditions given for rules in the last section. However, some predicates capture implicit parts of the protocol. For applying a rule correctly, one has to make sure that there are, for example, no duplicate members in any of the lists that occur as a component of {\fontfamily{qcr}\selectfont state} or {\fontfamily{qcr}\selectfont winners}. As another example, all of the candidates whose name appears in the list of elected or continuing candidates, or as the first component of tally lists and piles, should also be in the initial list of competing candidates. The mathematical representation given earlier hides such subtleties, simply because tallies and piles are formulated as functions operating on the list of all of candidates, hence automatically covering such concerns. Besides, from the perspective of certificate verification, it could very well be the case that someone has illegally duplicated name of a candidate in, for instance, list of elected candidates at some stage of the computation. A through checker should certify that such malicious certificates are detected and declare them invalid.  
+
+
+\begin{figure}
+\begin{small}
+{\fontfamily{qcr}\selectfont
+\begin{tabular}{l}
+val NO\_DUP\_PRED = Define ` \\
+   \hspace*{0.2cm}(NO\_DUP\_PRED h (c: Cand) =\\
+  \hspace*{0.7cm} (h = []) $\vee$ ($\neg$ MEM c h)\\
+  \hspace*{0.3cm} $\vee$ ($\exists$ h1 h2. (h = h1 ++ [c]++ h2)\\
+   \hspace*{2.35cm}$\wedge$ ($\neg$ MEM c h1)\\
+    \hspace*{2.35cm}$\wedge$ ($\neg$ MEM c h2))) `;  
+   \end{tabular}
+  }
+\caption{predicate for duplication-free list of candidates}
+\label{fig;fig.2}
+\end{small}
+\end{figure}  
+  Figure \ref{fig;fig.2} shows the definition of a predicate   that asserts when a list of candidates is duplicate-free. We need pre-conditions on tally and pile lists as well. Figure \ref{fig;fig.3} contains the predicate {\fontfamily{qcr}\selectfont Valid\_PileTally} which will be used to enforce tally and pile lists to be lists of pairs where if one \emph{maps} over the first value of each pair, the resulting list is exactly the initial list of competing candidates. Note that we assume HOL4 built-in functions/predicates such as {\fontfamily{qcr}\selectfont MAP} and {\fontfamily{qcr}\selectfont FST} as given. The predicate  {\fontfamily{qcr}\selectfont Valid\_Init\_CandList} in Figure\ref{fig;fig.3}, illustrates the requirement imposed on the initial list of candidates running in the election to be non-empty and duplicate-free. 
+
+\begin{figure}
+\begin{small}
+{\fontfamily{qcr}\selectfont
+\begin{tabular}{l}
+val Valid\_PileTally = Define `\\
+   \hspace*{0.2cm}  Valid\_PileTally t (l: Cand list) =\\
+    \hspace*{0.3cm}  ($\forall$c. (MEM c l) <=> (MEM c (MAP FST t)))`;\\
+ \\   
+val Valid\_Init\_CandList = Define `\\
+  \hspace*{0.2cm}   Valid\_Init\_CandList (l: Cand list) =\\
+  \hspace*{0.3cm}    ((l <> []) $\wedge$ ($\forall$ c. NO\_DUP\_PRED l c)) `;     
+  \end{tabular}
+}
+\caption{A predicate for partial validation of tallies/piles}
+\label{fig;fig.3}
+\end{small}
+\end{figure}
+
+Each of the above predicates have their corresponding computational definitions, some of which are illustrated in Figure \ref{fig;fig.4}. They compute an output for a given input object.
+\begin{figure}
+\begin{small}
+{\fontfamily{qcr}\selectfont
+\begin{tabular}{l}
+val no\_dup = Define\\ 
+      \hspace*{0.2cm}  `(no\_dup [] = T) \\
+    \hspace*{0.2cm} (no\_dup (h::t) = (if (not\_elem h t)\\ \hspace*{2.9cm} then (no\_dup t)
+                                           else F)) `;  
+\\
+\\
+val Valid\_PileTally\_DEC1\_def = Define `\\
+\hspace*{0.2cm}(Valid\_PileTally\_DEC1 [] (l: Cand list)= T)\\
+$\wedge$ (Valid\_PileTally\_DEC1 (h::t) l = \\
+\hspace*{0.5cm}(MEM (FST h) l)\\ \hspace*{0.1cm}$\wedge$ (Valid\_PileTally\_DEC1 t l))`;
+\\
+\\
+val Valid\_PileTally\_DEC2\_def = Define `\\
+        (Valid\_PileTally\_DEC2 t ([]: Cand list)= T) \\
+     $\wedge$ (Valid\_PileTally\_DEC2 t (l0::ls)= \\
+     \hspace*{0.4cm} if (MEM l0 (MAP FST t)) then \\
+     \hspace*{0.5cm}(Valid\_PileTally\_DEC2 t ls)
+                                           else F) `;
+\end{tabular}
+}
+\caption{Some auxiliary functions}
+\label{fig;fig.4}
+\end{small}
+\end{figure}
+Definitions of the predicates presented above, are meant as logical specification of these computational functions. We prove the equivalence of these predicates with the computational counterparts inside HOL4.
+\begin{theorem}\label{NoDup}
+For all lists of candidates $h$, if for all candidates $c$, the predicate stating that h has no duplicate with respect to c holds, then computationally the list $h$ has no duplicate,i.e.\\
+\begin{small}
+{\fontfamily{qcr}\selectfont
+$\forall$h.($\forall$c. (NO\_DUP\_PRED h c)) ==> (no\_dup h)
+}\\
+Moreover, if the list $h$ is computationally duplicate-free, then so it is predicatively,i.e.\\
+{\fontfamily{qcr}\selectfont
+$\forall$h $\forall$c. (no\_dup h) ==> (NO\_DUP\_PRED h c))
+} 
+\end{small}
+\end{theorem}
+\begin{theorem}\label{ValidPileTally}
+\begin{small}
+Suppose $l$ is a list of candidates and $t$ is a list of pairs where the first value of each pair is a candidate. If predicatively each of the candidates appearing as a first component of a pair in $t$, also belongs to $l$, then, so it does computationally, i.e.
+{\fontfamily{qcr}\selectfont 
+$\forall$l t. ($\forall$c. (MEM c (MAP FST t)) ==> (MEM c l))\\
+ \hspace*{2cm}==> (Valid\_PileTally\_DEC1 t l)}.\\
+The reverse direction holds as well,i.e.\\
+{\fontfamily{qcr}\selectfont 
+$\forall$l t. (Valid\_PileTally\_DEC1 t l)\\ \hspace*{0.4cm}==> ($\forall$c. (MEM c (MAP FST t)) ==> (MEM c l)).
+}
+\end{small}
+\end{theorem}  
+ 
+Now we can state predicates which are the formal counterpart of the protocol's counting rules. For the sake of space limitation, we only present the formalisation of the rule \emph{elim} in detail and refer the reader to the source code included in the paper. As it is shown in Figure \ref{fig;fig.5}, the predicate for the rule \emph{elim}, is constituted of the implicit predicates laid down above and some other conditions which are specific constraints for applying the rule \emph{elim}. The predicate {\fontfamily{qcr}\selectfont elim\_cand\_def} assumes some parameters which are {\fontfamily{qcr}\selectfont st}, {\fontfamily{qcr}\selectfont qu}, {\fontfamily{qcr}\selectfont l}, {\fontfamily{qcr}\selectfont c}, {\fontfamily{qcr}\selectfont j1}, and {\fontfamily{qcr}\selectfont j2} standing for the number of vacancies, quota of the election, list of all of the competing candidates, the premise and conclusion judgements, respectively.   
+\begin{figure}[h]
+\begin{small}
+{\fontfamily{qcr}\selectfont
+\begin{tabular}{l}
+val elim\_cand\_def = Define `(elim\_cand\\
+ \hspace*{0.2cm} st (qu:rat)(l:Cand list)(c: Cand) j1 j2)=
+ \\ \hspace*{0.5cm}($\exists$ p e h nh nba np.\\
+\hspace*{0.6cm}(j1 = state ([], t, p, [], e, h))\\
+  \hspace*{0.6cm}  1. $\wedge$ Valid\_Init\_CandList l\\
+   \hspace*{0.6cm} 2. $\wedge$ ($\forall$c'. MEM c' (h++e) ==> (MEM c' l))\\
+   \hspace*{0.6cm} 3. $\wedge$  ($\forall$c'. NO\_DUP\_PRED (h++e) c')\\
+  \hspace*{0.6cm} 4. $\wedge$ (Valid\_PileTally p l)   \\
+ \hspace*{0.6cm} 5. $\wedge$ (Valid\_PileTally np l)\\
+ \hspace*{0.6cm} 6. $\wedge$ (LENGTH (e ++ h) > st) \\
+ \hspace*{0.6cm} 7. $\wedge$ (LENGTH e < st)\\
+  \hspace*{0.6cm} 8. $\wedge$ ($\forall$c'. NO\_DUP\_PRED (MAP FST t) c')\\
+  \hspace*{0.6cm} 9. $\wedge$ (Valid\_PileTally t l)\\
+ \hspace*{0.44cm} 10. $\wedge$ ($\forall$c'.(MEM c' h ==> ($\exists$x. MEM (c',x) t\\
+ \hspace*{4.4cm} $\wedge$ (x < qu))))\\  
+    \hspace*{0.44cm} 11. $\wedge$ (MEM c h)\\ 
+\hspace*{0.44cm} 12. $\wedge$ ($\forall$d. (MEM d h ==> ($\exists$x y.(MEM (c,x) t) \\
+\hspace*{3cm} $\wedge$ (MEM (d,y) t) $\wedge$ (x <= y))))\\
+    \hspace*{0.44cm} 13. $\wedge$ (eqe c nh h)\\
+    \hspace*{0.44cm} 14. $\wedge$ (nba = get\_cand\_pile c p)\\
+    \hspace*{0.44cm} 15. $\wedge$ (MEM (c,[]) np)\\
+    \hspace*{0.44cm} 16. $\wedge$ ($\forall$d'. ((d' <> c) ==> (!l.\\ \hspace*{2cm}(MEM (d',l) p ==> MEM (d',l) np)\\ 
+                             \hspace*{1.5cm} $\wedge$ (MEM (d',l) np ==> MEM (d',l) p))))\\
+    \hspace*{0.6cm} $\wedge$ (j2 = state (nba, t, np, [], e, nh)))`; 
+
+\end{tabular}
+}
+\caption{The predicate for the \emph{elim} rule}
+\label{fig;fig.5}
+\end{small}
+\end{figure}
+We have numbered each constraint in the Figure \ref{fig;fig.5} to address them more efficiently and clearly. We explain how the items collectively match with the clauses of the definition \ref{elimrule}. As the definition \ref{elimrule} asserts in the clause 2, in order to apply the rule \emph{elim} legitimately, no continuing candidate should have reached the quota. Item 10 above along with number 1 and 9 capture this clause of the definition \ref{elimrule}. Item 10 states that for every continuing candidate $c'$, there exists a fractional value $x$ where the pair $(c',x)$ belongs to the tally list. By number 9, and theorem \ref{ValidPileTally}, $c'$ belongs to the initial list of competing candidates $l$. Number 1 postulates that $l$ has no duplicate element. Therefore, if there was some other fractional value $x'$ for which $(c',x)$ belonged to $l$ but $x \neq x'$, then we would obtain duplication of $c'$ in the list $l$. That is a contradiction. Hence, collectively, items 1, 9 and 10 enforce the existential $x$ in 10 to match exactly with the tally amount of the candidate $c'$. All of the above reasoning has been formalised and proven correct in HOL4. In the same manner, one can see how the predicate {\fontfamily{qcr}\selectfont elim\_cand\_def} and the definition \ref{elimrule} for the \emph{elim} match against each other. 
+
+
+Figure \ref{fig;fig.6} is an illustration of the  computational twin of the predicate {\fontfamily{qcr}\selectfont elim\_cand\_def}. This computational definition is composed of functions each of which are equivalent to either one exact item of the Figure \ref{fig;fig.5}, or a conjunction of some of them. Therefore, as we have proved, the computational {\fontfamily{qcr}\selectfont elim\_cand\_dec} is equivalent to the predicate {\fontfamily{qcr}\selectfont elim\_cand\_def}. 
+\begin{figure}[b]
+\begin{small}
+{\fontfamily{qcr}\selectfont
+\begin{tabular}{l}
+val Elim\_cand\_dec\_def = Define `\\
+     (Elim\_cand\_dec st qu l c (j, winners w)= F)\\
+    $\wedge$ (Elim\_cand\_dec st qu l c (winners w,j)= F) \\
+    $\wedge$ (Elim\_cand\_dec st qu l c \\
+    \hspace*{1cm}(state (ba,t,p,bl,e,h),\\ 
+    \hspace*{1.5cm} state (ba',t',p',bl',e',h')) =\\ 
+          \hspace*{1.8cm}   ((empty\_list ba) \\
+          \hspace*{1.4cm}  $\wedge$ (empty\_list bl)\\ 
+        \hspace*{1.4cm} $\wedge$ (t = t') $\wedge$ (bl = bl') $\wedge$ (e = e')\\
+      \hspace*{1.4cm} $\wedge$ (LENGTH (e ++ h) > st)\\          \hspace*{1.4cm} $\wedge$ (LENGTH e < st)\\
+\hspace*{1.4cm} $\wedge$ (non\_empty l) $\wedge$ (no\_dup l)\\
+        \hspace*{1.4cm} $\wedge$ (list\_MEM (h++e) l)\\
+        \hspace*{1.4cm} $\wedge$ (no\_dup (h++e)) \\      
+  \hspace*{1.4cm} $\wedge$ (Valid\_PileTally\_DEC1 p l)\\   \hspace*{1.4cm} $\wedge$ (Valid\_PileTally\_DEC2 p l)\\
+  \hspace*{1.4cm} $\wedge$ (Valid\_PileTally\_DEC1 p' l)\\   \hspace*{1.4cm} $\wedge$ (Valid\_PileTally\_DEC2 p' l)\\
+         \hspace*{1.4cm} $\wedge$ no\_dup (MAP FST t)\\
+ \hspace*{1.4cm} $\wedge$ (Valid\_PileTally\_DEC1 t l)\\  \hspace*{1.4cm} $\wedge$ (Valid\_PileTally\_DEC2 t l)\\ 
+       \hspace*{1.4cm} $\wedge$ (MEM c h)\\
+     \hspace*{1.4cm} $\wedge$ (less\_than\_quota qu h t)\\
+    \hspace*{1.4cm} $\wedge$ (h' = remove\_one\_cand c h)\\
+  \hspace*{1.4cm} $\wedge$ (bigger\_than\_cand c t h)\\
+  \hspace*{1.4cm} $\wedge$ (ba' = get\_cand\_pile c p)\\
+  \hspace*{1.4cm} $\wedge$ (MEM (c,[]) p')\\
+  \hspace*{1.4cm} $\wedge$ (subpile1 c p p')\\
+  \hspace*{1.4cm} $\wedge$ (subpile2 c p' p)))`;
+\end{tabular}
+}
+\caption{The computational \emph{elim} rule}
+\label{fig;fig.6}
+\end{small}
+\end{figure}  
+The computational function {\fontfamily{qcr}\selectfont remove\_one\_cand} is specified against the predicate {\fontfamily{qcr}\selectfont eqe} given in Figure \ref{fig;fig.5}. The property {\fontfamily{qcr}\selectfont eqe} states when two lists $l1$ and $l2$ are exactly the same except for one element. The function {\fontfamily{qcr}\selectfont remove\_one\_cand} takes a list $l$ and a candidate $c$ and removes one occurrence of $c$ from the list $l$. 
+\begin{theorem}\label{eqe}
+The following properties prove that the function {\fontfamily{qcr}\selectfont remove\_one\_cand} meets its specification, which is {\fontfamily{qcr}\selectfont eqe}.\\
+{\fontfamily{qcr}\selectfont
+\begin{small}
+$\forall$h1 h2 (c: Cand). (MEM c h2) $\wedge$ (eqe c h1 h2) \\ \hspace*{2cm} ==> (h1 = remove\_one\_cand c h2)
+\\
+\\
+$\forall$h (c: Cand). (MEM c h) $\wedge$ (NO\_DUP\_PRED h c) \\ \hspace*{2cm}==> (eqe c (remove\_one\_cand c h) h) 
+\end{small}
+}
+\end{theorem}
+Without providing details, we explain about some of the other functions appearing in Figure \ref{fig;fig.6}. For a list $h$ of candidates, the function {\fontfamily{qcr}\selectfont less\_than\_quota} checks if all of the elements of $h$ have a tally which is less than or equal to quota $qu$. This function is specified by the clause 10 of the Figure \ref{fig;fig.5}. Also the function {\fontfamily{qcr}\selectfont bigger\_than\_cand}, which is captured by help of clause 12 in Figure \ref{fig;fig.5}, checks if each element of a list $h$ have tally bigger than the tally of a particular candidate $c$. Finally, clause 16 in the definition of {\fontfamily{qcr}\selectfont elim\_cand\_def}, is matched extensionally against the two functions {\fontfamily{qcr}\selectfont subpile1} and {\fontfamily{qcr}\selectfont subpile2}. For each of these equivalences, there are proved lemmas in our formalisation. By calling these lemmas, we prove the following theorem.
+\begin{theorem}\label{ElimDec}
+The predictive and computational formalised counterpart of the rule \emph{elim} are equivalent, i.e.\\
+{\fontfamily{qcr}\selectfont 
+$\forall$st qu l c j1 j2.elim\_cand st qu l c j1 j2\\
+\hspace*{0.7cm} <=> (Elim\_cand\_dec st qu l c (j1,j2)) \\
+}
+\end{theorem}
+
+In the same way, we define predicates which are formalised twins of the other rules in the last section. Also we give computational functions that are shown to match exactly with their predicative counterpart. Hence, we verify that when a rule, as a computational function, applies, it always meets the expectations of the predicative part. These predicative and computational counting rules formalised, are put together to constitute the predicative and computational checker, respectively. Consequently, we ascertain that when the checker checks an input as valid, the returned result is not questionable. 
+
+
+
+
+
+
+
+
+
+%% Acknowledgments
+%\begin{acks}                            %% acks environment is optional
+                                        %% contents suppressed with 'anonymous'
+  %% Commands \grantsponsor{<sponsorID>}{<name>}{<url>} and
+  %% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
+  %% acknowledge financial support and will be used by metadata
+  %% extraction tools.
+ % This material is based upon work supported by the
+  %\grantsponsor{GS100000001}{National Science
+  %  Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
+ % No.~\grantnum{GS100000001}{nnnnnnn} and Grant
+ % No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
+ % conclusions or recommendations expressed in this material are those
+ % of the author and do not necessarily reflect the views of the
+  %National Science Foundation.
+%\end{acks}
+
+
+%% Bibliography
+%\bibliography{bibfile}
+
+
+%% Appendix
+%\appendix
+%\section{Appendix}
+
+%Text of appendix \ldots
+\section{Further Work}
+To complete the project and reach to executable machine code, we need to translate mechanically into CakeML executable code. For that, we need the rational arithmetic of HOL4 to be translatable from HOL4 into CakeML executable code. When the translation is available, we would need to give a specification for the input of the program and the output of the computation and prove it for correctness inside HOL4. Through mechanical extraction  and by help of the above specification, we will obtain verified machine code. 
+\end{document}
