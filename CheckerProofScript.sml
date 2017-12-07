@@ -1,6 +1,6 @@
 open preamble CheckerSpecTheory CheckerTheory
 open ratTheory
-      
+       
 val _ = new_theory "CheckerProof";
  
 val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
@@ -591,93 +591,87 @@ val Functional_Elim_to_Logical_elim = Q.store_thm ("Functional_Elim_to_Logical_e
            >- rfs[ELIM_CAND_dec_def])   
          >- rfs[ELIM_CAND_dec_def]); 
 
-  
-
-(* to be reconstructed
-
+   
 val Logical_transfer_to_Functional_Transfer = Q.store_thm ("Logical_transfer_to_Functional_Transfer",
  `! st qu l j1 j2. TRANSFER (qu,st,l) j1 j2 ==> TRANSFER_dec (qu,st,l) j1 j2`,
 
-(rw[TRANSFER_def,TRANSFER_dec_def]
-  >> EVAL_TAC
-    >> REPEAT STRIP_TAC)
+    (REPEAT STRIP_TAC
+      >> Cases_on `j1`)
+        >- (Cases_on `j2`
+          >- ((PairCases_on `p`
+              >> PairCases_on `p'` 
+              >> rfs[TRANSFER_dec_def,TRANSFER_def]
+              >> REPEAT STRIP_TAC)
+            >- (`(!d. MEM d p5 \/ MEM d p4 ==> MEM d l) ==> (!d. MEM d (p5++p4) ==> MEM d l)`
+               by  FULL_SIMP_TAC list_ss [MEM_APPEND] >>
+               metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional]) 
+            >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def] 
+            >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
+            >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
+            >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
+            >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
+            >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
+            >- metis_tac [Valid_Init_CandList_def,NULL_EQ]
+            >- fs[Valid_Init_CandList_def] 
+            >- metis_tac [LogicalLessThanQu_IMP_less_than_quota,Valid_PileTally_def]
+            >- metis_tac [Logical_subpile1_IMP_TheFunctional]
+            >- (`?(y: (cand # (((cand list) # rat) list))). (c = FST y) /\ (MEM y np)`
+              by (MAP_EVERY qexists_tac [`(c,[])`] >> metis_tac [FST]) 
+             >> `MEM c (MAP FST np)` by metis_tac[MEM_MAP] 
+             >> `!d. (d = c) ==> ?l. MEM (c,l) np` by metis_tac[GET_CAND_PILE_MEM,Valid_PileTally_def]
+           >> metis_tac [Logical_subpile2_IMP_TheFunctional,GET_CAND_PILE_MEM,Valid_PileTally_def]))  
+         >- fs[TRANSFER_def])
+       >- fs[TRANSFER_def]);
 
-     >- rw[]
-     >- (`(!d. MEM d h \/ MEM d e ==> MEM d l) ==> (!d. MEM d (h++e) ==> MEM d l)`
-         by  FULL_SIMP_TAC list_ss [MEM_APPEND] >>
-      metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional])
-     >- rw[]
-     >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
-     >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
-     >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
-     >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
-     >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
-     >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
-     >- (`?l1 y. l = y::l1` by metis_tac [Valid_Init_CandList_def,list_nchotomy]
-         >> fs[NULL])
-     >- metis_tac [Valid_Init_CandList_def]
-     >- rw[]
-     >- metis_tac [LogicalLessThanQu_IMP_less_than_quota,Valid_PileTally_def]
-     >- RW_TAC bool_ss []
-     >- metis_tac [Logical_subpile1_IMP_TheFunctional]
-     >- (`?(y: (Cand # (((Cand list) # rat) list))). (c = FST y) /\ (MEM y np)`
-        by (MAP_EVERY qexists_tac [`(c,[])`] >> metis_tac [FST])
-        >> `MEM c (MAP FST np)` by metis_tac[MEM_MAP]
-          >> `!d. (d = c) ==> ?l. MEM (c,l) p` by metis_tac[GET_CAND_PILE_MEM,Valid_PileTally]
-           >> metis_tac [Logical_subpile2_IMP_TheFunctional]));
-
-
-
+  
 val Functional_Transfer_to_Logical_transfer = Q.store_thm ("Functional_Transfer_to_Logical_transfer",
- `! st qu l j1 j2. Transfer_dec st qu l (j1,j2) ==> transfer st qu l j1 j2`,
+ `! st qu l j1 j2. TRANSFER_dec (qu,st,l) j1 j2 ==> TRANSFER (qu,st,l) j1 j2`,
 
- (REPEAT STRIP_TAC
-  >> rw[transfer_def]
-    >> Cases_on `j1`)
+ (REPEAT STRIP_TAC 
+  
+    >> Cases_on `j1`)   
       >- (Cases_on `j2`
-        >- ((Cases_on `p` >> Cases_on `r` >> Cases_on `r'` >> Cases_on `r` >> Cases_on `r'`
-          >> Cases_on `p'` >> Cases_on `r'`>> Cases_on `r''`>> Cases_on `r'`>> Cases_on `r''`
-           >> rfs [Transfer_dec_def]
-            >> MAP_EVERY qexists_tac [`q'''''`,`TL q'''`,`q'''''''`] >> REPEAT STRIP_TAC)
-       >- rw[empty_list_verified]
-       >-  RW_TAC bool_ss []
-       >-  metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
-       >-  metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
-       >-  metis_tac [no_dup_IMP_NO_DUP_PRED]
-       >-  metis_tac [Valid_PileTally,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-       >-  metis_tac [Valid_PileTally,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-       >-  metis_tac [Valid_PileTally,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-       >- (`!(L:Cand list). non_empty L ==> (L <> [])`
-                  by (Induct_on `L`
-                     >- rw[non_empty]
-                     >- rw[non_empty])
-           >> metis_tac[Valid_Init_CandList,no_dup_IMP_NO_DUP_PRED,non_empty])
-       >- metis_tac [no_dup_IMP_NO_DUP_PRED]
-       >- (`!(L:Cand list). non_empty L ==> (L <> [])`
-                   by (Induct_on `L`
-                     >- rw[non_empty]
-                     >- rw[non_empty]) >> `?L y. l = y::L` by metis_tac[non_empty,list_nchotomy]
-                      >> `MEM y (MAP FST q')` by metis_tac [PileTally_DEC2_IMP_PileTally,MEM]
-                      >> `?l1 q1. q' = q1::l1` by metis_tac [MEM_MAP,MEM,list_nchotomy]
-                      >> `!d. MEM d r ==> MEM d l`
-                           by metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
-                      >> `!d. MEM d r ==> MEM d (MAP FST q')` by metis_tac [PileTally_DEC2_IMP_PileTally]
-                    >> metis_tac[PileTally_to_PileTally_DEC2,less_than_qu_IMP_LogicalLessThanQuota])
-       >- ((MAP_EVERY qexists_tac [`HD q'''`] >> REPEAT STRIP_TAC)
-         >- FULL_SIMP_TAC list_ss []
-         >- rw[]
-         >- RW_TAC bool_ss []
-         >- metis_tac [Functional_subpile1_IMP_TheLogical]
-         >- metis_tac [Functional_subpile2_IMP_TheLogical]
-         >- rw[]
-         >- EVAL_TAC
-         >- rw[]))
-     >- rfs [Transfer_dec_def])
-    >- (Cases_on `j2`
-     >- rfs [Transfer_dec_def]
-     >- rfs [Transfer_dec_def]));
-*)
-
+      
+          >-  ((PairCases_on`p` >> PairCases_on`p'` 
+              >> rfs [TRANSFER_dec_def,TRANSFER_def] >> REPEAT STRIP_TAC
+              >> Cases_on `p3`)
+    
+                 >- rfs[]
+      
+                 >- (MAP_EVERY qexists_tac [`get_cand_pile h p2`,`t`,`p'2`] >> REPEAT STRIP_TAC
+                     >- fs[NULL_EQ]   
+                     >-  rw[]   
+                     >-  metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
+                     >-  metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
+		     >-  metis_tac []  
+         >-  metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
+         >-  metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
+         >-  metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
+         >-  metis_tac[Valid_Init_CandList_def,NULL_EQ]
+         >-  rw [] 
+         >- (`?L y. l = y::L` by metis_tac[NULL_EQ,list_nchotomy] 
+                 >> `MEM y (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally,MEM]
+                 >> `?l1 q1. p'1 = q1::l1` by metis_tac [MEM_MAP,MEM,list_nchotomy]
+                 >> `!d. MEM d p5 ==> MEM d l`
+                         by metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
+		 >> `!d. MEM d p5 ==> MEM d (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally]  
+                 >> metis_tac[PileTally_to_PileTally_DEC2,less_than_qu_IMP_LogicalLessThanQuota])
+       >- ((MAP_EVERY qexists_tac [`h`]
+             >> `(p'3 = t) /\ (p'0 = get_cand_pile h p2) /\ (MEM (h,[]) p'2) /\ (subpile1 h p2 p'2)
+	                   /\ (subpile2 h p'2 p2)` by rfs[] >> REPEAT STRIP_TAC)  
+           >- rw[]    
+           >- rw[] 
+           >- rfs[] 
+           >- metis_tac [Functional_subpile1_IMP_TheLogical]   
+           >- metis_tac [Functional_subpile2_IMP_TheLogical]
+           >- rw[]
+           >- rw[] 
+         >- rw[])))
+     >- rfs [TRANSFER_dec_def]) 
+     
+     >- rfs [TRANSFER_dec_def]); 
+    
+ 
 
 
 val fcc_to_first_continuing_cand = Q.store_thm ("fcc_to_first_continuing_cand",
