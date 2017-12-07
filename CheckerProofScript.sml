@@ -1,6 +1,6 @@
 open preamble CheckerSpecTheory CheckerTheory
 open ratTheory
-     
+      
 val _ = new_theory "CheckerProof";
  
 val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
@@ -10,7 +10,7 @@ val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
  
 
 val EWIN_thm = Q.store_thm("EWIN_thm",
-  `EWIN_dec = EWIN`,
+  `EWIN = EWIN_dec`,
   simp[FUN_EQ_THM]
   \\ qx_gen_tac`params`
   \\ PairCases_on`params`
@@ -21,7 +21,7 @@ val EWIN_thm = Q.store_thm("EWIN_thm",
   \\ metis_tac[]);
  
 val HWIN_thm = Q.store_thm("HWIN_thm",
-  `HWIN_dec = HWIN`,
+  `HWIN = HWIN_dec`,
   simp[FUN_EQ_THM]
   \\ qx_gen_tac`params`
   \\ PairCases_on`params`
@@ -40,13 +40,8 @@ val GET_CAND_TALLY_HEAD_REMOVAL_def = Q.store_thm ("GET_CAND_TALLY_HEAD_REM",
                  >> first_assum (qspecl_then [`h`,`c`] strip_assume_tac)
                     >> rw[get_cand_tally_def] >>
                     Cases_on`h'` >> fs[ALOOKUP_def]))
-<<<<<<< HEAD
  
 val GET_CAND_TALLY_MEM2 = Q.store_thm ("GET_CAND_TALLY_MEM",
-=======
-
-val GET_CAND_TALLY_MEM = Q.store_thm ("GET_CAND_TALLY_MEM",
->>>>>>> 6a235faf6cd8024931accb946189280d2edb7d4e
  `!(t: (cand #rat) list) c. (MEM c (MAP FST t))
                                     ==> (MEM (c, get_cand_tally c t) t) `,
 
@@ -509,68 +504,11 @@ val Logical_list_MEM_VICE_VERCA_TheFunctional = Q.store_thm("Logical_list_MEM_VI
  `!(l1: cand list) l2. (!c. MEM c l1 ==> MEM c l2) <=> list_MEM_dec l1 l2`,
  
     Induct_on `l1`
-<<<<<<< HEAD
       >-  fs[list_MEM_dec_def]  
       >- (REPEAT STRIP_TAC >> fs[] 
         >> metis_tac[MEM,list_MEM_dec_def]));
   
       
-=======
-      >- fs[]
-      >- (REPEAT STRIP_TAC >> fs[]
-        >> metis_tac[MEM]));
-
-val Valid_PileTally_thm = Q.store_thm("Valid_PileTally_thm",
-  `∀x y. Valid_PileTally x y ⇔ Valid_PileTally_dec1 x y ∧ Valid_PileTally_dec2 x y`,
-  simp[Valid_PileTally_def,EQ_IMP_THM]
-  \\ metis_tac[
-       PileTally_to_PileTally_DEC1,PileTally_DEC1_to_PileTally,
-       PileTally_to_PileTally_DEC2,PileTally_DEC2_IMP_PileTally]);
-
-(*
-val ELIM_CAND_thm = Q.store_thm("ELIM_CAND_thm",
-  `ELIM_CAND_dec = ELIM_CAND`,
-  simp[FUN_EQ_THM]
-  \\ qx_genl_tac[`c`,`p`,`j1`,`j2`]
-  \\ PairCases_on`p`
-  \\ map_every qid_spec_tac [`j2`,`j1`,`p2`,`p1`,`p0`,`c`]
-  \\ recInduct ELIM_CAND_dec_ind
-  \\ rw[ELIM_CAND_def,ELIM_CAND_dec_def,Valid_PileTally_thm,
-        list_MEM_dec_thm,Valid_Init_CandList_def,NULL_EQ,
-        SUBSET_DEF]
-  \\ rw[EQ_IMP_THM]
-  \\ imp_res_tac Valid_PileTally_thm
-  \\ fs[Valid_PileTally_def]
-*)
-
-(*
-val Elim_cand_dec_def = Define `
-             (Elim_cand_dec st (qu : rat) (l: cand list) (c:cand) ((j: judgement), winners w) = F)
-          /\ (Elim_cand_dec st qu l c (winners w, (j: judgement)) = F)
-          /\ (Elim_cand_dec st qu l c (state (ba, t, p, bl, e, h), state (ba', t', p', bl', e',h')) =
-                  ((NULL ba)
-               /\ (NULL bl)
-               /\ (t = t') /\ (bl = bl') /\ (e = e')
-               /\ (LENGTH (e ++ h) > st) /\ (LENGTH e < st)
-               /\ (~ (NULL l) /\ (ALL_DISTINCT l)
-               /\ (list_MEM (h++e) l)
-               /\ (ALL_DISTINCT (h++e))
-               /\ (Valid_PileTally_DEC1 p l) /\ (Valid_PileTally_DEC2 p l)
-               /\ (Valid_PileTally_DEC1 p' l) /\ (Valid_PileTally_DEC2 p' l)
-               /\ no_dup (MAP FST t)
-               /\ (Valid_PileTally_DEC1 t l) /\ (Valid_PileTally_DEC2 t l)
-               /\ (MEM c h)
-               /\ (less_than_quota qu h t)
-               /\ (h' = remove_one_cand c h)
-               /\ (bigger_than_cand c t h)
-               /\ (ba' = get_cand_pile c p)
-               /\ (MEM (c,[]) p')
-               /\ (subpile1 c p p') /\ (subpile2 c p' p) )) `;
-*)
-
-(* to be reconstructed
-
->>>>>>> 6a235faf6cd8024931accb946189280d2edb7d4e
 val Logical_elim_to_Functional_Elim = Q.store_thm ("Logical_elim_to_Functional_Elim",
  `!st qu l c j1 j2. ELIM_CAND c (qu,st,l) j1 j2 ==> (ELIM_CAND_dec c (qu,st,l) j1 j2)`,
 
@@ -605,10 +543,8 @@ val Logical_elim_to_Functional_Elim = Q.store_thm ("Logical_elim_to_Functional_E
          >-  metis_tac [Logical_subpile1_IMP_TheFunctional]
          >-  (`!d. (d = c) ==> ?l. MEM (c,l) p2` by metis_tac[GET_CAND_PILE_MEM,Valid_PileTally_def]
           >> metis_tac [Logical_subpile2_IMP_TheFunctional]))
-   
-       >- rfs[ELIM_CAND_def])
- 
-     >- rfs[ELIM_CAND_def]);
+      >- rfs[ELIM_CAND_def])
+    >- rfs[ELIM_CAND_def]);
    
    
 val Functional_Elim_to_Logical_elim = Q.store_thm ("Functional_Elim_to_Logical_elim",
