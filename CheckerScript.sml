@@ -1,5 +1,5 @@
 open preamble CheckerSpecTheory
-
+    
 val _ = new_theory "Checker";
 
 val EWIN_dec_def = Define `
@@ -32,15 +32,11 @@ val Valid_PileTally_dec2_def = Define `
 val _ = overload_on("list_MEM",``λl1 l2. set l1 ⊆ set l2``);
 val _ = overload_on("list_not_MEM",``λl1 l2. DISJOINT (set l1) (set l2)``);
 
-<<<<<<< HEAD
 
-=======
->>>>>>> f65cdf8b627cf9d7c780a19be8d336d97299ce62
 val list_MEM_dec_def = Define `
       (list_MEM_dec [] l ⇔ T)
    /\ (list_MEM_dec (h::t) l ⇔ (MEM h l) /\ (list_MEM_dec t l))`;
 
-<<<<<<< HEAD
 
 (*
 
@@ -51,6 +47,7 @@ val list_not_MEM_dec_def = Define `
      /\ (list_not_MEM_dec (h::t) l ⇔ (~ MEM h l) /\ (list_not_MEM_dec t l))`;
 
 *)
+
 val less_than_quota_def = Define `
   less_than_quota qu l ls =
     EVERY (λh. get_cand_tally h l < qu) ls`;
@@ -59,7 +56,37 @@ val bigger_than_cand_def = Define `
   bigger_than_cand c t ls =
     EVERY (λh0. get_cand_tally c t <= get_cand_tally h0 t) ls`;
 
+    
 val ELIM_CAND_dec_def = Define `
+  (ELIM_CAND_dec c ((qu,st,l):params)
+       (NonFinal (ba, t, p, bl, e, h))
+       (NonFinal (ba', t', p', bl', e',h')) ⇔
+    (NULL ba) /\ (NULL bl) /\ (NULL bl') /\  (t = t') /\ (e = e')
+   /\ (LENGTH (e ++ h) > st) /\ (LENGTH e < st)
+   /\ (¬(NULL l)) /\ (ALL_DISTINCT l)
+   /\ (list_MEM_dec (h++e) l)
+   /\ (ALL_DISTINCT (h++e))
+   /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
+   /\ (Valid_PileTally_dec1 p' l) /\ (Valid_PileTally_dec2 p' l)
+   /\ ALL_DISTINCT (MAP FST t)
+   /\ (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)
+   /\ (MEM c h)
+   /\ (less_than_quota qu t h)
+   /\ (h' = equal_except_dec c h)
+   /\ (bigger_than_cand c t h)
+   /\ (ba' = get_cand_pile c p)
+   /\ (MEM (c,[]) p')
+   /\ (subpile1 c p p') /\ (subpile2 c p' p))
+   /\ (ELIM_CAND_dec c _ (Final _ ) _ = F) 
+   /\ (ELIM_CAND_dec c _ _ (Final _ ) = F)`; 
+ 
+ 
+
+
+(*
+val ELIM_CAND_dec_def = Define `
+  (ELIM_CAND_dec c (qu,st,l) (Final _ ) _ = F) /\
+  (ELIM_CAND_dec c (qu,st,l) _ (Final _ ) = F) /\
   (ELIM_CAND_dec c ((qu,st,l):params)
        (NonFinal ([], t, p, [], e, h))
        (NonFinal (ba', t', p', [], e',h')) ⇔
@@ -78,14 +105,15 @@ val ELIM_CAND_dec_def = Define `
    /\ (bigger_than_cand c t h)
    /\ (ba' = get_cand_pile c p)
    /\ (MEM (c,[]) p')
-   /\ (subpile1 c p p') /\ (subpile2 c p' p) ) ∧
-  (ELIM_CAND_dec _ _ _ _ = F)`;
+   /\ (subpile1 c p p') /\ (subpile2 c p' p) )`; 
 
+*)
+  
 val TRANSFER_dec_def = Define `
   (TRANSFER_dec ((qu,st,l):params)
-    (NonFinal ([], t, p, bl, e, h))
+    (NonFinal (ba, t, p, bl, e, h))
     (NonFinal (ba', t', p', bl', e',h')) ⇔
-      (e = e') /\ (h = h') /\ (t = t')
+      (NULL ba) /\ (e = e') /\ (h = h') /\ (t = t')
    /\ (LENGTH e < st)
    /\ (list_MEM_dec (h++e) l)
    /\ ALL_DISTINCT (h++e)
@@ -100,8 +128,9 @@ val TRANSFER_dec_def = Define `
          /\ (ba' = get_cand_pile hbl p)
          /\ (MEM (hbl,[]) p')
          /\ (subpile1 hbl p p') /\ (subpile2 hbl p' p))) ∧
-  (TRANSFER_dec _ _ _ = F)`;
-
+  (TRANSFER_dec _ (Final _) _ = F) /\
+  (TRANSFER_dec _ _ (Final _) = F)`;
+ 
 val first_continuing_cand_dec_def = Define `
   (first_continuing_cand_dec (c:cand) ([]: cand list)  (h: cand list) ⇔ F) /\
   (first_continuing_cand_dec c (b0::bs) h =
