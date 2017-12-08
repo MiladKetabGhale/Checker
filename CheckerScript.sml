@@ -1,5 +1,5 @@
 open preamble CheckerSpecTheory
-      
+       
 val _ = new_theory "Checker";
  
 val EWIN_dec_def = Define `
@@ -137,19 +137,20 @@ val first_continuing_cand_dec_def = Define `
     if (c = b0) then T
     else if (~ MEM b0 h) /\ (first_continuing_cand_dec c bs h) then T
     else F)`;
-
+  
 val COUNTAux_dec_def = Define `
-     (COUNTAux_dec p np t t' ba h [] = T)
-  /\ (COUNTAux_dec p np t t' ba  h (l0::ls) =
-       if (MEM l0 h) then
-        (get_cand_pile l0 np = (get_cand_pile l0 p) ++ FILTER (λb. (first_continuing_cand_dec l0 (FST b) h)) ba)
-          /\ (get_cand_tally l0 t' = SUM_RAT (MAP SND (FILTER (λb. (first_continuing_cand_dec l0 (FST b) h)) ba)))
-           /\ (COUNTAux_dec p np t t' ba h ls)
-        else
-             (get_cand_pile l0 np = get_cand_pile l0 p)
-          /\ (get_cand_tally l0 t' = get_cand_tally l0 t)
-          /\ (COUNTAux_dec p np t t' ba h ls))`;
- 
+     (COUNTAux_dec p np t t' ba h [] <=> T)
+  /\ (COUNTAux_dec p np t t' ba  h (l0::ls) <=>
+      (let (l' = FILTER (λb. (first_continuing_cand_dec l0 (FST b) h)) ba)
+       in 
+          if (MEM l0 h) then
+                (get_cand_pile l0 np = (get_cand_pile l0 p) ++l') /\
+                (get_cand_tally l0 t' = SUM_RAT (MAP SND l'))
+           else
+                (get_cand_pile l0 np = get_cand_pile l0 p) /\
+                (get_cand_tally l0 t' = get_cand_tally l0 t)) /\
+	(COUNTAux_dec p np t t' ba h ls))`;
+  
  
 val COUNT_dec_def = Define `
    (COUNT_dec ((st, qu, l): params)
