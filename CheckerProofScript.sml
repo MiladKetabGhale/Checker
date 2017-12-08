@@ -1,6 +1,6 @@
 open preamble CheckerSpecTheory CheckerTheory
 open ratTheory
- 
+   
            
 val _ = new_theory "CheckerProof";
 
@@ -709,9 +709,9 @@ Induct_on `b`
         >- (FULL_SIMP_TAC list_ss [CONS_11]
           >> first_assum (qspecl_then [`c`,`h'`] strip_assume_tac)
             >> metis_tac [MEM]))));
-
  
-    
+  
+ (*   
 val intermediate_count_def = Define `
         (intermediate_count (qu,st,l) j1 j2 = ? ba t nt p np bl e h.
           (j1 = NonFinal (ba, t, p, bl, e, h))
@@ -738,21 +738,36 @@ val intermediate_count_def = Define `
                                            (get_cand_pile c np = get_cand_pile c p)
                                         /\ (get_cand_tally c nt = get_cand_tally c t)))
        /\ (j2 = NonFinal ([], nt, np, bl, e, h)))`;
-
+*)
+      
+val intermediate_count = Define `
+        (intermediate_count ((qu,st,l):params) j1 j2 = ? ba t nt p np bl e h.
+          (j1 = NonFinal (ba, t, p, bl, e, h))
+       /\ (!d. MEM d (h++e) ==> MEM d l)
+       /\ (ALL_DISTINCT (h++e))
+       /\ (Valid_PileTally t l)
+       /\ (Valid_PileTally nt l)
+       /\ (Valid_PileTally p l)
+       /\ (Valid_PileTally np l)
+       /\ (Valid_Init_CandList l)
+       /\ (ALL_DISTINCT (MAP FST p))
+       /\ (ALL_DISTINCT (MAP FST t)) 
+       /\ (ALL_DISTINCT (MAP FST np))
+       /\ (ALL_DISTINCT (MAP FST nt)) 
+       /\ (ba <> [])
+       /\ (h <> [])
+       /\ (!c. MEM c l ==>
+                            ((MEM c h ==> 
+                             ?(l': ((cand list) # rat) list).
+                               (l' = FILTER (\ (b: (cand list) # rat). (first_continuing_cand c (FST b) h)) ba)
+                            /\ (get_cand_pile c np = (get_cand_pile c p) ++ l')
+                            /\ (get_cand_tally c nt = (SUM_RAT (MAP SND l'))))
+                            /\ (~ MEM c h ==> 
+                                           (get_cand_pile c np = get_cand_pile c p)
+                                        /\ (get_cand_tally c nt = get_cand_tally c t))))  
+       /\ (j2 = NonFinal ([], nt, np, bl, e, h)))`; 
  
-val COUNTAux_dec = Define `
-     (COUNTAux_dec p np t t' ba h ([]: cand list) = T)
-  /\ (COUNTAux_dec p np t t' ba  (h: cand list) (l0::ls) =
-       if (MEM l0 h) then
-        (get_cand_pile l0 np = (get_cand_pile l0 p) ++ FILTER (\ (b: (cand list) # rat). (first_continuing_cand_dec l0 (FST b) h)) ba)
-          /\ ((get_cand_tally l0 t') = SUM_RAT (MAP SND (FILTER (\ (b: (cand list) # rat). (first_continuing_cand_dec l0 (FST b) h)) ba)))
-           /\ (COUNTAux_dec p np t t' ba h ls)
-        else
-             (get_cand_pile l0 np = get_cand_pile l0 p)
-          /\ ((get_cand_tally l0 t') = get_cand_tally l0 t)
-          /\ (COUNTAux_dec p np t t' ba h ls))`;
  
-   
 val Logical_to_Functional_Count_Dec_Aux = Q.store_thm ("Logical_to_Functional_Count_Dec_Aux",
  `!t nt p np ba h l.
        (!c. MEM c l ==>
@@ -768,9 +783,9 @@ val Logical_to_Functional_Count_Dec_Aux = Q.store_thm ("Logical_to_Functional_Co
 
 
 Induct_on `l`
-  >- rw[COUNTAux_dec]
+  >- rw[COUNTAux_dec_def]
   >- ((REPEAT STRIP_TAC
-      >> rw[COUNTAux_dec])
+      >> rw[COUNTAux_dec_def])
 
     >- (first_assum (qspecl_then [`h`] strip_assume_tac)
      >> FULL_SIMP_TAC list_ss [MEM]
@@ -783,51 +798,60 @@ Induct_on `l`
        >> `!c h ba. first_continuing_cand c h ba <=> first_continuing_cand_dec c h ba`
               by metis_tac [first_continuing_cand_IMP_fcc,fcc_to_first_continuing_cand]
          >> metis_tac [])));
+      
+
+
   
- (* to be reconstructed
 val Functional_to_Logical_Count_Dec_Aux = Q.store_thm ("Functional_to_Logical_Count_Dec_Aux",
-`!t nt p np ba h l. COUNTAux_dec p np t nt ba h l ==>
- (!c. MEM c l ==>
-               ((MEM c h ==>
-                   (get_cand_pile c np = (get_cand_pile c p)
-	             ++ (FILTER (\ (b: (cand list) # rat). (first_continuing_cand c (FST b) h)) ba))
-                /\ (get_cand_tally c nt = (SUM_RAT (MAP SND
-		   (FILTER (\ (b: (cand list) # rat). (first_continuing_cand c (FST b) h)) ba))))))
-                            /\ (~ MEM c h ==>
-                                           (get_cand_pile c np = get_cand_pile c p)
-                                        /\ (get_cand_tally c nt = get_cand_tally c t)))`,
+`!t t' p np ba h l. COUNTAux_dec p np t t' ba h l ==>
+          (!c. MEM c l ==>
+                 ((MEM c h ==> 
+                    ?(l': ((cand list) # rat) list).
+                      (l' = FILTER (\ (b: (cand list) # rat). (first_continuing_cand c (FST b) h)) ba)
+                         /\ (get_cand_pile c np = (get_cand_pile c p) ++ l')
+                         /\ (get_cand_tally c t' = (SUM_RAT (MAP SND l'))))
+                         /\ (~ MEM c h ==> 
+                                      (get_cand_pile c np = get_cand_pile c p)
+                                      /\ (get_cand_tally c t' = get_cand_tally c t))))`, 
+    
 Induct_on `l`
-  >- rw[]     
-  >- (REPEAT STRIP_TAC 
-      >- (`(c = h) \/ (MEM c l)` by FULL_SIMP_TAC list_ss [MEM]  
->- `!c h' ba. (FILTER (\b. first_continuing_cand c (FST b) h') ba)
-      = (FILTER (\b. first_continuing_cand_dec c (FST b) h') ba)`
-              by metis_tac [first_continuing_cand_IMP_fcc,fcc_to_first_continuing_cand]
-                   rw[]       
-                 >- metis_tac[COUNTAux_dec_def] rfs[COUNTAux_dec_def]   
-		      
-                 >- metis_tac[COUNTAux_dec])
-           >- ((MAP_EVERY qexists_tac [`FILTER (\ (b: (cand list) # rat). (first_continuing_cand_dec c (FST b) h')) ba`]
-            >> `!c h ba. first_continuing_cand c h ba <=> first_continuing_cand_dec c h ba`
-              by metis_tac [first_continuing_cand_IMP_fcc,fcc_to_first_continuing_cand]
-              >> STRIP_TAC)
-                >- metis_tac []
-                >- metis_tac [COUNTAux_dec]))
-       >- metis_tac[COUNTAux_dec,MEM]
->- metis_tac [COUNTAux_dec,MEM])); 
+    >- rw[]
+    >- (REPEAT STRIP_TAC  
+      >- ((MAP_EVERY qexists_tac
+      [`FILTER (\ (b: (cand list) # rat). (first_continuing_cand_dec c (FST b) h')) ba`] 
+        >> `!c h ba. first_continuing_cand c h ba <=> first_continuing_cand_dec c h ba` 
+              by metis_tac [first_continuing_cand_IMP_fcc,fcc_to_first_continuing_cand]   
+        >> `(c = h) \/ MEM c l` by FULL_SIMP_TAC list_ss []) 
+            >- (REPEAT STRIP_TAC
+               >- metis_tac[] 
+               >-  metis_tac[COUNTAux_dec_def]          
+               >-  metis_tac[COUNTAux_dec_def])
+            >- (REPEAT STRIP_TAC
+              >- metis_tac []
+              >- (first_assum (qspecl_then [`t`,`t'`,`p`,`np`,`ba`,`h'`] strip_assume_tac)
+                >> `COUNTAux_dec p np t t' ba h' l` by metis_tac[COUNTAux_dec_def]
+                >>  FULL_SIMP_TAC list_ss [])
+              >- (first_assum (qspecl_then [`t`,`t'`,`p`,`np`,`ba`,`h'`] strip_assume_tac)
+                >> `COUNTAux_dec p np t t' ba h' l` by metis_tac[COUNTAux_dec_def]
+                >> FULL_SIMP_TAC list_ss [])))
+       >- (`(c = h) \/ MEM c l` by FULL_SIMP_TAC list_ss []
+         >- metis_tac[COUNTAux_dec_def]
+         >- metis_tac[COUNTAux_dec_def]) 
+       >- (`(c = h) \/ MEM c l` by FULL_SIMP_TAC list_ss [MEM]
+         >- metis_tac[COUNTAux_dec_def]
+         >- metis_tac[COUNTAux_dec_def])));
+     
+        
 
-*)
-
-(* to be reconstructed
 val intermediate_count_IMP_Count_Aux = Q.store_thm ("intermediate_count_IMP_Count_Aux",
  `! (st: num) (qu: rat) l j1 j2. intermediate_count (qu,st,l) j1 j2 ==> COUNT (qu,st,l) j1 j2`,
 
 
-(REPEAT STRIP_TAC >> rw[COUNT_def] >> rfs[intermediate_count_def]
+(REPEAT STRIP_TAC >> rw[COUNT_def] >> rfs[intermediate_count]
      >> STRIP_TAC)
-     >- metis_tac[]
+     >- metis_tac[]  
      >- (REPEAT STRIP_TAC
-
+ 
        >- metis_tac[Valid_PileTally_def,PileTally_DEC2_IMP_PileTally,EVERY_CAND_HAS_ONE_PILE]
        >- (`!L. MEM (c,L) nt' ==> (get_cand_tally c nt' = L)` by
             metis_tac [Valid_PileTally_def,PileTally_DEC2_IMP_PileTally,EVERY_CAND_HAS_ONE_TALLY]
@@ -852,15 +876,14 @@ val intermediate_count_IMP_Count_Aux = Q.store_thm ("intermediate_count_IMP_Coun
             >> `!L. MEM (c,L) nt' ==> MEM (c,L) t` by (REPEAT STRIP_TAC >>
                  metis_tac [Valid_PileTally_def,PileTally_DEC2_IMP_PileTally,GET_CAND_TALLY_MEM2])
               >> metis_tac [])));
+   
 
-*)
 
-(* to be reconstructed
 val Count_Aux_IMP_intermediate_count = Q.store_thm ("Count_Aux_IMP_intermediate_count",
 `! (st: num) (qu: rat) l j1 j2. COUNT (qu,st,l) j1 j2 ==> intermediate_count (qu,st,l) j1 j2`,
 
 (REPEAT STRIP_TAC
- >> rw[intermediate_count_def]
+ >> rw[intermediate_count]
   >> rfs[COUNT_def]
    >> STRIP_TAC)
    >- metis_tac[]
@@ -877,10 +900,7 @@ val Count_Aux_IMP_intermediate_count = Q.store_thm ("Count_Aux_IMP_intermediate_
          >> metis_tac [Valid_PileTally_def,PileTally_DEC2_IMP_PileTally,EVERY_CAND_HAS_ONE_PILE])
      >- (`(!r. MEM c l /\ MEM (c,r) t <=> MEM c l /\ MEM (c,r) nt') ` by metis_tac []
       >> metis_tac [Valid_PileTally_def,PileTally_DEC2_IMP_PileTally,EVERY_CAND_HAS_ONE_TALLY,GET_CAND_TALLY_MEM2])));
-
-*)
-
-(* to be reconstructed
+  
 
 val Count_Aux_IMP_Count_Aux_dec = Q.store_thm ("Count_Aux_IMP_Count_Aux_dec",
  `! (st: num) (qu: rat) l j1 j2. COUNT (qu,st,l) j1 j2 ==> COUNT_dec (qu,st,l) j1 j2`,
@@ -889,42 +909,10 @@ val Count_Aux_IMP_Count_Aux_dec = Q.store_thm ("Count_Aux_IMP_Count_Aux_dec",
    >> REPEAT STRIP_TAC
    >> `intermediate_count (qu,st,l) j1 j2` by metis_tac[COUNT_def,Count_Aux_IMP_intermediate_count]
      >> rfs[COUNT_dec_def,COUNT_def] 
-      >> REPEAT STRIP_TAC)  
-        >-  (rfs [intermediate_count_def]
-            >> metis_tac [Logical_to_Functional_Count_Dec_Aux]         
-                
- 
-ASSUME_TAC Logical_to_Functional_Count_Dec_Aux
-         first_assum (qspecl_then [`t`,`nt'`,`p`,`np`,`ba`,`h`,`l`] strip_assume_tac)
-        `!c. MEM c l ==>
-	      (MEM c h ==>
-	               ?l. (l = FILTER (λb. first_continuing_cand c (FST b) h) ba) /\
-		       (get_cand_pile c np = (get_cand_pile c p) ++ l) /\
-		       (get_cand_tally c nt' = SUM_RAT (MAP SND l)))
-	  /\  ((~ MEM c h) ==>
-	               (get_cand_pile c np = get_cand_pile c p) /\
-		       (get_cand_tally c nt' = get_cand_tally c t))`
-		       by (REPEAT STRIP_TAC
-                      >- (MAP_EVERY qexists_tac [`FILTER (λb. first_continuing_cand c (FST b) h) ba`]
-		        >> fs[])
-                      >- metis_tac[]
-                      >- metis_tac[])
-  
-
-        metis_tac simp_tac bool_ss fs[COUNTAux_dec_def, Logical_to_Functional_Count_Dec_Aux] 		         UNDISCH_TAC [`!c. MEM c l ==>
-	      (MEM c h ==>
-	               ?l. (l = FILTER (λb. first_continuing_cand c (FST b) h) ba) /\
-		       (get_cand_pile c np = (get_cand_pile c p) ++ l) /\
-		       (get_cand_tally c nt' = SUM_RAT (MAP SND l)))
-	  /\  ((~ MEM c h) ==>
-	               (get_cand_pile c np = get_cand_pile c p) /\
-		       (get_cand_tally c nt' = get_cand_tally c t))`]
-
-
-
->- metis_tac[]
-        >- metis_tac[]
-        >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND]
+      >> REPEAT STRIP_TAC)   
+        >-  (rfs [intermediate_count]
+            >> metis_tac [Logical_to_Functional_Count_Dec_Aux])         
+        >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND] 
         >- metis_tac [Valid_PileTally_def,PileTally_to_PileTally_DEC1]
         >- metis_tac [Valid_PileTally_def,PileTally_to_PileTally_DEC2]
         >- metis_tac [Valid_PileTally_def,PileTally_to_PileTally_DEC1]
@@ -933,18 +921,11 @@ ASSUME_TAC Logical_to_Functional_Count_Dec_Aux
         >- metis_tac [Valid_PileTally_def,PileTally_to_PileTally_DEC2]
         >- metis_tac [Valid_PileTally_def,PileTally_to_PileTally_DEC1]
         >- metis_tac [Valid_PileTally_def,PileTally_to_PileTally_DEC2]
-        >- metis_tac []
-        >- metis_tac []
-        >- (`l <> []` by metis_tac[Valid_Init_CandList_def]
-         >> `?l1 x. l = x::l1` by metis_tac [list_nchotomy]
-           >> fs[NULL])
+        >- metis_tac [Valid_Init_CandList_def,NULL_EQ]
         >- metis_tac [Valid_Init_CandList_def]
-        >- metis_tac []
-        >- (`? X BA. ba = X::BA` by metis_tac [list_nchotomy] >> fs[NULL])
-        >- (`? h0 hs. h = h0::hs` by metis_tac [list_nchotomy] >> fs[NULL]));
-*)
+        >- rfs[NULL_EQ] 
+        >- metis_tac [NULL_EQ]); 
 
-(* to be reconstructed
 
 val Count_Aux_dec_IMP_Count_Aux = Q.store_thm ("Count_Aux_dec_IMP_Count_Aux",
  `! (st : num) (qu:rat) l j1 j2. COUNT_dec (qu,st,l) j1 j2 ==> COUNT (qu,st,l) j1 j2 `,
@@ -952,39 +933,30 @@ val Count_Aux_dec_IMP_Count_Aux = Q.store_thm ("Count_Aux_dec_IMP_Count_Aux",
  (ASSUME_TAC intermediate_count_IMP_Count_Aux
   >> REPEAT STRIP_TAC
     >> `intermediate_count (qu,st,l) j1 j2` by
-      (Cases_on `j1`
-       >- (Cases_on `j2`
+      (Cases_on `j1`  
+       >- (Cases_on `j2`   
          >- ((Cases_on `p` >> Cases_on `r` >> Cases_on `r'` >> Cases_on `r` >> Cases_on `r'`
-           >> Cases_on `p'` >> Cases_on `r'` >> Cases_on `r''` >> Cases_on `r'` >> Cases_on `r''`
-             >> rfs[intermediate_count_def,Count_dec]
-              >> REPEAT STRIP_TAC)
+           >> Cases_on `p'` >> Cases_on `r'` >> Cases_on `r''` >> Cases_on `r'` >> Cases_on `r''` 
+             >> rfs[intermediate_count,COUNT_dec_def] 
+              >> REPEAT STRIP_TAC) 
             >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND]
-            >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND]
-            >- metis_tac [no_dup_IMP_NO_DUP_PRED]
-            >- metis_tac [Valid_PileTally,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-            >- metis_tac [Valid_PileTally,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-            >- metis_tac [Valid_PileTally,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-            >- metis_tac [Valid_PileTally,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-            >- (`!(L:Cand list). non_empty L ==> (L <> [])`
-                  by (Induct_on `L`
-                     >- rw[non_empty]
-                     >- rw[non_empty]) >> metis_tac[Valid_Init_CandList,no_dup_IMP_NO_DUP_PRED,non_empty])
-            >- metis_tac [no_dup_IMP_NO_DUP_PRED]
-            >- metis_tac [no_dup_IMP_NO_DUP_PRED]
-            >- metis_tac [no_dup_IMP_NO_DUP_PRED]
-            >- metis_tac [no_dup_IMP_NO_DUP_PRED]
-            >- metis_tac [non_empty]
-            >- metis_tac [non_empty]
+            >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND] 
+            >- metis_tac [] 
+            >- metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
+            >- metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
+            >- metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
+            >- metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
+            >- metis_tac[Valid_Init_CandList_def,NULL_EQ]
+            >- metis_tac [NULL_EQ] 
+            >- metis_tac [NULL_EQ] 
             >- metis_tac [Functional_to_Logical_Count_Dec_Aux]
             >-  metis_tac [Functional_to_Logical_Count_Dec_Aux]
             >- metis_tac [Functional_to_Logical_Count_Dec_Aux]
-            >- metis_tac [Functional_to_Logical_Count_Dec_Aux])
-         >- rfs [COUNT_dec])
-        >- (Cases_on `j2`
-         >- rfs [COUNT_dec]
-         >- rfs [COUNT_dec]))
-           >> metis_tac[]);
-*)
+            >- metis_tac [Functional_to_Logical_Count_Dec_Aux]) 
+         >- rfs [COUNT_dec_def]) 
+        >-  rfs[COUNT_dec_def])  
+           >> metis_tac[intermediate_count_IMP_Count_Aux]));
+
 
 
 val APPEND_EQ_NIL2 = Q.store_thm ("APPEND_EQ_NIL2",
