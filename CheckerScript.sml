@@ -1,7 +1,7 @@
 open preamble CheckerSpecTheory
-    
+      
 val _ = new_theory "Checker";
-
+ 
 val EWIN_dec_def = Define `
   (EWIN_dec ((qu,st,l):params) (NonFinal (_,_,_,_,e,_)) (Final e')
      ⇔ (e = e') /\ LENGTH e = st) ∧
@@ -149,8 +149,8 @@ val COUNTAux_dec_def = Define `
              (get_cand_pile l0 np = get_cand_pile l0 p)
           /\ (get_cand_tally l0 t' = get_cand_tally l0 t)
           /\ (COUNTAux_dec p np t t' ba h ls))`;
-
-
+ 
+ 
 val COUNT_dec_def = Define `
    (COUNT_dec ((st, qu, l): params)
        (NonFinal (ba, t, p, bl, e, h))
@@ -171,7 +171,8 @@ val COUNT_dec_def = Define `
     /\ ~ (NULL ba)
     /\ ~ (NULL h)
     /\ (ba' = [])) /\
-   (COUNT_dec _ _ _ = F)`;
+   (COUNT_dec _ (Final _) _ = F) /\
+   (COUNT_dec _ _ (Final _) = F)`;
 
 
 val take_append_def = Define `
@@ -204,7 +205,7 @@ val update_cand_pile = Define `
            (MAP FST (get_cand_pile l0 p2) = MAP FST (get_cand_pile l0 p1))
         /\ (MAP SND (get_cand_pile l0 p2) = update_cand_trans_val qu l0 t p1) /\
            update_cand_pile qu t ls p1 p2)`;
-
+  
 val ELECT_dec = Define `
      (ELECT_dec ((qu,st,l): params)
            (NonFinal (ba, t, p, bl, e, h))
@@ -239,7 +240,8 @@ val ELECT_dec = Define `
                 /\ (list_MEM_dec e' l)
                 /\ (list_MEM_dec h l)
                 /\ (update_cand_pile qu t l1 p p')) /\
-     (ELECT_dec _ _ _ = F)`;
+     (ELECT_dec _ (Final _) _ = F) /\
+     (ELECT_dec _ _ (Final _) = F)`;
 
 val Initial_Judgement_dec_def = Define `
         (Initial_Judgement_dec _ (Final _) ⇔ F)
