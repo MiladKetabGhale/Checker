@@ -1,5 +1,5 @@
 open preamble
-
+ 
 val _ = new_theory "CheckerSpec";
  
 (* Helper functions that have nothing to do with vote counting *)
@@ -253,6 +253,7 @@ val ELECT_def = Define `
     /\ ALL_DISTINCT (MAP FST p)
     /\ ALL_DISTINCT (MAP FST t)
     /\ ALL_DISTINCT (MAP FST np)
+    /\ (0 < qu)
     /\ (!c. MEM c l1 ==> (!l'. MEM (c,l') np ==>
                              (MAP FST l' = MAP FST (get_cand_pile c p))
                           /\ (MAP SND l' = update_cand_trans_val qu c t p)))
