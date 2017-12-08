@@ -1,15 +1,23 @@
 open preamble CheckerSpecTheory CheckerTheory
 open ratTheory
+<<<<<<< HEAD
            
+=======
+
+>>>>>>> 4810b2a69d438254f317c4f5e620f5fd6235d101
 val _ = new_theory "CheckerProof";
- 
+
 val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
   `list_MEM_dec = list_MEM`,
   simp[FUN_EQ_THM]
   \\ Induct \\ rw[list_MEM_dec_def]);
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> 4810b2a69d438254f317c4f5e620f5fd6235d101
 val EWIN_thm = Q.store_thm("EWIN_thm",
-  `EWIN = EWIN_dec`,
+  `EWIN_dec = EWIN`,
   simp[FUN_EQ_THM]
   \\ qx_gen_tac`params`
   \\ PairCases_on`params`
@@ -18,9 +26,9 @@ val EWIN_thm = Q.store_thm("EWIN_thm",
   \\ PairCases_on`p`
   \\ rw[EWIN_def,EWIN_dec_def]
   \\ metis_tac[]);
- 
+
 val HWIN_thm = Q.store_thm("HWIN_thm",
-  `HWIN = HWIN_dec`,
+  `HWIN_dec = HWIN`,
   simp[FUN_EQ_THM]
   \\ qx_gen_tac`params`
   \\ PairCases_on`params`
@@ -28,7 +36,7 @@ val HWIN_thm = Q.store_thm("HWIN_thm",
   \\ PairCases_on`p`
   \\ rw[HWIN_def,HWIN_dec_def]
   \\ metis_tac[HWIN_def,HWIN_dec_def])
- 
+
 val GET_CAND_TALLY_HEAD_REMOVAL_def = Q.store_thm ("GET_CAND_TALLY_HEAD_REM",
 `!(h: cand #rat) t c. (~(c = FST h)) ==> (get_cand_tally c (h::t) = get_cand_tally c t)`,
           Induct_on `t `
@@ -39,7 +47,7 @@ val GET_CAND_TALLY_HEAD_REMOVAL_def = Q.store_thm ("GET_CAND_TALLY_HEAD_REM",
                  >> first_assum (qspecl_then [`h`,`c`] strip_assume_tac)
                     >> rw[get_cand_tally_def] >>
                     Cases_on`h'` >> fs[ALOOKUP_def]))
- 
+
 val GET_CAND_TALLY_MEM2 = Q.store_thm ("GET_CAND_TALLY_MEM",
  `!(t: (cand #rat) list) c. (MEM c (MAP FST t))
                                     ==> (MEM (c, get_cand_tally c t) t) `,
@@ -50,7 +58,7 @@ val GET_CAND_TALLY_MEM2 = Q.store_thm ("GET_CAND_TALLY_MEM",
         >- ((REPEAT STRIP_TAC >> Cases_on `h` >> Cases_on `c =q`)
           >- fs[get_cand_tally_def,ALOOKUP_def]
 	  >- fs[get_cand_tally_def,ALOOKUP_def]));
- 
+
 
 val PileTally_to_PileTally_DEC1 = Q.store_thm ("PileTally_to_PileTally_DEC1",
  `!l t. (!c. (MEM c (MAP FST t)) ==> (MEM c l)) ==> (Valid_PileTally_dec1 t l) `,
@@ -60,7 +68,7 @@ val PileTally_to_PileTally_DEC1 = Q.store_thm ("PileTally_to_PileTally_DEC1",
        >- (REPEAT STRIP_TAC
           >> first_assum (qspecl_then [`FST h`] strip_assume_tac)
             >> rfs[Valid_PileTally_dec1_def,MAP]));
- 
+
 val PileTally_DEC1_to_PileTally = Q.store_thm ("PileTally_DEC1_to_PileTally",
  `!l t. (Valid_PileTally_dec1 t l) ==> (!c. MEM c (MAP FST t) ==> (MEM c l))`,
 
@@ -68,7 +76,7 @@ val PileTally_DEC1_to_PileTally = Q.store_thm ("PileTally_DEC1_to_PileTally",
         >- rw[]
         >- (REPEAT STRIP_TAC
             >> rfs [Valid_PileTally_dec1_def]));
- 
+
 
 
 val PileTally_to_PileTally_DEC2 = Q.store_thm ("PileTally_to_PileTally_DEC2",
@@ -88,7 +96,7 @@ val PileTally_DEC2_IMP_PileTally = Q.store_thm ("PileTally_DEC2_IMP_PileTally",
            >> FULL_SIMP_TAC list_ss [MEM])
               >- FULL_SIMP_TAC list_ss [Valid_PileTally_dec2_def]
               >- rfs [Valid_PileTally_dec2_def]));
- 
+
 
 val REMOVE_ONE_CAND_APPEND = Q.store_thm ("REMOVE_ONE_CAND_APPEND",
  `! l1 l2 (c: cand). (~ MEM c l1) ==> (equal_except_dec c (l1 ++l2) = l1 ++ (equal_except_dec c l2))`,
@@ -107,7 +115,7 @@ val REMOVE_ONE_CAND_NOTIN = Q.store_thm ("REMOVE_ONE_CAND_NOTIN",
         >- rw [equal_except_dec_def]
         >- (REPEAT STRIP_TAC
           >> FULL_SIMP_TAC list_ss [MEM, equal_except_dec_def])) ;
- 
+
 
 
 val EQE_REMOVE_ONE_CAND = Q.store_thm ("EQE_REMOVE_ONE_CAND",
@@ -133,7 +141,7 @@ val EQE_REMOVE_ONE_CAND = Q.store_thm ("EQE_REMOVE_ONE_CAND",
 
               >- (MAP_EVERY qexists_tac [`h'::l1`,`l2`]
                 >> FULL_SIMP_TAC list_ss []))));
- 
+
 
 val EQE_IMP_REMOVE_ONE_CAND = Q.store_thm ("EQE_IMP_REMOVE_ONE_CAND",
  `!h1 h2 (c: cand). (MEM c h2) /\ (equal_except c h1 h2) ==> (h1 = equal_except_dec c h2) `,
@@ -154,7 +162,7 @@ val APPEND_NIL_LEFT_COR = Q.store_thm("APPEND_NIL_lEFT_COR",
                                                    rw[APPEND_NIL_LEFT]) ;
 
 
- 
+
 val MAP_APPEND_TRIO = Q.store_thm ("MAP_APPEND_TRIO",
   `!t l1 l0 l2. (t = l1 ++ [l0] ++ l2) ==> (MAP FST t = (MAP FST l1) ++ [FST l0] ++ (MAP FST l2))`,
 
@@ -181,7 +189,7 @@ val NoDupCand_BOTH_SIDES= Q.store_thm ("NoDupCand_BOTH_SIDES",
                >-   (rfs[CONS_11]
                     >> first_assum (qspecl_then [`l2`,`c`,`t`,`h2`] strip_assume_tac)
                       >> rfs[])));
- 
+
 
 val get_cand_tally_APPEND = Q.store_thm ("get_cand_tally_APPEND",
   `!(l1: (cand #rat) list) l2 c. (~ MEM c (MAP FST l1))
@@ -193,7 +201,7 @@ val get_cand_tally_APPEND = Q.store_thm ("get_cand_tally_APPEND",
            >- (REPEAT STRIP_TAC >>
                `c <> q` by fs[MEM,MAP] >>
                fs[get_cand_tally_def,ALOOKUP_def]))
- 
+
 
 
 val EVERY_CAND_HAS_ONE_TALLY = Q.store_thm ("EVERY_CAND_HAS_ONE_TALLY",
@@ -210,7 +218,7 @@ val EVERY_CAND_HAS_ONE_TALLY = Q.store_thm ("EVERY_CAND_HAS_ONE_TALLY",
                >> `MEM c (MAP FST ([(c,x)] ++ l2))` by FULL_SIMP_TAC list_ss [MAP_APPEND]
                >> `~ MEM c (MAP FST l1)` by metis_tac[]
 	       >> fs[get_cand_tally_APPEND,get_cand_tally_def,ALOOKUP_def])
- 
+
 
 
 val LESS_THAN_QUOTA_OK = Q.store_thm ("LESS_THAN_QUOTA_OK",
@@ -249,7 +257,7 @@ val less_than_qu_IMP_LogicalLessThanQuota = Q.store_thm ("less_than_qu_IMP_Logic
                                 >> rfs []))
              >- (first_assum (qspecl_then [`t0`,`t1`,`qu`] strip_assume_tac)
                >> rfs [less_than_quota_def,Valid_PileTally_dec2_def])));
- 
+
 
 val LogicalLessThanQu_IMP_less_than_quota =Q.store_thm ("LogicalLessThanQu_IMP_less_than_quota",
   `!(qu:rat) t h. (!c. (MEM c h) ==> ?x. (MEM (c,x) t)
@@ -270,7 +278,7 @@ val LogicalLessThanQu_IMP_less_than_quota =Q.store_thm ("LogicalLessThanQu_IMP_l
         >- (`less_than_quota qu t h` by  metis_tac[MEM]
            >> fs[less_than_quota_def])))
 
- 
+
 val bigger_than_cand_OK = Q.store_thm ("bigger_than_cand_OK",
  `!c t h. (bigger_than_cand c t h) ==> (!d. (MEM d h) ==> (get_cand_tally c t <= get_cand_tally d t))`,
 
@@ -302,7 +310,7 @@ val bigger_than_cand_LogicallyOK = Q.store_thm ("bigger_than_cand_LogicallyOK",
                              >> first_assum (qspecl_then [`c`,`t0::t1`,`h'::h`] strip_assume_tac)
                                >> metis_tac []));
 
- 
+
 
 val Logical_bigger_than_cand_IMP_TheFunctional = Q.store_thm ("Logical_bigger_than_cand_IMP_TheFunctional",
  `!h t c. (!d. (MEM d h)  ==> (?x (y: rat). (MEM (c,x) t)
@@ -327,7 +335,7 @@ val Logical_bigger_than_cand_IMP_TheFunctional = Q.store_thm ("Logical_bigger_th
                        >> RW_TAC bool_ss [])
              >-( first_assum(qspecl_then [`t`,`c`] strip_assume_tac)
                >> rfs[bigger_than_cand_def,MEM])));
- 
+
 
 val SUBPILE_ONE_HEAD_REMOVAL = Q.store_thm ("SUBPILE_ONE_HEAD_REMOVAL",
  `! p1 p2 c h. (subpile1 c (h::p1) p2) ==> (subpile1 c p1 p2)`,
@@ -347,7 +355,7 @@ val Functional_subpile1_IMP_TheLogical = Q.store_thm ("Functional_subpile1_IMP_T
             >- (first_assum (qspecl_then [`p2`,`c`] strip_assume_tac)
               >> metis_tac[SUBPILE_ONE_HEAD_REMOVAL])));
 
- 
+
 val GET_CAND_PILE_MEM = Q.store_thm ("GET_CAND_PILE_MEM",
  `!(p:(cand # (((cand list) # rat) list)) list) c. (MEM c (MAP FST p))
                           ==> (MEM (c,get_cand_pile c p) p)`,
@@ -363,7 +371,7 @@ val GET_CAND_PILE_MEM = Q.store_thm ("GET_CAND_PILE_MEM",
                  >- (Cases_on `h`
                    >> rfs [get_cand_pile_def,ALOOKUP_def,MEM,MAP]
                      >> rw[])));
- 
+
 
 val get_cand_pile_APPEND = Q.store_thm ("get_cand_pile_APPEND",
  `! (l1:(cand # (((cand list) # rat) list)) list) l2 c. (~ MEM c (MAP FST l1))
@@ -393,7 +401,7 @@ val EVERY_CAND_HAS_ONE_PILE = Q.store_thm ("EVERY_CAND_HAS_ONE_PILE",
                >> ASSUME_TAC get_cand_pile_APPEND
                >> first_assum (qspecl_then [`l1`,`(c,y)::l2`] strip_assume_tac)
                >>  fs [get_cand_pile_def,get_cand_pile_APPEND,ALOOKUP_def]));
- 
+
 
 val Logical_subpile1_IMP_TheFunctional = Q.store_thm ("Logical_subpile1_IMP_TheFunctional",
  `! p1 p2 c. (!d'. ((d' <> c) ==> (!l. (MEM (d',l) p1 ==> MEM (d',l) p2)))
@@ -416,7 +424,7 @@ val Logical_subpile1_IMP_TheFunctional = Q.store_thm ("Logical_subpile1_IMP_TheF
                >> fs[])
 
            >- rfs[subpile1_def]));
- 
+
 
 val SUBPILE_TWO_HEAD_REMOVAL = Q.store_thm ("SUBPILE_TWO_HEAD_REMOVAL",
  `!p1 p2 c h. (subpile2 c (h::p2) p1) ==> (subpile2 c p2 p1) `,
@@ -437,7 +445,7 @@ val Functional_subpile2_IMP_TheLogical = Q.store_thm ("Functional_subpile2_IMP_T
              >- (first_assum (qspecl_then [`p1`,`c`] strip_assume_tac)
                >> metis_tac [SUBPILE_TWO_HEAD_REMOVAL])));
 
- 
+
 val subpile1_CandPile_Empty = Q.store_thm ("subpile1_CandPile_Empty",
  `!(l: cand list) p1 p2 c. (subpile1 c p1 p2) /\ (MEM c (MAP FST p2))
                                               /\ (MEM c (MAP FST p1))  ==> (MEM (c,[]) p2)`,
@@ -449,7 +457,7 @@ Induct_on `p1`
           >- (FULL_SIMP_TAC list_ss [subpile1_def]
               >> metis_tac [subpile1_def,MAP,MEM])
          >- fs[subpile1_def,MEM]));
- 
+
 
 
 val Logical_subpile2_IMP_TheFunctional = Q.store_thm ("Logical_subpile2_IMP_TheFunctional",
@@ -484,7 +492,7 @@ val logical_GetCandPile_IMP_TheFunctional = Q.store_thm ("logical_GetCandPile_IM
                      >> `(c,get_cand_pile c (h::p)) =  (c,nba)` by metis_tac[]
                        >> RW_TAC bool_ss [PAIR_EQ,EQ_SYM_EQ])
             >- metis_tac[MEM,MAP,PAIR_EQ,EQ_SYM_EQ]));
- 
+
 
 
 val list_not_MEM_verified_fully= Q.store_thm ("list_not_MEM_verified_fully",
@@ -497,29 +505,29 @@ val list_not_MEM_verified_fully= Q.store_thm ("list_not_MEM_verified_fully",
              >- (REPEAT STRIP_TAC
 	          >> fs[]
                     >> metis_tac[MEM]));
- 
- 
+
+
 val Logical_list_MEM_VICE_VERCA_TheFunctional = Q.store_thm("Logical_list_MEM_VICE_VERCA_TheFunctional",
  `!(l1: cand list) l2. (!c. MEM c l1 ==> MEM c l2) <=> list_MEM_dec l1 l2`,
- 
+
     Induct_on `l1`
-      >-  fs[list_MEM_dec_def]  
-      >- (REPEAT STRIP_TAC >> fs[] 
+      >-  fs[list_MEM_dec_def]
+      >- (REPEAT STRIP_TAC >> fs[]
         >> metis_tac[MEM,list_MEM_dec_def]));
-  
-      
+
+
 val Logical_elim_to_Functional_Elim = Q.store_thm ("Logical_elim_to_Functional_Elim",
  `!st qu l c j1 j2. ELIM_CAND c (qu,st,l) j1 j2 ==> (ELIM_CAND_dec c (qu,st,l) j1 j2)`,
 
    (REPEAT STRIP_TAC >> Cases_on `j1`)
-  
+
      >-  (Cases_on `j2`
 
         >- ((PairCases_on`p` >>
 	  PairCases_on`p'` >>
 	  rfs[ELIM_CAND_def,ELIM_CAND_dec_def] >>
           REPEAT STRIP_TAC)
-    
+
          >-  (`l <> []` by metis_tac[Valid_Init_CandList_def]
                >> `?l1 x. l = x::l1` by metis_tac [list_nchotomy]
                >> fs[NULL])
@@ -527,14 +535,14 @@ val Logical_elim_to_Functional_Elim = Q.store_thm ("Logical_elim_to_Functional_E
          >- (`!(l1:cand list) l2 (c':cand). MEM c' l1 \/ MEM c' l2 ==> MEM c' (l1++l2)`
                by FULL_SIMP_TAC list_ss [MEM,MEM_APPEND]
                >> `!c'. MEM c' (p5++p4) ==> MEM c' l` by metis_tac [MEM,MEM_APPEND]
-               >> metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional])  
-         >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]  
-         >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
+               >> metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional])
          >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
          >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
          >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
-         >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]  
-         >- metis_tac[LogicalLessThanQu_IMP_less_than_quota,Valid_PileTally_def,ALOOKUP_def] 
+         >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
+         >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
+         >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
+         >- metis_tac[LogicalLessThanQu_IMP_less_than_quota,Valid_PileTally_def,ALOOKUP_def]
          >-  metis_tac [EQE_IMP_REMOVE_ONE_CAND]
          >-  (`MEM c (MAP FST p1)` by metis_tac [Valid_PileTally_def,FST,MAP]
                >> `!d. MEM d p5 ==> MEM d (MAP FST p1)` by metis_tac [Valid_PileTally_def]
@@ -544,53 +552,53 @@ val Logical_elim_to_Functional_Elim = Q.store_thm ("Logical_elim_to_Functional_E
           >> metis_tac [Logical_subpile2_IMP_TheFunctional]))
       >- rfs[ELIM_CAND_def])
     >- rfs[ELIM_CAND_def]);
-   
-   
+
+
 val Functional_Elim_to_Logical_elim = Q.store_thm ("Functional_Elim_to_Logical_elim",
  `!st qu l c j1 j2. ELIM_CAND_dec c (qu,st,l) j1 j2 ==> ELIM_CAND c (qu,st,l) j1 j2`,
 
- 
+
 
   (REPEAT STRIP_TAC >> Cases_on `j1`)
-         >- (Cases_on `j2`  
-                  
-           >- ((PairCases_on`p` >> PairCases_on`p'` 
-	    >> rfs[ELIM_CAND_def,ELIM_CAND_dec_def]   
-              >> REPEAT STRIP_TAC) 
-                >- metis_tac[NULL_EQ] 
+         >- (Cases_on `j2`
+
+           >- ((PairCases_on`p` >> PairCases_on`p'`
+	    >> rfs[ELIM_CAND_def,ELIM_CAND_dec_def]
+              >> REPEAT STRIP_TAC)
+                >- metis_tac[NULL_EQ]
                 >- metis_tac [NULL_EQ]
                 >- metis_tac[NULL_EQ,Valid_Init_CandList_def,ALL_DISTINCT]
                 >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND]
-                >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND] 
+                >- metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional,MEM_APPEND]
                 >- rw[]
                 >- metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
                 >- metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
                 >- fs[]
-                >- fs[]  
-                >- rw[] 
+                >- fs[]
+                >- rw[]
                 >- metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
-                >- (`?L y. l = y::L` by metis_tac[NULL_EQ,list_nchotomy] 
+                >- (`?L y. l = y::L` by metis_tac[NULL_EQ,list_nchotomy]
                       >> `MEM y (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally,MEM]
                       >> `?l1 q1. p'1 = q1::l1` by metis_tac [MEM_MAP,MEM,list_nchotomy]
                       >> `!d. MEM d p5 ==> MEM d l`
                            by metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
                       >> `!d. MEM d p5 ==> MEM d (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally]
-                    >> metis_tac[PileTally_to_PileTally_DEC2,less_than_qu_IMP_LogicalLessThanQuota]) 
-                >- (`?L y. l = y::L` by metis_tac[NULL_EQ,list_nchotomy] 
+                    >> metis_tac[PileTally_to_PileTally_DEC2,less_than_qu_IMP_LogicalLessThanQuota])
+                >- (`?L y. l = y::L` by metis_tac[NULL_EQ,list_nchotomy]
                      >> `MEM y (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally,MEM]
                      >> `?l1 q1. p'1 = q1::l1` by metis_tac [MEM_MAP,MEM,list_nchotomy]
                      >> `!d. MEM d p5 ==> MEM d l`
                          by metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
                      >> `!d. MEM d p5 ==> MEM d (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally]
-                     >> metis_tac [PileTally_to_PileTally_DEC2,bigger_than_cand_LogicallyOK]) 
-                 >- metis_tac [EQE_REMOVE_ONE_CAND,ALL_DISTINCT_APPEND] 
+                     >> metis_tac [PileTally_to_PileTally_DEC2,bigger_than_cand_LogicallyOK])
+                 >- metis_tac [EQE_REMOVE_ONE_CAND,ALL_DISTINCT_APPEND]
                  >-  metis_tac [Functional_subpile1_IMP_TheLogical]
                  >- metis_tac [Functional_subpile2_IMP_TheLogical]
-                 >- metis_tac [NULL_EQ]) 
-           >- rfs[ELIM_CAND_dec_def])   
-         >- rfs[ELIM_CAND_dec_def]); 
+                 >- metis_tac [NULL_EQ])
+           >- rfs[ELIM_CAND_dec_def])
+         >- rfs[ELIM_CAND_dec_def]);
 
-   
+
 val Logical_transfer_to_Functional_Transfer = Q.store_thm ("Logical_transfer_to_Functional_Transfer",
  `! st qu l j1 j2. TRANSFER (qu,st,l) j1 j2 ==> TRANSFER_dec (qu,st,l) j1 j2`,
 
@@ -598,79 +606,89 @@ val Logical_transfer_to_Functional_Transfer = Q.store_thm ("Logical_transfer_to_
       >> Cases_on `j1`)
         >- (Cases_on `j2`
           >- ((PairCases_on `p`
-              >> PairCases_on `p'` 
+              >> PairCases_on `p'`
               >> rfs[TRANSFER_dec_def,TRANSFER_def]
               >> REPEAT STRIP_TAC)
             >- (`(!d. MEM d p5 \/ MEM d p4 ==> MEM d l) ==> (!d. MEM d (p5++p4) ==> MEM d l)`
                by  FULL_SIMP_TAC list_ss [MEM_APPEND] >>
-               metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional]) 
-            >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def] 
+               metis_tac [Logical_list_MEM_VICE_VERCA_TheFunctional])
+            >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
             >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
             >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
             >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
             >- metis_tac [PileTally_to_PileTally_DEC1,Valid_PileTally_def]
             >- metis_tac [PileTally_to_PileTally_DEC2,Valid_PileTally_def]
             >- metis_tac [Valid_Init_CandList_def,NULL_EQ]
-            >- fs[Valid_Init_CandList_def] 
+            >- fs[Valid_Init_CandList_def]
             >- metis_tac [LogicalLessThanQu_IMP_less_than_quota,Valid_PileTally_def]
             >- metis_tac [Logical_subpile1_IMP_TheFunctional]
             >- (`?(y: (cand # (((cand list) # rat) list))). (c = FST y) /\ (MEM y np)`
-              by (MAP_EVERY qexists_tac [`(c,[])`] >> metis_tac [FST]) 
-             >> `MEM c (MAP FST np)` by metis_tac[MEM_MAP] 
+              by (MAP_EVERY qexists_tac [`(c,[])`] >> metis_tac [FST])
+             >> `MEM c (MAP FST np)` by metis_tac[MEM_MAP]
              >> `!d. (d = c) ==> ?l. MEM (c,l) np` by metis_tac[GET_CAND_PILE_MEM,Valid_PileTally_def]
-           >> metis_tac [Logical_subpile2_IMP_TheFunctional,GET_CAND_PILE_MEM,Valid_PileTally_def]))  
+           >> metis_tac [Logical_subpile2_IMP_TheFunctional,GET_CAND_PILE_MEM,Valid_PileTally_def]))
          >- fs[TRANSFER_def])
        >- fs[TRANSFER_def]);
 
-  
+
 val Functional_Transfer_to_Logical_transfer = Q.store_thm ("Functional_Transfer_to_Logical_transfer",
  `! st qu l j1 j2. TRANSFER_dec (qu,st,l) j1 j2 ==> TRANSFER (qu,st,l) j1 j2`,
 
- (REPEAT STRIP_TAC 
-  
-    >> Cases_on `j1`)   
+ (REPEAT STRIP_TAC
+
+    >> Cases_on `j1`)
       >- (Cases_on `j2`
-      
-          >-  ((PairCases_on`p` >> PairCases_on`p'` 
+
+          >-  ((PairCases_on`p` >> PairCases_on`p'`
               >> rfs [TRANSFER_dec_def,TRANSFER_def] >> REPEAT STRIP_TAC
               >> Cases_on `p3`)
-    
+
                  >- rfs[]
-      
+
                  >- (MAP_EVERY qexists_tac [`get_cand_pile h p2`,`t`,`p'2`] >> REPEAT STRIP_TAC
-                     >- fs[NULL_EQ]   
-                     >-  rw[]   
+                     >- fs[NULL_EQ]
+                     >-  rw[]
                      >-  metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
                      >-  metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
-		     >-  metis_tac []  
+		     >-  metis_tac []
          >-  metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
          >-  metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
          >-  metis_tac [Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_DEC2_IMP_PileTally]
          >-  metis_tac[Valid_Init_CandList_def,NULL_EQ]
-         >-  rw [] 
-         >- (`?L y. l = y::L` by metis_tac[NULL_EQ,list_nchotomy] 
+         >-  rw []
+         >- (`?L y. l = y::L` by metis_tac[NULL_EQ,list_nchotomy]
                  >> `MEM y (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally,MEM]
                  >> `?l1 q1. p'1 = q1::l1` by metis_tac [MEM_MAP,MEM,list_nchotomy]
                  >> `!d. MEM d p5 ==> MEM d l`
                          by metis_tac [MEM_APPEND,Logical_list_MEM_VICE_VERCA_TheFunctional]
-		 >> `!d. MEM d p5 ==> MEM d (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally]  
+		 >> `!d. MEM d p5 ==> MEM d (MAP FST p'1)` by metis_tac [PileTally_DEC2_IMP_PileTally]
                  >> metis_tac[PileTally_to_PileTally_DEC2,less_than_qu_IMP_LogicalLessThanQuota])
        >- ((MAP_EVERY qexists_tac [`h`]
              >> `(p'3 = t) /\ (p'0 = get_cand_pile h p2) /\ (MEM (h,[]) p'2) /\ (subpile1 h p2 p'2)
-	                   /\ (subpile2 h p'2 p2)` by rfs[] >> REPEAT STRIP_TAC)  
-           >- rw[]    
-           >- rw[] 
-           >- rfs[] 
-           >- metis_tac [Functional_subpile1_IMP_TheLogical]   
+	                   /\ (subpile2 h p'2 p2)` by rfs[] >> REPEAT STRIP_TAC)
+           >- rw[]
+           >- rw[]
+           >- rfs[]
+           >- metis_tac [Functional_subpile1_IMP_TheLogical]
            >- metis_tac [Functional_subpile2_IMP_TheLogical]
            >- rw[]
-           >- rw[] 
+           >- rw[]
          >- rw[])))
+<<<<<<< HEAD
      >- rfs [TRANSFER_dec_def]) 
      
      >- rfs [TRANSFER_dec_def]); 
     
  
+=======
+     >- rfs [TRANSFER_dec_def])
+
+     >- rfs [TRANSFER_dec_def]);
+
+
+
+
+>>>>>>> 4810b2a69d438254f317c4f5e620f5fd6235d101
 val fcc_to_first_continuing_cand = Q.store_thm ("fcc_to_first_continuing_cand",
  `! c b h. first_continuing_cand_dec c b h ==> first_continuing_cand c b h`,
 
@@ -1066,6 +1084,7 @@ val functional_to_logicl_piles_eq = Q.store_thm ("functional_to_logical_piles_eq
  `! l1 l2 p1 p2. ALL_DISTINCT (MAP FST p1) /\ ALL_DISTINCT (MAP FST p2) /\ (list_MEM_dec l1 (MAP FST p1)) /\
                 (list_MEM_dec l1 (MAP FST p2)) /\ (piles_eq_list l1 l2 p1 p2) ==>
    (!c. MEM c l1 ==> (~ MEM c l2 ==> (!l'. MEM (c,l') p1 <=> MEM (c,l') p2)))`,
+<<<<<<< HEAD
  
 Induct_on `l1`
  >- rw[]
@@ -1102,6 +1121,12 @@ Induct_on `l1`
       `piles_eq_list l1 l2 p1 p2` by metis_tac [piles_eq_list_def] >>
       metis_tac [MEM])));
   
+=======
+  Induct_on`l1`
+  \\ fs[piles_eq_list_def,SUBSET_DEF,MEM_MAP,EXISTS_PROD]
+  \\ rw[]
+  \\ metis_tac[EVERY_CAND_HAS_ONE_PILE]);
+>>>>>>> 4810b2a69d438254f317c4f5e620f5fd6235d101
 
 val logical_to_functional_piles_eq = Q.store_thm ("logical_to_functional_piles_eq",
 `! l1 l2 p1 p2.  (!c. MEM c l1 ==> (~ MEM c l2 ==> (!l'. MEM (c,l') p1 <=> MEM (c,l') p2)))
