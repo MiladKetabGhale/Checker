@@ -13,6 +13,77 @@ Data61, CSIRO and UNSW}
 Abstract goes here
 \end{abstract}
 \section{Introduction}\label{sec:intro}
+
+
+
+\noindent
+Certificable / Verifiable Computation.
+\begin{itemize}
+  \item programs produce results with correctness proofs
+  \item much easier than, and orthogonal to, verification
+  \item however need to prove that valid certificates imply valid
+  results (soundness), maybe also that every correct result is
+  certifiable.
+  \item in particular, this is independent of the program that
+  produces the results. 
+  \item mainly used to offload computation to untrusted clients.
+  \item reliability is given by verifying the \emph{checker} rather
+  than the program that carries out computation.
+\end{itemize}
+
+\noindent
+Vote counting.
+
+\begin{itemize}
+  \item here, we employ certified computation with a different goal:
+  vote counting
+  \item difference: general public / election authority is outsourcing
+  computation to us.
+  \item state of the art: no verifiability, black box, sometimes not
+  even open source.
+  \item this is a real problem -- e.g. NSW 2012 Griffith
+  \item large trust base, including to trust that the right program
+  has been run!
+  \item indeed in evoting research: concept of ``universal
+  verifiability'' means precisely that. Is the holy grail of any
+  evoting system.
+  \item for vote counting, this is a paradigm shift: don't verify
+  the program, but verify the checker -- down to machine level!
+  \item this happens in a fully verified / verifiable environment
+  \item higher guarantees by machine level verification
+\end{itemize}
+
+\noindent
+Our contribution.
+\begin{itemize}
+  \item Have formalised STV (complex, preferential voting scheme
+  used in Malta, Scotland, etc.) in HOL
+  \item rule based to minimise gap between law and code
+  \item Have designed a notion of certificate that establishes the
+  correctness of STV counts. Think about this more \dots
+  \item Have developed a verified checker 
+  \item Used CakeML to give correctness down to machine level
+  \item smallest possible trust base: microprocessor, basic IO
+  system calls
+\end{itemize}
+
+\noindent
+Evaluation
+\begin{itemize}
+  \item to be done.
+\end{itemize}
+
+\noindent
+Related Work.
+\begin{itemize}
+  \item Verifiability and electronic voting
+  \item Verified / certified computation in general
+  \item CakeML stuff??
+\end{itemize}
+
+
+\section{Single Transferable Vote and Certification}
+
 \bibliographystyle{splncs03}
 \bibliography{paper}
 \end{document}
