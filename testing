@@ -1,5 +1,5 @@
 open preamble CheckerTheory CheckerSpecTheory myparserTheory
- 
+  
 * --------------------------------------------------------------------------------------*
 * correct order of the rules which must be applied to get a "valide certificate" output *
 
@@ -66,3 +66,16 @@ EVAL ``COUNT_dec  (7 / 2, 1, [Cand (strlit "A"); Cand (strlit "B"); Cand (strlit
 
 (THE (parse_judgement (strlit
 "[]; A{3%1} B{1%1} C{1%1}; A{[([A,C],1%1),([A,B,C],1%1),([A,C,B],1%1)]} B{[([B,A],1%1)]} C{[([C,B,A],1%1)]}; []; []; [A,B,C]\n")))``
+
+ 
+EVAL ``COUNT_dec (2 / 1, 1, [Cand (strlit "A"); Cand (strlit "B")])
+(THE (parse_judgement (strlit
+"[([A,B],1%1),([A,B],1%1)]; A{0%1} B{0%1}; A{[]} B{[]}; []; []; [A,B]\n")))
+(THE (parse_judgement (strlit
+"[]; A{2%1} B{0%1}; A{[([A,B],1%1),([A,B],1%1)]} B{[]}; []; []; [A,B]\n")))``
+
+
+first_continuing_cand_dec_def
+  
+EVAL ``first_continuing_cand_dec (Cand (strlit "A")) [Cand (strlit "B"); Cand (strlit "A")]
+[Cand (strlit "A")]``
