@@ -1,5 +1,5 @@
 open preamble CheckerSpecTheory
-       
+         
 val _ = new_theory "Checker";
  
 val EWIN_dec_def = Define `
@@ -81,33 +81,6 @@ val ELIM_CAND_dec_def = Define `
    /\ (ELIM_CAND_dec c _ _ (Final _ ) = F)`; 
  
  
-
-
-(*
-val ELIM_CAND_dec_def = Define `
-  (ELIM_CAND_dec c (qu,st,l) (Final _ ) _ = F) /\
-  (ELIM_CAND_dec c (qu,st,l) _ (Final _ ) = F) /\
-  (ELIM_CAND_dec c ((qu,st,l):params)
-       (NonFinal ([], t, p, [], e, h))
-       (NonFinal (ba', t', p', [], e',h')) ⇔
-   (t = t') /\ (e = e')
-   /\ (LENGTH (e ++ h) > st) /\ (LENGTH e < st)
-   /\ (¬(NULL l)) /\ (ALL_DISTINCT l)
-   /\ (list_MEM_dec (h++e) l)
-   /\ (ALL_DISTINCT (h++e))
-   /\ (Valid_PileTally_dec1 p l) /\ (Valid_PileTally_dec2 p l)
-   /\ (Valid_PileTally_dec1 p' l) /\ (Valid_PileTally_dec2 p' l)
-   /\ ALL_DISTINCT (MAP FST t)
-   /\ (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)
-   /\ (MEM c h)
-   /\ (less_than_quota qu t h)
-   /\ (h' = equal_except_dec c h)
-   /\ (bigger_than_cand c t h)
-   /\ (ba' = get_cand_pile c p)
-   /\ (MEM (c,[]) p')
-   /\ (subpile1 c p p') /\ (subpile2 c p' p) )`; 
-
-*)
   
 val TRANSFER_dec_def = Define `
   (TRANSFER_dec ((qu,st,l):params)
@@ -137,7 +110,7 @@ val first_continuing_cand_dec_def = Define `
     if (c = b0) then T
     else if (~ MEM b0 h) /\ (first_continuing_cand_dec c bs h) then T
     else F)`;
-  
+   
 val COUNTAux_dec_def = Define `
      (COUNTAux_dec p np t t' ba h [] <=> T)
   /\ (COUNTAux_dec p np t t' ba  h (l0::ls) <=>
@@ -145,13 +118,13 @@ val COUNTAux_dec_def = Define `
        in 
           if (MEM l0 h) then
                 (get_cand_pile l0 np = (get_cand_pile l0 p) ++l') /\
-                (get_cand_tally l0 t' = SUM_RAT (MAP SND l'))
+                (get_cand_tally l0 t' = (get_cand_tally l0 t) + SUM_RAT (MAP SND l'))
            else
                 (get_cand_pile l0 np = get_cand_pile l0 p) /\
                 (get_cand_tally l0 t' = get_cand_tally l0 t)) /\
 	(COUNTAux_dec p np t t' ba h ls))`;
+    
   
- 
 val COUNT_dec_def = Define `
    (COUNT_dec ((st, qu, l): params)
        (NonFinal (ba, t, p, bl, e, h))
