@@ -1,7 +1,18 @@
 \documentclass{llncs}
-\usepackage{url}
+\usepackage{holtexbasic,url,amsmath,environ}
+\renewcommand{\HOLinline}[1]{\ensuremath{#1}}
+\renewcommand{\HOLKeyword}[1]{\mathsf{#1}}
+\renewcommand{\HOLConst}[1]{{\textsf{\upshape #1}}}
+\renewcommand{\HOLSymConst}[1]{\HOLConst{#1}}
+\NewEnviron{holthmenv}{
+  \begin{equation*}
+  \begin{array}[t]{l}
+  \BODY
+  \end{array}
+  \end{equation*}}
+\newcommand{\TODO}[1]{{\bf TODO:} #1}
 \begin{document}
-\title{(draft) Verified Certificate Checking for Vote Counting}
+\title{Verified Certificate Checking for Counting Votes}
 \author{
 Milad~K.~Ghale\inst{1}\and
 Dirk~Pattison\inst{1}\and
@@ -14,8 +25,6 @@ Abstract goes here
 \end{abstract}
 \section{Introduction}\label{sec:intro}
 
-
-
 \noindent
 Certificable / Verifiable Computation.
 \begin{itemize}
@@ -25,7 +34,7 @@ Certificable / Verifiable Computation.
   results (soundness), maybe also that every correct result is
   certifiable.
   \item in particular, this is independent of the program that
-  produces the results. 
+  produces the results.
   \item mainly used to offload computation to untrusted clients.
   \item reliability is given by verifying the \emph{checker} rather
   than the program that carries out computation.
@@ -61,28 +70,37 @@ Our contribution.
   \item rule based to minimise gap between law and code
   \item Have designed a notion of certificate that establishes the
   correctness of STV counts. Think about this more \dots
-  \item Have developed a verified checker 
+  \item Have developed a verified checker
   \item Used CakeML to give correctness down to machine level
   \item smallest possible trust base: microprocessor, basic IO
   system calls
 \end{itemize}
 
-\noindent
-Evaluation
+\section{Single Transferable Vote and Certification}
+
+\section{Final Theorem}
+\begin{holthmenv}
+  \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
+\end{holthmenv}
+
+\begin{holthmenv}
+  \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
+\end{holthmenv}
+
+\section{Evaluation}
 \begin{itemize}
   \item to be done.
 \end{itemize}
 
-\noindent
-Related Work.
+\section{Related Work}
 \begin{itemize}
   \item Verifiability and electronic voting
   \item Verified / certified computation in general
   \item CakeML stuff??
+
 \end{itemize}
 
-
-\section{Single Transferable Vote and Certification}
+\section{Conclusion}
 
 \bibliographystyle{splncs03}
 \bibliography{paper}

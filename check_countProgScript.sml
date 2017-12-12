@@ -63,6 +63,8 @@ val option_case_rand = prove_case_rand_thm{case_def=option_case_def,nchotomy=opt
 
 (* The checker for unparsed certificates. Defined here so we can use the parser. *)
 
+val () = patternMatchesLib.ENABLE_PMATCH_CASES ();
+
 val Check_Certificate_def = Define`
   Check_Certificate lines =
     case lines of
@@ -88,12 +90,12 @@ val invalid_step_msg_def = Define`
 val loop_def = Define`
   loop params i j1 j0 ls =
    if Valid_Step params j0 j1 then
-     case ls of
+     dtcase ls of
      | [] => if Initial_Judgement_dec (SND(SND params)) j0
              then NONE
              else SOME (strlit"Malformed initial judgement\n",i)
      | (line::ls) =>
-        case parse_judgement line of
+        dtcase parse_judgement line of
         | NONE => SOME (malformed_line_msg i,i+1)
         | SOME j => loop params (i+1) j0 j ls
    else SOME (invalid_step_msg i,i)`;
@@ -175,7 +177,7 @@ val loop_spec = Q.store_thm("loop_spec",
      (POSTv uv.
        &UNIT_TYPE () uv *
        STDIO (
-         case loop params i j1 j0 (MAP implode (linesFD fs 0)) of
+         dtcase loop params i j1 j0 (MAP implode (linesFD fs 0)) of
          | NONE => add_stdout (fastForwardFD fs 0) "Certificate OK\n"
          | SOME (err,j) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num(j-i)) fs) (explode err)))`,
   Induct_on`linesFD fs 0` \\ rw[]
@@ -355,9 +357,9 @@ val malformed_msg_def = Define`
 
 val parse_line_def = Define`
   parse_line parse name ls =
-    case ls of [] => INR (missing_msg name)
+    dtcase ls of [] => INR (missing_msg name)
     | line::ls =>
-    (case parse line of
+    (dtcase parse line of
      | NONE => INR (malformed_msg name)
      | SOME x => INL (x,ls))`;
 
@@ -389,7 +391,7 @@ val parse_line_spec = Q.store_thm("parse_line_spec",
    [parserv;namev;kv]
      (STDIO fs)
      (POSTv v. &UNIT_TYPE () v *
-       case parse_line parser name (MAP implode (linesFD fs 0))
+       dtcase parse_line parser name (MAP implode (linesFD fs 0))
        of INR msg => STDIO (add_stderr (lineForwardFD fs 0) (explode msg))
         | INL (x,ls) => Q x)`,
   xcf "parse_line" (get_ml_prog_state())
@@ -475,37 +477,38 @@ val parse_line_spec = Q.store_thm("parse_line_spec",
 
 val line4_def = Define`
   line4 quota seats candidates winners ls =
-    case parse_line parse_judgement (strlit"penultimate judgement") ls
+    dtcase parse_line parse_judgement (strlit"penultimate judgement") ls
     of INR err => SOME (err, 5) | INL (j0, ls) =>
       loop (quota,seats,candidates) 5 (Final winners) j0 ls`;
 
 val line3_def = Define`
   line3 quota seats candidates ls =
-    case parse_line parse_candidates (strlit"final judgement") ls
+    dtcase parse_line parse_candidates (strlit"final judgement") ls
     of INR err => SOME (err, 4) | INL (winners, ls) =>
       line4 quota seats candidates winners ls`;
 
 val line2_def = Define`
   line2 quota seats ls =
-    case parse_line parse_candidates (strlit"candidates") ls
+    dtcase parse_line parse_candidates (strlit"candidates") ls
     of INR err => SOME (err, 3) | INL (candidates,ls) =>
       line3 quota seats candidates ls`;
 
 val line1_def = Define`
   line1 quota ls =
-    case parse_line parse_seats (strlit"seats") ls
+    dtcase parse_line parse_seats (strlit"seats") ls
     of INR err => SOME (err, 2) | INL (seats,ls) =>
       line2 quota seats ls`;
 
 val check_count_def = Define`
   check_count ls =
-    case parse_line parse_quota (strlit"quota") ls
+    dtcase parse_line parse_quota (strlit"quota") ls
     of INR err => SOME (err, 1) | INL (quota,ls) =>
       line1 quota ls`;
 
 val check_count_thm = Q.store_thm("check_count_thm",
   `check_count ls = NONE ⇔ Check_Certificate ls`,
   rw[check_count_def,Check_Certificate_def,parse_line_def]
+  \\ CONV_TAC(RAND_CONV(DEPTH_CONV patternMatchesLib.PMATCH_ELIM_CONV))
   \\ CASE_TAC \\ CASE_TAC >- every_case_tac
   \\ rw[line1_def,parse_line_def]
   \\ CASE_TAC \\ CASE_TAC >- every_case_tac
@@ -539,7 +542,7 @@ val check_count_spec = Q.store_thm("check_count_spec",
      (POSTv uv.
        &UNIT_TYPE () uv *
        STDIO
-         (case check_count (MAP implode (linesFD fs 0)) of
+         (dtcase check_count (MAP implode (linesFD fs 0)) of
           | NONE => add_stdout (fastForwardFD fs 0) "Certificate OK\n"
           | SOME (err,n) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num n) fs)
                               (explode err)))`,

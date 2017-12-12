@@ -1,13 +1,15 @@
 paper.pdf : paper.tex holtexbasic.sty llncs.cls splncs03.bst aliascnt.sty remreset.sty
 	latexmk -pdf paper
 
-INCLUDES = ..
+INCLUDES = $(CAKEMLDIR)/misc .. ../compilation/proofs
 
-munge.exe : ../CheckerProofTheory.uo
-	$(protect $(HOLDIR)/bin/mkmunge.exe) ../CheckerProofTheory
+DEPS = ppLib ../CheckerProofTheory ../compilation/proofs/check_countProofTheory
 
-paper.tex : paper.htex munge.exe
-	./munge.exe -m';' < $< > $@
+munge.exe : $(patsubst %,%.uo,$(DEPS))
+	$(protect $(HOLDIR)/bin/mkmunge.exe) $(DEPS)
+
+paper.tex : paper.htex munge.exe overrides
+	./munge.exe -m';' overrides < $< > $@
 
 holtexbasic.sty: $(HOLDIR)/src/TeX/holtexbasic.sty
 	$(CP) $< $@
