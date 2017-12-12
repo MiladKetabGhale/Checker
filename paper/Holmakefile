@@ -8,8 +8,8 @@ DEPS = ppLib ../CheckerProofTheory ../compilation/proofs/check_countProofTheory
 munge.exe : $(patsubst %,%.uo,$(DEPS))
 	$(protect $(HOLDIR)/bin/mkmunge.exe) $(DEPS)
 
-paper.tex : paper.htex munge.exe
-	./munge.exe -m';' < $< > $@
+paper.tex : paper.htex munge.exe overrides
+	./munge.exe -m';' overrides < $< > $@
 
 holtexbasic.sty: $(HOLDIR)/src/TeX/holtexbasic.sty
 	$(CP) $< $@

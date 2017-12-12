@@ -80,7 +80,11 @@ Our contribution.
 
 \section{Final Theorem}
 \begin{holthmenv}
-  \HOLthm{check_countProof.check_count_compiled_thm}
+  \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
+\end{holthmenv}
+
+\begin{holthmenv}
+  \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}
 
 \section{Evaluation}
