@@ -20,12 +20,6 @@ val stdo_lineForwardFD = Q.store_thm("stdo_lineForwardFD",
 (* -- *)
 
 (* TODO: move to HOL *)
-val LRC_APPEND = Q.store_thm("LRC_APPEND",
-  `∀l1 l2 x y.
-   LRC R (l1 ++ l2) x y ⇔
-   ∃z. LRC R l1 x z ∧ LRC R l2 z y`,
-  Induct \\ rw[LRC_def] \\ metis_tac[])
-
 val LRC_inv = Q.store_thm("LRC_inv",
   `∀ls x y.
    LRC (inv R) ls x y ⇔

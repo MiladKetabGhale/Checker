@@ -1,7 +1,15 @@
 open preamble CheckerSpecTheory
-         
+
 val _ = new_theory "Checker";
- 
+
+(* TODO: move to HOL *)
+val LRC_APPEND = Q.store_thm("LRC_APPEND",
+  `∀l1 l2 x y.
+   LRC R (l1 ++ l2) x y ⇔
+   ∃z. LRC R l1 x z ∧ LRC R l2 z y`,
+  Induct \\ rw[LRC_def] \\ metis_tac[])
+(* -- *)
+
 val EWIN_dec_def = Define `
   (EWIN_dec ((qu,st,l):params) (NonFinal (_,_,_,_,e,_)) (Final e')
      ⇔ (e = e') /\ LENGTH e = st) ∧
@@ -56,7 +64,7 @@ val bigger_than_cand_def = Define `
   bigger_than_cand c t ls =
     EVERY (λh0. get_cand_tally c t <= get_cand_tally h0 t) ls`;
 
-    
+
 val ELIM_CAND_dec_def = Define `
   (ELIM_CAND_dec c ((qu,st,l):params)
        (NonFinal (ba, t, p, bl, e, h))
@@ -77,11 +85,11 @@ val ELIM_CAND_dec_def = Define `
    /\ (ba' = get_cand_pile c p)
    /\ (MEM (c,[]) p')
    /\ (subpile1 c p p') /\ (subpile2 c p' p))
-   /\ (ELIM_CAND_dec c _ (Final _ ) _ = F) 
-   /\ (ELIM_CAND_dec c _ _ (Final _ ) = F)`; 
- 
- 
-  
+   /\ (ELIM_CAND_dec c _ (Final _ ) _ = F)
+   /\ (ELIM_CAND_dec c _ _ (Final _ ) = F)`;
+
+
+
 val TRANSFER_dec_def = Define `
   (TRANSFER_dec ((qu,st,l):params)
     (NonFinal (ba, t, p, bl, e, h))
@@ -103,19 +111,19 @@ val TRANSFER_dec_def = Define `
          /\ (subpile1 hbl p p') /\ (subpile2 hbl p' p))) ∧
   (TRANSFER_dec _ (Final _) _ = F) /\
   (TRANSFER_dec _ _ (Final _) = F)`;
- 
+
 val first_continuing_cand_dec_def = Define `
   (first_continuing_cand_dec (c:cand) ([]: cand list)  (h: cand list) ⇔ F) /\
   (first_continuing_cand_dec c (b0::bs) h =
     if (c = b0) then T
     else if (~ MEM b0 h) /\ (first_continuing_cand_dec c bs h) then T
     else F)`;
-   
+
 val COUNTAux_dec_def = Define `
      (COUNTAux_dec p np t t' ba h [] <=> T)
   /\ (COUNTAux_dec p np t t' ba  h (l0::ls) <=>
       (let (l' = FILTER (λb. (first_continuing_cand_dec l0 (FST b) h)) ba)
-       in 
+       in
           if (MEM l0 h) then
                 (get_cand_pile l0 np = (get_cand_pile l0 p) ++l') /\
                 (get_cand_tally l0 t' = (get_cand_tally l0 t) + SUM_RAT (MAP SND l'))
@@ -123,8 +131,8 @@ val COUNTAux_dec_def = Define `
                 (get_cand_pile l0 np = get_cand_pile l0 p) /\
                 (get_cand_tally l0 t' = get_cand_tally l0 t)) /\
 	(COUNTAux_dec p np t t' ba h ls))`;
-    
-  
+
+
 val COUNT_dec_def = Define `
    (COUNT_dec ((st, qu, l): params)
        (NonFinal (ba, t, p, bl, e, h))
@@ -179,7 +187,7 @@ val update_cand_pile = Define `
            (MAP FST (get_cand_pile l0 p2) = MAP FST (get_cand_pile l0 p1))
         /\ (MAP SND (get_cand_pile l0 p2) = update_cand_trans_val qu l0 t p1) /\
            update_cand_pile qu t ls p1 p2)`;
-  
+
 val ELECT_dec = Define `
      (ELECT_dec ((qu,st,l): params)
            (NonFinal (ba, t, p, bl, e, h))
@@ -245,7 +253,7 @@ val valid_judgements_dec_def = Define `
 
 val valid_judgements_dec_ind = theorem"valid_judgements_dec_ind";
 
-val valid_judgments_dec_LRC = Q.store_thm("valid_judgments_dec_LRC",
+val valid_judgements_dec_LRC = Q.store_thm("valid_judgements_dec_LRC",
   `∀params ls.
     valid_judgements_dec params ls ⇔
     ∃s ls0 w. (ls = ls0 ++ [Final w]) ∧
@@ -269,7 +277,7 @@ val Check_Parsed_Certificate_LRC = Q.store_thm("Check_Parsed_Certificate_LRC",
      LRC (Valid_Step params) (j0::ints) j0 (Final w) ∧
      Initial_Judgement_dec (SND(SND params)) j0`,
   Cases_on`js`
-  \\ rw[Check_Parsed_Certificate_def,LRC_def,Initial_Judgement_dec_def,PULL_EXISTS,valid_judgments_dec_LRC]
+  \\ rw[Check_Parsed_Certificate_def,LRC_def,Initial_Judgement_dec_def,PULL_EXISTS,valid_judgements_dec_LRC]
   \\ rw[EQ_IMP_THM] \\ rw[LRC_def]
   >- (
     Cases_on`ls0` \\ fs[LRC_def,Initial_Judgement_dec_def]
