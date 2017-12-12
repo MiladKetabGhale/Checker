@@ -1,6 +1,6 @@
 open preamble CheckerSpecTheory CheckerTheory
 open ratTheory
-  
+   
 val _ = new_theory "CheckerProof";
  
 val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
@@ -1215,7 +1215,59 @@ val Logical_to_Functional_Initial_Judgement = Q.store_thm ("Logical_to_Functiona
       >> rw[Initial_Judgement_dec_def])
          >- FULL_SIMP_TAC list_ss [EVERY_MEM]
          >- FULL_SIMP_TAC list_ss [EVERY_MEM]);
+
+  
+val No_Valid_Step_After_Final = Q.store_thm("No_Valid_Step_After_Final",
+ `! qu st h l w. ~ (Valid_Step (qu,st,l) (Final w) h)`,
  
+ REPEAT STRIP_TAC
+  >> rfs[Valid_Step_def] 
+        >- rfs[HWIN_dec_def] 
+	>- rfs[EWIN_dec_def] 
+	>- rfs[COUNT_dec_def] 
+	>- rfs[TRANSFER_dec_def]
+	>- rfs[ELECT_dec_def]
+	>- rfs[ELIM_CAND_dec_def]);                  
+      
+
+
+`! qu st l J. valid_judgements (qu,st,l) J ==> valid_judgements_dec (qu,st,l) J`
+
+Induct_on `J`
+     
+   rw[valid_judgements_dec_def,valid_judgements_def]
+       
+   REPEAT STRIP_TAC
+    >> `(J = []) \/ (J <> [])` by metis_tac[list_nchotomy] 
+       
+        rw[]
+	(Cases_on `h`
+      
+             rfs[valid_judgements_def]
+    
+             rfs[valid_judgements_dec_def,valid_judgements_def]) 
+  
+        `? j' J'. (J = j'::J')` by metis_tac[list_nchotomy] 
+        >> rw[]
+        >> rfs[valid_judgements_def] 
+        >> first_assum (qspecl_then [`[]`,`J'`,`h`,`j'`] strip_assume_tac)
+        >> fs[valid_judgements_dec_def]
+
+             (1) Cases_on`j'`
+
+                        rfs[HWIN_def]
+                       
+                        fs[Valid_Step_def,HWIN_thm] 
+                        Cases_on`J'`
+
+                  rfs[valid_judgements_dec_def]
+  
+                  first_assum (qspecl_then [`[h]`,`t`,`j'`,`h'`] strip_assume_tac)
+                  rfs[]
+                     (1) (Cases_on`h'`
+		               >- rfs[HWIN_def]    
+                               >- Case rfs[HWIN_def]
+
 
 (*
 val Elim_dec = Define `
