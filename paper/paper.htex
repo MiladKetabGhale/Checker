@@ -24,6 +24,36 @@ Data61, CSIRO and UNSW}
 Abstract goes here
 \end{abstract}
 \section{Introduction}\label{sec:intro}
+Certified computation offers a high level of trustworthiness and correctness of the output end result. 
+A Certifying program is an implementation of an algorithm which, upon each execution, produces an  end result accompanied by a certificate as to how it has been computed\cite{}. The certificate witnesses correctness of the computation and is independently and effectively checkable without any reference  to the program producing it. Therefore the verification objective directs to verifying the checker of the certificates rather than the program itself. In contrast to complete static verification methods, this demands much less resources for undertaking the task. Moreover, it considerably reduces the trust that clients has to lay in many components, including the programmer, compiler and hardware malfunctioning.
+
+
+
+In recent years, numerous programs have come to carry the task of vote counting based on implementation of some Single Transferable Vote (STV) schemes. STV algorithms are preferential protocols for deciding winners of an election. They aim at reflecting the proportion of the preferences of the public towards different competing candidates. All of these programs are claimed to satisfy the expectations of the protocol. However, there are corner cases in STV protocols that are open to interpretation and, therefore, divergent implementations and computations. Moreover, source code of many of these programs are kept secret under the excuse of \lq\lq commercial in use\rq\rq\cite{} . This in addition to the mentioned difficulties of the traditional verification methods makes it challenging to verify these programs to decide which one(s) indeed implement the algorithm correctly. Hence, reliability of the computations by aforementioned programs requires huge amount of trust. Furthermore, absence of adequate correctness proofs stands in sharp contrast with election qualitative measures such as universal verifiability whose realisation amounts to providing as many scrutineers as possible with a guarantee for authenticity of the election result.
+
+   
+
+We realise each STV algorithm as a certified computation which formalises the count as a sequence of logical rule applications to stages of the count, together with a certificate that is a visualisation of the trace of rule applications to the ballots cast in the election. Stages of the count, are formalised as typing judgements which are of two kind; non-final and final. The former is constituted of six components that put together provide all the necessary information to know what the current status of the count is. It informs the scrutineers of the ballots which (possibly) need to be counted, tally of each candidate, pile of the votes allocated to each candidate according to the preferences, list of candidates whose votes may be distributed later, and list of elected and continuing
+candidates at this stage. The latter judgement is a terminal
+stage of the process whereby winners of the election are
+announced. 
+
+
+
+The election protocol implicitly specifies steps for advancing the counting process. These steps which tell us when and how to move from one stage of the count (judgement) to another are formalised as logical rules. These rules have side conditions that must be met before such transitions can happen. Side conditions are, essentially, the formal counterpart of the protocol laid down by the legislation, and are expressed by standalone HOL predicates. By satisfying these side conditions, one makes sure that the process has proceeded in accordance to the protocol of the election. We shall refer to such assertions as predicative definitions or specification. We have another category of HOL assertions referred to as computational definitions. They correspond to some or one of the aforementioned predicative definitions. Conjunction of different, appropriate computational parts form the computational definition for each counting rule. By help of the equivalences established between components of the predicative counting rules and the computational ones, we come to verify that the computational rules meet the expectations of the specification, thus the protocol, at any application. To check if a given list of judgements is valid, the checker merely needs to verify if each two consecutive list elements match against a premise and conclusion of a valid rule instance application. Therefore, we formalise the checker as a disjunction of computational counting rules. 
+
+
+
+\begin{itemize}
+\item to do: write on connecting CakeML with HOL and the parser. Here we will explain proof of correspondence between valid certificates and valid judgements. The connection between checker as in HOL with loop function in CakeML. Some internal processes of translation from HOL to CakemL is to be given in a simple yet packed-up language.
+\item
+to do: tests of the executable. Here tests on the certificates output by counting programs is to be presented. The tests should reflect complexity of the computation with regards to number of ballots, candidates, and number of seats.
+\item to do: reviewing related works. This one is almost right away. But will look to see if there is more to mention.
+\end{itemize}
+
+
+
+\section{Outline}\label{sec:out}
 
 \noindent
 Certificable / Verifiable Computation.
@@ -75,6 +105,7 @@ Our contribution.
   \item smallest possible trust base: microprocessor, basic IO
   system calls
 \end{itemize}
+
 
 \section{Single Transferable Vote and Certification}
 
