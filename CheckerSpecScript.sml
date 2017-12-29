@@ -1,5 +1,5 @@
 open preamble
- 
+  
 val _ = new_theory "CheckerSpec";
   
 (* Helper functions that have nothing to do with vote counting *)
@@ -198,9 +198,9 @@ val COUNT_def = Define `
  
 
 (* ELECT rule *)
-
+ 
 val tally_comparison_def = Define `
-  tally_comparison (t:tallies) c1 c2 ⇔ (get_cand_tally c1 t <= get_cand_tally c2 t)`;
+  tally_comparison (t:tallies) c1 c2 ⇔ (get_cand_tally c2 t <= get_cand_tally c1 t)`;
 
 val update_cand_trans_val_def = Define `
     (update_cand_trans_val (qu:rat) (c:cand) (t:tallies) (p:piles) =
