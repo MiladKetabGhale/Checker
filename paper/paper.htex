@@ -25,15 +25,10 @@ Abstract goes here
 \end{abstract}
 \section{Introduction}\label{sec:intro}
 
-Certified computation offers a high level of trustworthiness and correctness of the output end result. 
-A Certifying program is an implementation of an algorithm which, upon each execution, produces an  end result accompanied by a certificate as to how it has been computed\cite{}. The certificate witnesses correctness of the computation and is independently and effectively checkable without any reference  to the program producing it. Therefore the verification objective directs to verifying the checker of the certificates rather than the program itself. In contrast to complete static verification methods, this demands much less resources for undertaking the task. Moreover, it considerably reduces the trust that clients has to lay in many components, including the programmer, compiler and hardware malfunctioning.
-
-
-
-In recent years, numerous programs have come to carry the task of vote counting based on implementation of some Single Transferable Vote (STV) schemes. STV algorithms are preferential protocols for deciding winners of an election. They aim at reflecting the proportion of the preferences of the public towards different competing candidates. All of these programs are claimed to satisfy the expectations of the protocol. However, there are corner cases in STV protocols that are open to interpretation and, therefore, divergent implementations and computations. Moreover, source code of many of these programs are kept secret under the excuse of \lq\lq commercial in use\rq\rq\cite{} . This in addition to the mentioned difficulties of the traditional verification methods makes it challenging to verify these programs to decide which one(s) indeed implement the algorithm correctly. Hence, reliability of the computations by aforementioned programs requires huge amount of trust. Furthermore, absence of adequate correctness proofs stands in sharp contrast with election qualitative measures such as universal verifiability whose realisation amounts to providing as many scrutineers as possible with a guarantee for authenticity of the election result.
+Numerous programs have recently come to carry the task of vote counting based on implementation of some Single Transferable Vote (STV) schemes.  All of these programs are claimed to satisfy the expectations of the protocol. However, there are corner cases in STV protocols that are open to interpretation and, therefore, divergent implementations and computations. Moreover, source code of many of these programs are kept secret under the excuse of \lq\lq commercial in use\rq\rq\cite{} . This in addition to difficulties of the traditional verification methods makes it challenging to verify these programs to decide which one(s) indeed implement the algorithm correctly. Hence, reliability of the computations by aforementioned programs requires huge amount of trust. Furthermore, absence of adequate correctness proofs stands in sharp contrast with election qualitative measures such as universal verifiability whose realisation amounts to providing as many scrutineers as possible with a guarantee for authenticity of the election result.
 
    
-A cost-effective solution for verification of such programs is to certify them and then validate the certificate produced upon each execution by a verified checker.  Here, we demonstrate how to carry the task out for STV elections. To this end, we take four steps. 
+A cost-effective solution for verification of such programs is to certify them and then verify the certificate. A certifying program outputs a result along with a certificate witnessing correctness of the computation. A checker can, then, check each certificate for correctness. Validation of the program therefore reduces to verification of the certificate checker.  Here, we demonstrate how to carry the task out for STV elections. To this end, we take four steps. 
 
 
 First, we formalise  vote counting algorithm  inside the theorem prover HOL as a sequence of logical rule applications to stages of the count. Stages of the count, are formalised as typing judgements which are of two kind; non-final and final. The former is constituted of six components that put together provide all the necessary information to know what the current status of the count is. It informs the scrutineers of the ballots which (possibly) need to be counted, tally of each candidate, pile of the votes allocated to each candidate according to the preferences, list of candidates whose votes may be distributed later, and list of elected and continuing candidates at this stage. The latter judgement is a terminal stage of the process whereby winners of the election are announced. A list of judgements is called a \emph{formal certificate}.
@@ -58,17 +53,407 @@ Our fourth step is extraction of executable that is correct down to the machine 
 Furthermore, to perform computation on an actual certificate, we combine our parser defined in HOL with I/O functions of CakeML, and the computational checker. These are put together as a deeply embedded CakeML function, which is named \textsf{check\_count}. The behaviour of this function is stated as Hoare triples in syle of separation logic. Its behaviour is proven correct with respect to a CakeML formalisation of the characteristic formula, which is a higher-order logic assertion employed to state properties about impure parts of a program. Consequently, we come to verify that \textsf{check\_count} is extensionally equivalent to the computational checker in the HOL. Hence, we validate an actual certificate if and only if its corresponding  formal certificate is valid. Finally to obtain executable code, we evaluate a built-in CakeML function called \textsf{compiler} on our program. There exists a correctness theorem about the compiler itself. We instantiate this theorem with our deeply embedded \textsf{check\_count} program and the theorem proved about its behaviour, to obtain a correctness result on this particular run of the compiler. This result roughly sates that the behaviour of the \textsf{check\_count} on the machine level coincides with its behaviour on the top-level. 
 
 \begin{itemize}
-\item to do: write on connecting CakeML with HOL and the parser. Here we will explain proof of correspondence between valid certificates and valid judgements. The connection between checker as in HOL with loop function in CakeML. Some internal processes of translation from HOL to CakemL is to be given in a simple yet packed-up language.
+
 \item
 to do: tests of the executable. Here tests on the certificates output by counting programs is to be presented. The tests should reflect complexity of the computation with regards to number of ballots, candidates, and number of seats.
 \item to do: reviewing related works. This one is almost right away. But will look to see if there is more to mention.
 \end{itemize}
 
+\section{The Protocol and Its Mathematical Specification}
+STV is an election scheme used in multi-seated constituencies and is designed to reflect the proportional preferences of voters in that district for competing candidates. The preference is expressed by ordering candidates on each ballot. Then the count proceeds by assigning the value of the ballot to the most preferred continuing candidate. A continuing candidate is one who has neither been elected nor eliminated from the initial list of competing candidates. When a candidate is not continuing any more, they are not considered in the preferences of ballots any further. Additionally, transfer of ballots of the elected or eliminated candidates may occur until all vacancies are filled.  
 
 
-\section{Outline}\label{sec:out}
+
+There are various versions of STV. They mainly differ in how  and when ballots are transferred or candidates are elected , the transfer value of ballots of elected candidates, and the tie breaking methods for determining which candidate is the weakest to exclude. Here, we particularly deal with a STV called ANU\_Union. It is similar to the STV used in the Australian Senate election but with three distinctive properties:  
+\begin{description} 
+\item[Step-by-step surplus transfer.] Surplus
+votes of already elected candidates, who are awaiting for their
+surplus to be transferred, are dealt with, one at a time, in order of
+first preferences.
+\item[Electing after each
+transfer.] After each transfer of values, candidates that reach
+the quota are elected immediately. 
+\item[Fractional transfer.] The
+value of vote transfer is a fractional number determined by a
+specific formula.\end{description}
+
+
+The protocol proceeds as follows.
+\begin{center}
+\begin{enumerate} \item decide which ballots are
+\emph{formal}.  \item determine what the quota exactly is.  \item
+count the first preference for each \emph{formal} ballot paper and
+place the vote in the pile of the  votes of the preferred candidate.
+\item if there are vacancies, any candidate that reaches
+the quota is declared elected.  \item if all
+the vacancies have been filled, counting terminates and the result
+is announced. 
+\item if the number of vacancies exceeds the number of continuing
+candidates, all of them are declared elected and the result is
+announced. 
+\item if there are still vacancies and all ballots are counted, and
+there is
+an elected candidate with surplus,
+go to step $8$ otherwise go to step $9$.  
+\item In case of surplus
+votes, transfer them to the next continuing preference appearing on
+each of those votes at a fractional value according to the following
+formula:
+
+\begin{equation}  \label{eq:tv}
+\mbox{new value} = \frac{\mbox{number of votes of elected
+candidate} - \mbox{quota}}{\mbox{number of votes of elected
+candidate}}
+\end{equation}
 
 \noindent
+Subsequent transfer values are computed as the product of the current value with previous transfer value.
+\item if there are still vacancies and all ballots are counted, and
+all surplus votes are transferred, choose the candidate with the
+least amount of votes and exclude them from the list of continuing
+candidates. Also transfer all of their votes according to the next
+preference appearing on each of the votes in his pile. The transfer
+value of the ballots shall remain unchanged. 
+\item if there is more than one elected candidate, first transfer
+the surplus of the candidate who has the largest surplus. If after a
+transfer of surplus, a continuing candidate exceeds the quota, declare them elected and transfer their surplus, only after all of the earlier elected candidates' surpluses have been dealt with.
+\item at transfer stage, candidates who are already elected or eliminated receive no vote. 
+\end{enumerate}
+\end{center}
+
+\section{The Mathematical Specification}
+
+The count is constituted of some key components, all of which appear in a comprehensive certificate for the counting process:
+\begin{enumerate}
+\item candidates competing in the election
+\item number of vacancies
+\item quota of the election
+\item ballots consisting of a list of candidates to be ranked and a fractional value of the ballot
+\item stages of the counting (or computation)
+\end{enumerate}
+At every non-final stage of the counting, we need to know that if there are ballots to be counted, how the votes have been distributed up to now, what is the tally of each candidate, and if any candidate was elected or eliminated from the election. Therefore, for stages of the count to thoroughly inform the scrutineers of how the situation of the count is at the moment, it is necessary and sufficient to contain the following components:
+\begin{enumerate}
+\item the (possibly) uncounted ballots
+\item a group of candidates called \emph{elected} candidates
+\item a group of candidates called \emph{continuing} candidates
+\item a group of candidates already elected who have exceeded the quota
+\item the tally of votes of each candidate
+\item the set of ballots that have been counted for each individual candidate.
+\end{enumerate}
+In order to specify the protocol in a precise formal language, we introduce symbols that characterise these integral parts of the computation. 
+We reserve the symbols C and B for the set of candidates and the set of ballots, respectively. Here a ballot $b$ $\in$ $B$ has two parts: one part is a list of candidates and the other is the value that the ballot has. So a ballot $b$ is a pair $(l,q)$, for some $l\in$ \textsf{List} $(C)$ and a fractional number $q\in$ $\mathbb{Q}$.  
+The character $ba\in B$, is reserved to show the set of ballots
+which require to be counted in each single state of the count
+($\mathit{ba}$ for ``ballots requiring attention''). The tallying
+operation done in a hand-count election is formalised by function
+$t$. Item 6 above is expressed by the function pile $p$. At each
+stage of the count for any candidate $c$, $p(c)$ determines which
+votes are given to the candidate $c$. The list $bl\in$
+\textsf{List}$(C)$ which is the backlog, is the list of already
+elected candidates whose votes are yet to be transferred. The
+notation $e$ (for ``elected'') and $h$ (for ``hopeful'', as $c$
+already represents candidates) respectively represent the list of elected and continuing candidates at each stage. 
+
+
+We should note that the use of lists, instead of sets, for ballots, and continuing or elected candidates is simply for the convenience of formalisation in a theorem prover. But the counting rules ,defined shortly afterwards, make no essential use of this representation. 
+
+
+Moreover, we must encapsulate the concept of stages of the count mathematically. To this end, we use two kind of judgements, called non-final and final judgements.\\
+
+
+\noindent\textbf{Non-final Judgement.}
+$qu,st,\mathcal{L}   \vdash  \mathsf{NonFinal}(ba,t,p,bl,e,h)$ :
+
+\begin{small}
+In an election, assuming we have a quota $qu$, initial number of vacancies $st$, and a list $\mathcal{L}$ of all candidates competing in the election, \textsf{NonFinal}$(ba,t,p,bl,e,h)$ is an intermediate stage of the computation, where $ba$ is the list of uncounted ballots at this point, for a candidate $c$, $t(c)$ is the tally recording the number of votes $c$ has received up to this point, $p (c)$ computes the pile of votes for the candidate $c$, $bl$ is the list of elected whose surplus have not yet been transferred, $e$ is the list of elected candidates by this point, and $h$ is the list of continuing candidates up to this stage.
+\end{small}\\
+
+
+\noindent\textbf{Final Judgement.}
+$qu,st,\mathcal{L}   \vdash  \mathsf{Final}(w)$:
+
+\begin{small}
+In an election, assuming we have a quota $qu$, initial number of vacancies $st$, and a list $\mathcal{L}$ of all candidates competing in the election, \textsf{Final}$(w)$ is a final stage of the computation, where $w$ is the final list consisting of all of the declared elected candidates. 
+\end{small}
+
+The formalised protocol has six rules which specify how count ballots, when to elect a candidate as one of the winners, who to eliminate from the election, and where to terminate the count by declaring all of the winners. We begin by the rule \emph{count} which determines when and how to count ballots. 
+
+\begin{definition}[count]
+Suppose for $ba\in$\textsf{List}$(B)$, $t: C\rightarrow\mathbb{Q}$, $p: C\rightarrow$\textsf{List}$(B)$, $bl\in$\textsf{List}$(C)$, $e, h\in$\textsf{List}$(C)$, and the non-final judgement \textsf{NonFinal}$(ba, t, p, bl, e, h)$ is the current stage of the computation. Then we can move to  \textsf{NonFinal}$(ba_{\epsilon}, nt, np, bl, e, h)$ as the next stage of the computation if the conditions below are met.
+\begin{center}
+\begin{tabular}{c}
+\textsf{NonFinal}$(ba, t, p, bl, e, h)$\\
+\hline
+\textsf{NonFinal}$(ba_{\epsilon}, nt, np, bl, e, h)$
+\end{tabular}
+$count$
+\end{center}  
+\begin{enumerate}
+\item $ba$ is not empty, i.e. $ba \neq []$
+\item if a candidate $c$ is not continuing, then $c$'s pile and tally remain the same,i.e. $\forall c\notin h,$ $np(c)= p(c)$ and $nt(c)= t(c)$
+\item if a candidate $c$ is continuing, then find all of the ballots which have $c$ as their first continuing preference and put them in the pile of $c$, i.e. $\forall c\in h,$ $np (c) = p (c) \mbox{++}$ $l_c$, and $nt(c)$ equals to the sum of values of the ballots in the updated pile\\
+\end{enumerate}
+\end{definition}
+
+As the definition above shows, counting of ballots happens according to \emph{first continuing preferences}. This means that in the first component of each ballots, which is a list, we look for the candidate who is neither elected nor eliminated and their name precedes all the other whose name appears in the list part of the ballot. Then we count such a ballot for this candidate.
+
+
+When counting the first preferences is dealt with, we elect all of those candidates who have reached the quota and announce them as elected. Subsequently, a new fractional value is computed according to formula (\ref{eq:tv}) for the each of these candidates' surpluses. The candidates are removed from the list of continuing candidates and appended to the backlog in order of the amount of their tallies. 
+\begin{definition}[elect]
+Assume \textsf{NonFinal} $(ba_{\epsilon}, t, p, bl, e, h)$ is a judgement and $ba_{\epsilon}$ is the empty list of ballots. Then we have the following rule whenever there exists $l\in$\textsf{List} $(C)$, a list of candidates to be elected, such that each of the conditions below hold:
+
+\begin{center}
+\begin{tabular}{c}
+\textsf{NonFinal} $(ba_{\epsilon}, t, p, bl, e, h)$\\
+\hline
+\textsf{NonFinal} $(ba_{\epsilon}, t, np, nbl, ne, nh)$
+\end{tabular}
+$elect$
+\end{center} 
+\begin{center}
+\begin{enumerate}
+\item length of the list $l$ is less than or equal to $st$ $-$
+\textsf{length}$(e)$ (there are enough vacant seats)
+\item every candidate in the list $l$ has reached (or exceeded) the
+quota $qu$
+\item the list $l$ is ordered with respect to the number of votes each elected candidate (whose name appears in $l$) has received.
+\item the updated list of elected candidates $ne$, contains every already elected candidates (in $e$) plus the ones appearing in the list $l$
+\item the updated list $nh$ has every continuing candidate whose name is in $h$, except those whose name also exists in $l$
+\item $nbl$ equals to $bl$ appended by the list $l$,i.e. $nbl$ $=$ $bl$ \mbox{$++$} $l$
+\item if a candidate $c$ is not in the list $l$, then pile of $c$ is kept the same,i.e. $\forall c\notin l,  np(c) =p(c)$
+\item if a candidate $c$ is in $l$, then update their pile by
+keeping the votes already attributed to them, but changing the value
+of those votes to a new fractional value according to formula
+(\ref{eq:tv}).
+
+\end{enumerate}
+\end{center}
+\end{definition}
+If the number of the elected candidates equals to vacancies, then the computation terminates and all of the winners are declared by the rule \emph{ewin}.
+
+\begin{definition}[ewin]
+Let \textsf{NonFinal} $(ba, t, p, bl, e, h)$ be a stage of the computation. The inference rule \emph{ewin} asserts that \textsf{winners} $(e)$ is the next judgement, provided that \textsf{length} $(e) =$ \textsf{st}.
+\begin{center}
+\begin{tabular}{c}
+\textsf{NonFinal} $(ba, t, p, bl, e, h)$\\
+\hline
+\textsf{Final} $(e)$
+\end{tabular}
+$ewin$
+\end{center}
+\end{definition}
+In case where the number of elected candidates and those who are still continuing put together does not exceeds the quota, then we announce all of them as winners and finish the count.
+ \begin{definition}[hwin]
+If \textsf{NonFinal} $(ba, t, p, bl ,e, h)$ is a judgement and $($\textsf{length} $(e)$ $+$ \textsf{length} $(h) \leq$ \textsf{st}$)$, then we can transit to the stage \textsf{Final} $(e$ $\mbox{++}$ $h)$.
+\begin{center}
+\begin{tabular}{c}
+\textsf{NonFinal} $(ba, t, p, bl ,e, h)$\\
+\hline
+\textsf{Final} $(e$ $\mbox{++}$ $h)$
+\end{tabular}
+$hwin$
+\end{center}
+\end{definition}
+
+We may reach a stage of the computation where there is no ballot left to count, no one has exceeded the quota, the number of elected candidates is strictly less than the vacancies, and there is at least one candidate who has already been elected but their surplus votes awaits to be distributed. Then the rule \emph{transfer} takes the first candidate in the backlog out and places their votes into the list of ballots to be dealt with later.  
+\begin{definition}[transfer]
+Suppose \textsf{NonFinal} $(ba_{\epsilon}, t, p, bl, e, h)$ is the current judgement. Then the rule \emph{transfer} asserts \textsf{NonFinal} $(nba, t, np, nbl, e, h)$ is the judgement we reach to:
+\begin{center}
+\begin{tabular}{c}
+\textsf{NonFinal} $(ba_{\epsilon}, t, p, bl, e, h)$\\
+\hline
+\textsf{NonFinal} $(nba, t, np, nbl, e, h)$
+\end{tabular}
+$transfer$
+\end{center}
+
+\noindent and the side conditions for applying the rule are
+\begin{enumerate}
+\item there are still seats to fill, i.e. \textsf{length} $(e) < st$
+\item no candidate has reached the quota,i.e. $\forall c', c'\in h\rightarrow (t (c) < qu)$
+\item there exist a list $l\in$\textsf{List}$(C)$ and a candidate $c'$ such that 
+\begin{enumerate}
+\item[3.1] $c'$ is the first candidate in the backlog and $l$ is the tail of $bl$, i.e. $bl= c'::l$
+\item[3.2] remove $c'$ from the backlog $bl$ and update it, i.e. $nbl= $ $l$
+\item[3.3] move the votes in the pile of $c'$ to the list of uncounted ballots, $nba$ $= p(c')$
+\item[3.4] empty the pile of $c'$, i.e. $np(c')=$ $ba_{\epsilon}$
+\item[3.5] do not tamper with pile of candidates other than $c'$, i.e. $\forall c'', c''\neq c'\rightarrow np(c'') = p(c'')$.
+\end{enumerate}
+\end{enumerate}
+\end{definition}
+
+Finally, it is possible that we obtain a situation where one candidate has to be eliminated from the counting process. The rule \emph{elim} specifies when and how to proceed in such conditions.
+\begin{definition}[elim]\label{elim:rule}
+Suppose \textsf{NonFinal} $(ba_{\epsilon}, t, p, [], e, h)$ is the current stage of computation. If  \textsf{st} $< ($\textsf{length} $(e)$ $+$ \textsf{length} $(h))$, and no candidate has reached the quota  then subject to below conditions by the rule \emph{elim},  we move to the judgement \textsf{NonFinal} $(nba, t, np, [], e, h)$. 
+\begin{center}
+\begin{tabular}{c}
+\textsf{NonFinal} $(ba_{\epsilon}, t, p, [], e, h)$\\
+\hline
+\textsf{NonFinal} $(nba, t, np, [], e, h)$
+\end{tabular}
+$elim$
+\end{center}
+
+\begin{enumerate}
+\item All continuing candidates are below the quota
+\item there exists a weakest candidate $c'$ such that
+\begin{enumerate}
+\item[2.1] other continuing candidates have strictly more votes than $c'$ 
+\item[2.2] exclude $c'$ from current continuing list of candidates (namely $h$) and update it to $nh$
+\item[2.3] remove the ballots in the pile of $c'$ without changing the value of those ballots and put them in the list of uncounted ballots, i.e. $nba= p(c')$ and $np(c')= ba_{\epsilon}$.
+\item[2.4] do not tamper with the pile of other candidates, i.e. $\forall c'', c''\neq c'\rightarrow np(c'')= p(c'')$ 
+\end{enumerate}
+\end{enumerate}  
+\end{definition}
+\begin{remark}
+As one can check, clauses in the definition of \emph{elim} match against assertions given in the item 9 of the legislation above.
+\end{remark}
+\begin{remark}\label{rem2:spec}
+Note that in the definition of \emph{elim}, it does not specify how to decide on exclusion of some candidates whose tallies are tied at the least amount. Therefore, the specification of \emph{elim} allows for any tie breaking method between candidates as long as their tallies are equal and less than other continuing candidates. 
+\end{remark}
+
+
+
+\section{The HOL Formalization}
+We laid down a mathematical specification of the protocol in the last section. Each of the notions introduced has a HOL formalised counterpart. The concept of the stages of compuation is captured according to the definition~\ref{jud:hol}. 
+
+\begin{definition}\label{jud:hol}
+Assume ballots, tallies, and piles are type synonyms for \textsf{((cand list)\# rat) list}, \textsf{(cand, rat) list}, and \textsf{(cand\# (ballots list)) list} respectively.\\
+
+%\begin{tabular}{l} 
+\hspace*{0.5cm} \textsf{val} \_ = \textsf{Hol}\_\textsf{datatype `judgement} =\\  
+\begin{tabular}{l}
+  \hspace*{2cm} \textsf{NonFinal}   of \\
+  \hspace*{2.8cm} \textsf{ballots}
+   \# \textsf{tallies}
+   \# \textsf{piles} \# \\
+  \hspace*{2.8cm} \textsf{cand list} 
+   \# \textsf{cand list}
+      \# \textsf{cand list} \\
+   \hspace*{2cm}    $|$ \textsf{Final} of \textsf{(cand list)`;}    
+\end{tabular}
+ \end{definition}
+Note that unlike the mathematical specification, the HOL formalisation realises tallies and piles as list types rather than functions for two reasons; judgements become an instance of equality type class of which we make use when formalising counting rules. Also, this formulation reduces the gap between an actual certificate and its abstract syntactic representation which we refer to as formal certificate. A formal certificate is a list of judgements. 
+
+
+
+To check a formal certificate for correctness, the first step is to formalise the mathematical counting rules in section~3 as predicates in HOL. Recall that each rule has side conditions. We express these constraints by means of auxiliary predicative assertions. There are also implicit conditions hidden in the mathematical representation. For example, we expect a valid certificate to have no duplication in the list of elected or continuing candidates, and every candidate must have only one tally and one pile at every non-final judgement. Therefore, we need to define some auxiliary predicates to check such subtleties implicitly existing in the mathematical specification.  Conjunction of these auxiliary definitions formalises individual counting rules in HOL. 
+
+
+The second step is to define functions in HOL which are meant to be the computational counterparts of the HOL specification in the step above. Conjunction of appropriate computational definitions constitutes the computational definition for individual counting rules. These functions are later translated by the built-in mechanisms of CakeML for the purpose of actual computations on an actual certificate. 
+
+
+The last step is to prove equivalence of the HOL specification and the computational assertions. By establishing this correspondence, we demonstrate that the computational parts meet the expectation of their specification. We therefore validate a formal certificate if and when it is indeed valid. To show how the process concretely proceeds, we indicate the aformentioned phases put togather for the case of \emph{elim} rule. However, we should note that our actual formalisation seperates the three steps to enhance readability and clearance of the programming.  
+
+\subsection{The Case of the Elimination Rule}
+As mentioned, the mathematical specification of rules in section~3 hides some  conditions. Among the implicit conditions for \emph{elim} rule is that every candidate's name appears only once in the initial list of competing candidates. The predicate \textsf{Valid\_Init\_CandList} encapsulates this constraint. 
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerSpec.Valid_Init_CandList_def}
+\end{holthmenv}
+Moreover, every candidate has exactly one tally in the premise and conclusion of the rule. We express this condition by the following.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerSpec.Valid_PileTally_def}
+\end{holthmenv}
+We also have the computational twins for both of the predicates above. Assume the lists $t$ and $l$ are given. Then the function \textsf{Valid\_PileTally\_dec1} decides if every first element of each pair in $t$ is a member of $l$. 
+\begin{holthmenv}
+  \HOLthm[width=80]{Checker.Valid_PileTally_dec1_def}
+\end{holthmenv} 
+Additionally, the function \textsf{Valid\_PileTally\_dec2} determins if each element of $l$ appears as the first component of a pair in $t$.
+\begin{holthmenv}
+  \HOLthm[width=80]{Checker.Valid_PileTally_dec2_def}
+\end{holthmenv}  
+W prove that the formal specification \textsf{Valid\_PileTally\_def} enforces correctness of the function \textsf{Valid\_PileTally\_dec1}.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC1}
+\end{holthmenv}  
+
+Also the specification \textsf{Valid\_PileTally\_def} implies correctness of \textsf{Valid\_PileTally\_dec2} witnessed by the theorem below.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC2}
+\end{holthmenv} 
+Conversely, correctness of the computational definition \textsf{Valid\_PileTally\_dec1} entails that every element appearing as the first component of a pair in $t$,  belongs to the list $l$.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.PileTally_DEC1_to_PileTally}
+\end{holthmenv} 
+The same theorem guarantees that if \textsf{Valid\_PileTally\_dec1} holds, then every element of $l$ is the first component of a pair in $t$.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.PileTally_DEC2_IMP_PileTally}
+\end{holthmenv}
+Hence, putting the four theorems togather, we obtain equivalence of the specification \textsf{Valid\_PileTally\_def} with its computational counterparts.
+
+ 
+
+Aside from the implicit conditions, \emph{elim} has explicit constraints to meet for its legal applications. For example, item~2.2 in definition~\ref{elim:rule} states that the difference between the continuing list of candidates in the premise of the rule with the one in the conclusion is that the weakest candidate is no longer a continuing candidate in the comclusion of the rule. The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element. 
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerSpec.equal_except_def}
+\end{holthmenv}
+To compute when indeed two list match with the exception of one element, we define the function \textsf{equal\_except\_dec}. 
+\begin{holthmenv}
+  \HOLthm[width=80]{Checker.equal_except_dec_def}
+\end{holthmenv} 
+This function is proven to satisfy the specification laid down by \textsf{equal\_except} predicate.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.EQE_REMOVE_ONE_CAND}
+\end{holthmenv} 
+Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} is unique.
+ \begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
+\end{holthmenv}
+Therefore, when we validate an instance of elimination rule application, the list of continuing candidates in the premise and conclusion of the rule are proven to be the same with the exception of one candidate removed from the former. The fact that the candidate removed is the weakest, is established by other assertions which are expressed along with \textsf{equal\_except} as conjuncts of the elimination rule's defintion.
+
+ 
+ 
+Having defined the implicit and explicit side conditions in the definition of \emph{elim}, we can present the formlisation of this rule in HOL as a predicate.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerSpec.ELIM_CAND_def}
+\end{holthmenv} 
+
+\textsf{ELIM\_CAND} is defined on three kind of input; a candidate, a triple composed of three fixed parameters which are the quota, vacancies, and the initial list of candidates, and two judgements one of which is the premise and the other is the conclusion of the rule. Each of the conjuncts corresponds to a condition specified in the definition~\ref{elim:rule}, as we already demonstrated it for a few cases. \textsf{ELIM\_CAND\_dec} is the computational realisation of the \textsf{ELIM\_CAND}.
+\begin{holthmenv}
+  \HOLthm[width=80]{Checker.ELIM_CAND_dec_def}
+\end{holthmenv} 
+We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain entailment of the computational \textsf{ELIM\_CAND\_dec} by its specification.  
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.Logical_elim_to_Functional_Elim}
+\end{holthmenv} 
+Furthermore, correctness of the computational elimination rule implies satisfcation of  its predicative formalisation. 
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.Functional_Elim_to_Logical_elim}
+\end{holthmenv}
+The same procedure is followed to acheive formal specification and computational definitions for the rest of counting rules in the section~3. 
+
+\subsection{The Checker formalisation}
+To check a given formal certificate for correctness, we mainly need to validate if a transition from an element in the judgement list to the next element is legitimately doable by application of a rule. On the other hand, rules have been proven applicable only when they meet their respective specification. Since rules have some side conditions which make them distinct, this implies that at every stage actually only one of them applies. Therefore, we specify the correct transition-check to be a disjunction of the predicative counting rules.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerSpec.valid_judgements_def}
+\end{holthmenv}
+ To compute correct transitions between consecutive formal certificate elements, we recursively call the disjunction of the computational counting rules.
+\begin{holthmenv}
+  \HOLthm[width=80]{Checker.valid_judgements_dec_def}
+\end{holthmenv}
+The specification \textsf{valid\_judgements} matches with its computational twin.
+\begin{holthmenv}
+  \HOLthm[width=80]{CheckerProof.valid_judgements_thm}
+\end{holthmenv}
+Note that we require the last judgement of a formal certificate to be of final type.
+ Moreover, we impose the condition that the first element of a judgement be an \emph{intial} judgement. An intial judgement is one in which every candidates tally is intially set to zero, their piles are empty, and the backlog and the list of elected candidates are both emoty as well. For checking a formal certifcate we therefore first  certify if the the certificate starts at an initial stage. Then recursively we continue checking if transitions have happened correctly, and if the terminating state is a final one where winners are declared. 
+ \begin{holthmenv}
+  \HOLthm[width=80]{CheckerSpec.valid_certificate_def}
+\end{holthmenv}
+  The above specification of the checker, therefore, corresponds to the following computational formal certificate checker. 
+ \begin{holthmenv}
+  \HOLthm[width=80]{Checker.Check_Parsed_Certificate_def}
+\end{holthmenv} 
+Hence a formal certificate is validated if and when it is valid according to the HOL specification of \textsf{valid\_certificate}. As we showed, the HOL specification is a formalisation of the mathematical specification. The mathematical specification is simply a symbolic representation of the counting protocol. Consequently, a formal certificate is validated if and only if it matches with the protocol.   
+  
+
+\section{Translation into CakeML and Code Extraction}
+ 
+ 
+\section{Discussion and Conclusion} 
+\section{Outline}\label{sec:out}
+
+
 Certificable / Verifiable Computation.
 \begin{itemize}
   \item programs produce results with correctness proofs
