@@ -13,9 +13,9 @@ PARENT_HOLHEAP = ../heap
 EXTRA_CLEANS = $(HOLHEAP) $(HOLHEAP).o
 all: $(HOLHEAP)
 
-BARE_DEPS = ../check_countCompileTheory\
-						$(CAKEMLDIR)/compiler/proofs/compilerProofTheory\
-						$(CAKEMLDIR)/compiler/backend/x64/proofs/x64_configProofTheory
+BARE_DEPS = $(CAKEMLDIR)/compiler/proofs/compilerProofTheory\
+						$(CAKEMLDIR)/compiler/backend/x64/proofs/x64_configProofTheory\
+						../check_countCompileTheory
 
 DEPS = $(patsubst %,%.uo,$(BARE_DEPS)) $(PARENTHEAP)
 
