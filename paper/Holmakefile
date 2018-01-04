@@ -6,7 +6,7 @@ INCLUDES = $(CAKEMLDIR)/misc .. ../compilation/proofs
 DEPS = ppLib ../CheckerProofTheory ../compilation/proofs/check_countProofTheory
 
 munge.exe : $(patsubst %,%.uo,$(DEPS))
-	$(protect $(HOLDIR)/bin/mkmunge.exe) $(DEPS)
+	$(protect $(HOLDIR)/bin/mkmunge.exe) -b ../compilation/proofs/heap $(DEPS)
 
 paper.tex : paper.htex munge.exe overrides
 	./munge.exe -m';' overrides < $< > $@

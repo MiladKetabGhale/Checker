@@ -172,8 +172,8 @@ val loop_spec = Q.store_thm("loop_spec",
        &UNIT_TYPE () uv *
        STDIO (
          dtcase loop params i j1 j0 (MAP implode (linesFD fs 0)) of
-         | NONE => add_stdout (fastForwardFD fs 0) "Certificate OK\n"
-         | SOME (err,j) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num(j-i)) fs) (explode err)))`,
+         | NONE => add_stdout (fastForwardFD fs 0) (strlit"Certificate OK\n")
+         | SOME (err,j) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num(j-i)) fs) err))`,
   Induct_on`linesFD fs 0` \\ rw[]
   \\ qpat_x_assum`_ = linesFD _ _`(assume_tac o SYM) \\ fs[]
   \\ simp[Once loop_def]
@@ -186,22 +186,8 @@ val loop_spec = Q.store_thm("loop_spec",
     \\ reverse xif
     >- (
       xlet_auto >- xsimpl
-      \\ xapp_spec output_STDIO_spec
-      \\ xsimpl
-      \\ instantiate
-      \\ imp_res_tac STD_streams_stderr
-      \\ fs[stdo_def,get_file_content_def,PULL_EXISTS]
-      \\ instantiate
-      \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-      \\ xsimpl
-      \\ simp[insert_atI_end]
-      \\ simp[add_stdo_def] \\ rw[]
-      \\ SELECT_ELIM_TAC
-      \\ conj_tac >- metis_tac[STD_streams_stderr]
-      \\ rw[]
-      \\ fs[stdo_def]
-      \\ simp[up_stdo_def,LENGTH_explode]
-      \\ xsimpl )
+      \\ xapp_spec output_stderr_spec
+      \\ simp[])
     \\ reverse(Cases_on `∃inp pos. stdin fs inp pos`)
     >- ( (* TODO: Move this reasoning out into a separate theorem. *)
       fs[stdin_def,STDIO_def,IOFS_def]
@@ -235,26 +221,14 @@ val loop_spec = Q.store_thm("loop_spec",
       \\ CONV_TAC SWAP_EXISTS_CONV
       \\ qexists_tac`fastForwardFD fs 0`
       \\ xsimpl )
-    \\ xapp_spec output_STDIO_spec
+    \\ xapp_spec output_stderr_spec
     \\ xsimpl
     \\ simp[lineFD_NONE_lineForwardFD_fastForwardFD]
-    \\ `STD_streams (fastForwardFD fs 0)` by simp[STD_streams_fastForwardFD]
-    \\ drule STD_streams_stderr \\ strip_tac
-    \\ fs[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[add_stdo_def]
+    \\ qexists_tac`emp` \\ xsimpl
+    \\ qexists_tac`fastForwardFD fs 0` \\ xsimpl
     \\ DEP_REWRITE_TAC[fastForwardFD_0]
-    \\ fs[lineFD_def,get_file_content_def,UNCURRY]
-    \\ rw[]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[STD_streams_stderr]
-    \\ rw[]
-    \\ fs[stdo_def]
-    \\ simp[up_stdo_def,LENGTH_explode]
-    \\ xsimpl )
+    \\ fs[lineFD_def,get_file_content_def,UNCURRY] \\ rfs[]
+    \\ rveq \\ fs[] \\ xsimpl)
   (* inductive case: read a line from stdin *)
   \\ xcf "loop" (get_ml_prog_state())
   \\ reverse(Cases_on`STD_streams fs`) >- (simp[STDIO_def] \\ xpull)
@@ -262,22 +236,8 @@ val loop_spec = Q.store_thm("loop_spec",
   \\ reverse xif
   >- (
     xlet_auto >- xsimpl
-    \\ xapp_spec output_STDIO_spec
-    \\ xsimpl
-    \\ instantiate
-    \\ imp_res_tac STD_streams_stderr
-    \\ fs[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[add_stdo_def] \\ rw[]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[STD_streams_stderr]
-    \\ rw[]
-    \\ fs[stdo_def]
-    \\ simp[up_stdo_def,LENGTH_explode]
-    \\ xsimpl )
+    \\ xapp_spec output_stderr_spec
+    \\ simp[])
   \\ reverse(Cases_on `∃inp pos. stdin fs inp pos`)
   >- ( (* TODO: move this reasoning out into a separate theorem *)
     fs[stdin_def,STDIO_def,IOFS_def]
@@ -309,22 +269,8 @@ val loop_spec = Q.store_thm("loop_spec",
   >- (
     reverse conj_tac >- (EVAL_TAC \\ rw[])
     \\ xlet_auto >- xsimpl
-    \\ xapp_spec output_STDIO_spec
-    \\ fs[] \\ rveq
-    \\ `STD_streams (lineForwardFD fs 0)` by simp[STD_streams_lineForwardFD]
-    \\ drule STD_streams_stderr \\ strip_tac
-    \\ fs[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[add_stdo_def]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[STD_streams_stderr,STD_streams_forwardFD]
-    \\ rw[]
-    \\ fs[stdo_def]
-    \\ simp[up_stdo_def,LENGTH_explode]
-    \\ xsimpl )
+    \\ xapp_spec output_stderr_spec
+    \\ fs[] )
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ xlet_auto >- xsimpl
@@ -386,7 +332,7 @@ val parse_line_spec = Q.store_thm("parse_line_spec",
      (STDIO fs)
      (POSTv v. &UNIT_TYPE () v *
        dtcase parse_line parser name (MAP implode (linesFD fs 0))
-       of INR msg => STDIO (add_stderr (lineForwardFD fs 0) (explode msg))
+       of INR msg => STDIO (add_stderr (lineForwardFD fs 0) msg)
         | INL (x,ls) => Q x)`,
   xcf "parse_line" (get_ml_prog_state())
   \\ reverse(Cases_on `∃inp pos. stdin fs inp pos`)
@@ -415,25 +361,13 @@ val parse_line_spec = Q.store_thm("parse_line_spec",
     reverse conj_tac >- (EVAL_TAC \\ rw[])
     \\ fs[GSYM linesFD_nil_lineFD_NONE]
     \\ xlet_auto >- xsimpl
-    \\ xapp_spec output_STDIO_spec
+    \\ xapp_spec output_stderr_spec
     \\ xsimpl
-    \\ `STD_streams (lineForwardFD fs 0)` by simp[STD_streams_lineForwardFD]
-    \\ drule STD_streams_stderr \\ strip_tac
-    \\ first_assum mp_tac
-    \\ simp_tac(srw_ss())[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ strip_tac
     \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[add_stdo_def] \\ rw[]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[]
-    \\ rw[] \\ fs[]
-    \\ imp_res_tac stdo_UNICITY_R \\ rveq
-    \\ simp[up_stdo_def,LENGTH_explode]
     \\ simp[parse_line_def]
-    \\ xsimpl )
+    \\ CONV_TAC SWAP_EXISTS_CONV
+    \\ qexists_tac`lineForwardFD fs 0`
+    \\ xsimpl)
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ qmatch_goalsub_abbrev_tac`STDIO fs1`
@@ -448,22 +382,8 @@ val parse_line_spec = Q.store_thm("parse_line_spec",
   >- (
     reverse conj_tac >- (EVAL_TAC \\ rw[])
     \\ xlet_auto >- xsimpl
-    \\ xapp_spec output_STDIO_spec
-    \\ drule STD_streams_stderr \\ strip_tac
-    \\ first_assum mp_tac
-    \\ simp_tac(srw_ss())[stdo_def,get_file_content_def,PULL_EXISTS]
-    \\ strip_tac
-    \\ instantiate
-    \\ simp[REWRITE_RULE[EVAL``stdErr``]stderr_v_thm]
-    \\ xsimpl
-    \\ simp[insert_atI_end]
-    \\ simp[add_stdo_def]
-    \\ SELECT_ELIM_TAC
-    \\ conj_tac >- metis_tac[]
-    \\ rw[]
-    \\ imp_res_tac stdo_UNICITY_R \\ rw[]
-    \\ simp[up_stdo_def,LENGTH_explode]
-    \\ xsimpl )
+    \\ xapp_spec output_stderr_spec
+    \\ simp[])
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
   \\ xapp
@@ -537,9 +457,8 @@ val check_count_spec = Q.store_thm("check_count_spec",
        &UNIT_TYPE () uv *
        STDIO
          (dtcase check_count (MAP implode (linesFD fs 0)) of
-          | NONE => add_stdout (fastForwardFD fs 0) "Certificate OK\n"
-          | SOME (err,n) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num n) fs)
-                              (explode err)))`,
+          | NONE => add_stdout (fastForwardFD fs 0) (strlit"Certificate OK\n")
+          | SOME (err,n) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num n) fs) err))`,
   xcf "check_count" (get_ml_prog_state())
   \\ xfun`quota_fun`
   \\ xapp_spec (Q.ISPECL[`RAT_TYPE`,`parse_quota`]parse_line_spec)
@@ -693,7 +612,7 @@ val check_count_correct = Q.store_thm("check_count_correct",
      semantics_prog (init_state (basis_ffi cls fs)) init_env check_count_prog
        (Terminate Success io_events) ∧
      extract_fs fs io_events = SOME fs' ∧
-     (stdout fs' (init_out ++ "Certificate OK\n")
+     (stdout fs' (strcat init_out (strlit"Certificate OK\n"))
       ⇔ Check_Certificate (MAP implode (linesFD fs 0)))`,
   rw[]
   \\ imp_res_tac check_count_sem
@@ -713,6 +632,7 @@ val check_count_correct = Q.store_thm("check_count_correct",
   \\ simp[GSYM check_count_thm]
   \\ strip_tac
   \\ imp_res_tac stdo_UNICITY_R
-  \\ fs[]);
+  \\ fs[] \\ rw[]
+  \\ pop_assum(mp_tac o Q.AP_TERM`strlen`) \\ simp[]);
 
 val _ = export_theory();
