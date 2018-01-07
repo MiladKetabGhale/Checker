@@ -1,4 +1,5 @@
 \documentclass{llncs}
+\usepackage{bussproofs}
 \usepackage{holtexbasic,url,amsmath,environ}
 \renewcommand{\HOLinline}[1]{\ensuremath{#1}}
 \renewcommand{\HOLKeyword}[1]{\mathsf{#1}}
@@ -21,7 +22,8 @@ Ramana~Kumar\inst{2}}
 Data61, CSIRO and UNSW}
 \maketitle
 \begin{abstract}
-Abstract goes here
+We introduce a new framework for verifying electronic vote counting results that are based on the Single Transferable Vote scheme (STV). We demonstrate the process by formalizing an STV counting protocol inside the theorem prover HOL. Then we obtain a verified checker inside HOL that validates formal certificates. By means of a built-in provably correct mechamism, we translate the checker from HOL into CakeML. Combining the translated checker, translated parser, and the I/O aspects inside CakeML environment, we prove that the combination performs the computation for checking real certificates correctly down to the machine code. Therefore, we achieve an extraordinary level of verification for deciding which election results are authentic. Besides requiring a low amount of labor, our formalization is modular in that it can be easily adapted to accommodate other STV shcemes. Furthermore, the executable extracted from CakeML is capable of handling real size elections.  
+ 
 \end{abstract}
 \section{Introduction}\label{sec:intro}
 
@@ -52,12 +54,15 @@ Our fourth step is extraction of executable that is correct down to the machine 
 
 Furthermore, to perform computation on an actual certificate, we combine our parser defined in HOL with I/O functions of CakeML, and the computational checker. These are put together as a deeply embedded CakeML function, which is named \textsf{check\_count}. The behaviour of this function is stated as Hoare triples in syle of separation logic. Its behaviour is proven correct with respect to a CakeML formalisation of the characteristic formula, which is a higher-order logic assertion employed to state properties about impure parts of a program. Consequently, we come to verify that \textsf{check\_count} is extensionally equivalent to the computational checker in the HOL. Hence, we validate an actual certificate if and only if its corresponding  formal certificate is valid. Finally to obtain executable code, we evaluate a built-in CakeML function called \textsf{compiler} on our program. There exists a correctness theorem about the compiler itself. We instantiate this theorem with our deeply embedded \textsf{check\_count} program and the theorem proved about its behaviour, to obtain a correctness result on this particular run of the compiler. This result roughly sates that the behaviour of the \textsf{check\_count} on the machine level coincides with its behaviour on the top-level. 
 
-\begin{itemize}
 
-\item
-to do: tests of the executable. Here tests on the certificates output by counting programs is to be presented. The tests should reflect complexity of the computation with regards to number of ballots, candidates, and number of seats.
-\item to do: reviewing related works. This one is almost right away. But will look to see if there is more to mention.
-\end{itemize}
+
+Our formalization has some advantages. We accomplish the phenomenal degree of verification down to machine code  in a very cost-effective way.Also all of the steps are taken inside verified environments. We do not outsource any part of our task to other sources such as third party theorem provers or code verifiers through untrusted, unverified translation methods. Moreover, it enjoys modularity. Most of STV algorithms differ mainly in some small aspects. On the other hand, we capture the protocol in terms of stand-alone HOL assertions. Thereofore to formalise other STV algorithms, we essentially need to modify specific part of one or some rules and then discharge the related proofs rather than throwing the entire formalization away to strat from the scratch. Furhtermore, our work extends beyond mere theorem proving as the executable extracted from CakeML is capable of dealing with real size elections. 
+ 
+
+
+
+
+\noindent\textbf{Related Work.} Alkassar et al~\cite{EAlk} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{}, they obtain some pre- and postconditions, which are next generalized syntatically and then implemented in the Isabella theorem prover to be discharged. Even though this metohd introduces a uniform platform for dealing with certifiying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{LNos} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DGre} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation. On the other hand, in context of vote counting verification, merely certifying implementations exist~\cite{DPat,DPati,MKet}. For STV, in particular, Ghale et al~\cite{MKet} and Pattinson et al~\cite{DPati} verify some STV schemes inside Coq and output a certificate for each input upon every execution of the extracted Haskell program. Nonetheless, they do not provide any verified checker to independently scrutinize the certificate for authenticity.           
 
 \section{The Protocol and Its Mathematical Specification}
 STV is an election scheme used in multi-seated constituencies and is designed to reflect the proportional preferences of voters in that district for competing candidates. The preference is expressed by ordering candidates on each ballot. Then the count proceeds by assigning the value of the ballot to the most preferred continuing candidate. A continuing candidate is one who has neither been elected nor eliminated from the initial list of competing candidates. When a candidate is not continuing any more, they are not considered in the preferences of ballots any further. Additionally, transfer of ballots of the elected or eliminated candidates may occur until all vacancies are filled.  
@@ -312,7 +317,43 @@ As one can check, clauses in the definition of \emph{elim} match against asserti
 Note that in the definition of \emph{elim}, it does not specify how to decide on exclusion of some candidates whose tallies are tied at the least amount. Therefore, the specification of \emph{elim} allows for any tie breaking method between candidates as long as their tallies are equal and less than other continuing candidates. 
 \end{remark}
 
+We are now in a position to present an instance of an actual certificate. As the figure illustrates, the initial value of each ballot is set to the rational number 1. After each instance of \emph{elect} rule application, this value is updated according to the formula mentioned above.
+\begin{small}
+\begin{figure}[b]
+\begin{tabular}{c@{\hspace{2cm}}c}
+%\\[0.5em]
+    \AxiomC{\scriptsize 133\%50} 
+    \noLine
+     \UnaryInfC{\scriptsize 2}
+     \noLine
+     \UnaryInfC{\scriptsize [A,B,C]}
+    \noLine
+     \UnaryInfC{\scriptsize [A,C]}
+     \RightLabel{\tiny hwin}
+    \UnaryInfC{\tiny []; A[3\%1] B[111\%100] C[133\%100]; A[] B[] C[$b_{5}$,([C],11\%100),([C,B],11\%100),([C],11\%100)]; []; [A]; [C]}
+    \RightLabel{\tiny count}
+    \UnaryInfC{\tiny [$b_4$,([B,C],11\%100)]; A[3\%1] B[111\%1000] C[61\%500], A[] B[$b_4$,([B,C],11\%100)] C[$b_{5}$,([C],11\%100),([C,B],11\%100)]; []; [A]; [C]}
+   \RightLabel{\tiny elim}
+   \UnaryInfC{\tiny []; A[3\%1] B[111\%1000] C[61\%500], A[] B[$b_4$,([B,C],11\%100)] C[$b_5$,([C],11\%100),([C,B],113\%1000)]; []; [A]; [B,C] }
+  \RightLabel{\tiny count}
+  \UnaryInfC{\tiny [([A,C],11\%100),([A,B,C],11\%100),([A,C,B],11\%100)]; A[3\%1] B[1\%1] C[1\%1]; A[] B[$b_4$] C[$b_5$]; []; [A]; [B,C]}
+   \RightLabel{\tiny transfer}
+   \UnaryInfC{\tiny []; A[3\%1] B[1\%1] C[1\%1]; A[([A,C],11\%100),([A,B,C],11\%100),([A,C,B],11\%100)] B[$b_4$] C[$b_5$]; [A]; [A]; [B,C]}
+ \RightLabel{\tiny elect}
+ \UnaryInfC{\tiny []; A[3\%1] B[1\%1] C[1\%1]; A[$b_1$,$b_2$,$b_3$] B[$b_4$] C[$b_5$]; []; []; [A,B,C]}
+   \RightLabel{\tiny count}
+   \UnaryInfC{\tiny bs; A[0\%1] B[0\%1] C[0\%1]; A[] B[] C[]; []; []; [A,B,C]}
+   \DisplayProof
+\end{tabular}
+\caption{example of a certificate}
+\label{fig;figure1}
+\end{figure}
+\end{small}
 
+\begin{example}
+Suppose in an election, there are three candidates and two vacancies, where the initial set of ballots is $ba= [b_1,b_2,b_3,b_4,b_5]$, where $b_1=([A,C],1\%1)$, $b_2=([A,B,C],1\%1)$, $b_3=([A,C,B],1\%1)$, $b_4=([B,A],1\%1)$, and $b_5=([C,B,A],1\%1)$. Figure~\ref{fig;figure1} is the certificate obtained for this small election. The first three lines are the quota, number of seats available, and the list of all of competing canididates in the election. The fourth line is the final judgement where winners are declared. The rest of the lines represent non-final judgements. Rules are applied until we reach to an initial judgement where everyone's tally is zero, no one has been elected, and the backlog and pile are both empty.  
+
+\end{example}
 
 \section{The HOL Formalization}
 We laid down a mathematical specification of the protocol in the last section. Each of the notions introduced has a HOL formalised counterpart. The concept of the stages of compuation is captured according to the definition~\ref{jud:hol}. 
@@ -449,7 +490,63 @@ Hence a formal certificate is validated if and when it is valid according to the
 
 \section{Translation into CakeML and Code Extraction}
  
- 
+\section{Experimental Results}
+We have tested our approach against some of the past Australian
+Legislative Assembly elections in ACT for years 2008 and 2012 (figure\ref{ref;figure2}). The certificates have been produced by the Haskell program extracted from our previous formalization of ANU\_Union STV in Coq~\cite{MKet}. 
+\begin{figure}
+\centering
+%\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
+\begin{tabular}{|l |c |c |c |c |c|c|}
+\hline
+electoral & ballots& vacancies& candidates& time (sec)& certificate size (MB)&year\\
+\hline
+%\end{tabular}
+%\begin{tabu} to 0.86\textwidth {X[l] | X[c]  | X[c] | X[c] | X[c] | X[c]}
+%\begin{tabular}{c c c c c c}
+Brindabella &$63334$&$5$&$19$&$86$&$54.4$&2008\\
+Ginninderra &$60049$&$5$&$27$&$118$&83.0&2008\\
+Molonglo &$88266$&$7$&$40$&$329$&211.2&2008\\
+Brindabella&$63562$&$5$&$20$&$75$&74.5&2012\\
+Ginninderra&$66076$&$5$&$28$&$191$&90.1&2012\\
+Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
+\hline
+\end{tabular}
+\caption{ACT Legislative Assembly 2008 and 2012}
+\label{ref;figure2}
+\end{figure}   
+\begin{figure}
+\centering
+\begin{minipage}{.45\textwidth}
+  \centering
+\begin{tabular}{|l |c |c| c|}
+\hline
+ballots &certificate size& time (sec)\\
+\hline
+$300000$&$390.8$&$2076$\\
+$200000$&$253.3$&$938$\\
+$100000$&$131.1$&$461$\\
+\hline
+\end{tabular}
+\caption{Varying list of ballots size}
+\label{ref;figure3}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+  \centering
+\begin{tabular}{|l |c | c|}
+\hline
+candidates& certificate size& time (sec)\\
+\hline
+$5$&$16.5$&$118$\\
+$10$&$43.0$&$186$\\
+$20$&&$302$\\
+\hline
+\end{tabular}
+\caption{Varying number of candidates}
+\label{ref;figure4}
+\end{minipage}
+\end{figure}
+
+Moreover, we have studied behavior of our executable by examining it on certificates output on randomly generated ballots. Figure~\ref{ref;figure3} depicts results on certificates for ranmdomly produced certificates with the number of candidates and vacancies are fix to 20 and 5, respecitively. It appears that the complexity of the program in the number of ballots is quadratic. Also we fix the number of ballots to 100000 and vacancies to one in order to inspect the effect of increase in the number of candidates (Figure~\ref{ref;figure4}). 
 \section{Discussion and Conclusion} 
 \section{Outline}\label{sec:out}
 
