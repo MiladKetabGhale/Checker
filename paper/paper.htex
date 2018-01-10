@@ -4,6 +4,7 @@
 \renewcommand{\HOLinline}[1]{\ensuremath{#1}}
 \renewcommand{\HOLKeyword}[1]{\mathsf{#1}}
 \renewcommand{\HOLConst}[1]{{\textsf{\upshape #1}}}
+\renewcommand{\HOLTyOp}[1]{\textsf{\itshape #1}}
 \renewcommand{\HOLSymConst}[1]{\HOLConst{#1}}
 \NewEnviron{holthmenv}{
   \begin{equation*}
@@ -359,21 +360,14 @@ Suppose in an election, there are three candidates and two vacancies, where the 
 We laid down a mathematical specification of the protocol in the last section. Each of the notions introduced has a HOL formalised counterpart. The concept of the stages of compuation is captured according to the definition~\ref{jud:hol}.
 
 \begin{definition}\label{jud:hol}
-Assume ballots, tallies, and piles are type synonyms for \textsf{((cand list)\# rat) list}, \textsf{(cand, rat) list}, and \textsf{(cand\# (ballots list)) list} respectively.\\
-
-%\begin{tabular}{l}
-\hspace*{0.5cm} \textsf{val} \_ = \textsf{Hol}\_\textsf{datatype `judgement} =\\
-\begin{tabular}{l}
-  \hspace*{2cm} \textsf{NonFinal}   of \\
-  \hspace*{2.8cm} \textsf{ballots}
-   \# \textsf{tallies}
-   \# \textsf{piles} \# \\
-  \hspace*{2.8cm} \textsf{cand list}
-   \# \textsf{cand list}
-      \# \textsf{cand list} \\
-   \hspace*{2cm}    $|$ \textsf{Final} of \textsf{(cand list)`;}
-\end{tabular}
- \end{definition}
+  Assume \HOLty{:ballots}, \HOLty{:tallies}, and \HOLty{:piles} are type synonyms for
+  \HOLty[-ballots,-alist]{:ballots},
+  \HOLty[-tallies,-alist]{:tallies}, and
+  \HOLty[-piles,-alist]{:piles} respectively.
+\begin{holthmenv}
+\HOLthm[width=80]{CheckerSpec.datatype_judgement}
+\end{holthmenv}
+\end{definition}
 Note that unlike the mathematical specification, the HOL formalisation realises tallies and piles as list types rather than functions for two reasons; judgements become an instance of equality type class of which we make use when formalising counting rules. Also, this formulation reduces the gap between an actual certificate and its abstract syntactic representation which we refer to as formal certificate. A formal certificate is a list of judgements.
 
 
