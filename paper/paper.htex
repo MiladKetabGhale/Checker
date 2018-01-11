@@ -19,7 +19,7 @@
 \title{Verified Certificate Checking for Counting Votes}
 \author{
 Milad~K.~Ghale\inst{1}\and
-Dirk~Pattison\inst{1}\and
+Dirk~Pattinson\inst{1}\and
 Ramana~Kumar\inst{2}}
 \institute{Australian National University\and
 Data61, CSIRO and UNSW}
@@ -29,8 +29,9 @@ We approach electronic vote counting as a certified computation where for each e
 
 \end{abstract}
 \section{Introduction}\label{sec:intro}
+Members of the general public outsource the task of vote counting of an election in a democratic system to authorities in order to safeguard their preferences. Therefore    correct, publicly verifiable, transparent election count is a key constituent of establishing trustworthiness in the final outcome. Vote counting methods currently in use fail to meet such expectations. In hand counting methods, to provide the public with some evidence for the process, scrutiny sheets are published. Also independent scrutineers are welcomed to monitor the counting process. However scrutiny sheets are inadequate as costly mistakes have happened in the traditional hand counting methods\cite{}. As a result, computers have come to perform the computation for elections with different counting algorithms including the Single Transferable Vote scheme. These program merely output a final result where winners of the election are announced. Moreover, their source code is kept secret under the excuse of \lq\lq commercial in confidence\rq\rq. On the other hand, elections with STV scheme are complex and have corner cases which are left open to interpretation and, therefore, implementations. Hence efforts to reproduce the same results output by the commercial programs is usually unsuccessful. Consequently the public has no choice other than having plain faith in numerous components employed throughout this process. 
 
-Numerous programs have recently come to carry the task of vote counting based on implementation of some Single Transferable Vote (STV) schemes.  All of these programs are claimed to satisfy the expectations of the protocol. However, there are corner cases in STV protocols that are open to interpretation and, therefore, divergent implementations and computations. Moreover, source code of many of these programs are kept secret under the excuse of \lq\lq commercial in use\rq\rq\cite{} . This in addition to difficulties of the traditional verification methods makes it challenging to verify these programs to decide which one(s) indeed implement the algorithm correctly. Hence, reliability of the computations by aforementioned programs requires huge amount of trust. Furthermore, absence of adequate correctness proofs stands in sharp contrast with election qualitative measures such as universal verifiability whose realisation amounts to providing as many scrutineers as possible with a guarantee for authenticity of the election result.
+ 
 
 
 A cost-effective solution for verification of such programs is to certify them and then verify the certificate. A certifying program outputs a result along with a certificate witnessing correctness of the computation. A checker can, then, check each certificate for correctness. Validation of the program therefore reduces to verification of the certificate checker.  Here, we demonstrate how to carry the task out for STV elections. To this end, we take four steps.
