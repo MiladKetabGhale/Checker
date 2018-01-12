@@ -17,6 +17,18 @@ val stdo_add_other_stdo = Q.store_thm("stdo_add_other_stdo",
 val stdo_lineForwardFD = Q.store_thm("stdo_lineForwardFD",
   `fd ≠ fd' ⇒ (stdo fd' nm (lineForwardFD fs fd) out ⇔ stdo fd' nm fs out)`,
   metis_tac[stdo_forwardFD,lineForwardFD_forwardFD]);
+
+val linesFD_with_numchars = Q.store_thm("linesFD_with_numchars[simp]",
+  `linesFD (fs with numchars := ns) x = linesFD fs x`,
+  rw[linesFD_def,GSYM get_file_content_numchars]);
+
+val lineForwardFD_with_numchars = Q.store_thm("lineForwardFD_with_numchars",
+  `lineForwardFD (fs with numchars := ns) x = lineForwardFD fs x with numchars := ns`,
+  rw[lineForwardFD_def]
+  \\ rw[GSYM get_file_content_numchars]
+  \\ CASE_TAC
+  \\ CASE_TAC
+  \\ rw[forwardFD_numchars,UNCURRY]);
 (* -- *)
 
 (* TODO: move to HOL *)
@@ -450,16 +462,32 @@ val check_count = process_topdecs`
 
 val _ = append_prog check_count;
 
+val check_count_sem_def = Define`
+  check_count_sem fs =
+    (dtcase check_count (MAP implode (linesFD fs 0)) of
+     | NONE => add_stdout (fastForwardFD fs 0) (strlit"Certificate OK\n")
+     | SOME (err,n) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num n) fs) err)`;
+
+val check_count_sem_with_numchars = Q.store_thm("check_count_sem_with_numchars",
+  `check_count_sem (fs with numchars := ns) = check_count_sem fs with numchars := ns`,
+  rw[check_count_sem_def]
+  \\ every_case_tac
+  >- rw[GSYM add_stdo_with_numchars,GSYM fastForwardFD_with_numchars]
+  \\ rename1`_ = SOME (fs0,m)`
+  \\ qid_spec_tac`fs0`
+  \\ qid_spec_tac`fs`
+  \\ pop_assum kall_tac
+  \\ qspec_tac(`Num m`,`n`)
+  \\ Induct \\ rw[GSYM add_stdo_with_numchars,FUNPOW,lineForwardFD_with_numchars]);
+
 val check_count_spec = Q.store_thm("check_count_spec",
   `app (p:'ffi ffi_proj) ^(fetch_v"check_count"(get_ml_prog_state())) [Conv NONE []]
      (STDIO fs)
      (POSTv uv.
        &UNIT_TYPE () uv *
-       STDIO
-         (dtcase check_count (MAP implode (linesFD fs 0)) of
-          | NONE => add_stdout (fastForwardFD fs 0) (strlit"Certificate OK\n")
-          | SOME (err,n) => add_stderr (FUNPOW (combin$C lineForwardFD 0) (Num n) fs) err))`,
-  xcf "check_count" (get_ml_prog_state())
+       STDIO (check_count_sem fs))`,
+  rewrite_tac[check_count_sem_def]
+  \\ xcf "check_count" (get_ml_prog_state())
   \\ xfun`quota_fun`
   \\ xapp_spec (Q.ISPECL[`RAT_TYPE`,`parse_quota`]parse_line_spec)
   \\ simp[STRING_TYPE_def,parse_quota_v_thm]
@@ -580,55 +608,51 @@ val check_count_spec = Q.store_thm("check_count_spec",
   \\ rw[]
   \\ xsimpl);
 
-val (sem_thm,prog_tm) =
-  call_thm (get_ml_prog_state()) "check_count" (
-    check_count_spec
-    |> CONV_RULE(RAND_CONV(SIMP_CONV
-       std_ss [Once (SEP_CLAUSES |> SPEC_ALL |> CONJUNCTS |> last |> GSYM)]))
-    |> SIMP_RULE std_ss [STDIO_def] |> add_basis_proj)
+val check_count_whole_prog_spec = Q.store_thm("check_count_whole_prog_spec",
+  `whole_prog_spec ^(fetch_v"check_count"(get_ml_prog_state())) cl fs
+   ((=) (check_count_sem fs))`,
+  rw[whole_prog_spec_def]
+  \\ qexists_tac`check_count_sem fs`
+  \\ rw[GSYM check_count_sem_with_numchars,with_same_numchars]
+  \\ match_mp_tac (MP_CANON (MATCH_MP app_wgframe check_count_spec))
+  \\ xsimpl);
 
-val STD_streams_FUNPOW_lineForwardFD_0 = Q.store_thm("STD_streams_FUNPOW_lineForwardFD_0",
-  `∀n fs. STD_streams fs ⇒ STD_streams (FUNPOW (combin$C lineForwardFD 0) n fs)`,
-  Induct \\ rw[STD_streams_lineForwardFD,FUNPOW]);
+val (sem_thm,prog_tm) =
+  whole_prog_thm (get_ml_prog_state()) "check_count" check_count_whole_prog_spec
+
+val check_count_prog_def = Define`check_count_prog = ^prog_tm`;
+
+val check_count_sem =
+  sem_thm
+  |> REWRITE_RULE[GSYM check_count_prog_def]
+  |> DISCH_ALL
+  |> SIMP_RULE std_ss [AND_IMP_INTRO,GSYM CONJ_ASSOC]
+  |> curry save_thm "check_count_sem";
 
 val stdo_FUNPOW_lineForwardFD_0 = Q.store_thm("stdo_FUNPOW_lineForwardFD_0",
   `∀n fs. fd ≠ fd' ⇒ (stdo fd nm (FUNPOW (combin$C lineForwardFD fd') n fs) out ⇔ stdo fd nm fs out)`,
   Induct \\ rw[stdo_lineForwardFD,FUNPOW]);
 
-val check_count_prog_def = Define`check_count_prog = ^prog_tm`;
-
-val check_count_sem =
-  sem_thm |> REWRITE_RULE[GSYM check_count_prog_def] |> DISCH_ALL
-  |> CONV_RULE(LAND_CONV EVAL)
-  |> SIMP_RULE std_ss [AND_IMP_INTRO,Once option_case_rand]
-  |> SIMP_RULE std_ss [STD_streams_add_stdout,STD_streams_fastForwardFD,Once pair_CASE_def]
-  |> SIMP_RULE std_ss [STD_streams_add_stderr,STD_streams_FUNPOW_lineForwardFD_0,Once pair_CASE_def]
-  |> SIMP_RULE std_ss [Once option_case_compute]
-  |> curry save_thm "check_count_sem";
-
 val check_count_correct = Q.store_thm("check_count_correct",
-  `wfFS fs ∧ STD_streams fs ∧ stdout fs init_out ⇒
+  `wfcl cl ∧ wfFS fs ∧ STD_streams fs ∧ stdout fs init_out ⇒
    ∃io_events fs'.
-     semantics_prog (init_state (basis_ffi cls fs)) init_env check_count_prog
+     semantics_prog (init_state (basis_ffi cl fs)) init_env check_count_prog
        (Terminate Success io_events) ∧
      extract_fs fs io_events = SOME fs' ∧
      (stdout fs' (strcat init_out (strlit"Certificate OK\n"))
       ⇔ Check_Certificate (MAP implode (linesFD fs 0)))`,
   rw[]
-  \\ imp_res_tac check_count_sem
-  \\ first_x_assum(qspec_then`cls`strip_assume_tac)
-  \\ asm_exists_tac \\ rw[]
+  \\ drule check_count_sem
+  \\ rw[]
+  \\ asm_exists_tac \\ rw[check_count_sem_def]
   \\ CASE_TAC
   >- (
     simp[stdo_numchars,stdo_add_stdo,stdo_fastForwardFD]
     \\ fs[check_count_thm] )
-  \\ qmatch_goalsub_abbrev_tac`add_stderr fs'`
-  \\ `STD_streams fs'` by metis_tac[STD_streams_FUNPOW_lineForwardFD_0]
-  \\ simp[stdo_numchars]
+  \\ CASE_TAC
   \\ DEP_REWRITE_TAC[GEN_ALL stdo_add_other_stdo]
-  \\ simp[]
-  \\ conj_tac >- metis_tac[STD_streams_stderr]
-  \\ simp[stdo_FUNPOW_lineForwardFD_0,Abbr`fs'`]
+  \\ rw[stdo_FUNPOW_lineForwardFD_0]
+  >- metis_tac[STD_streams_stderr]
   \\ simp[GSYM check_count_thm]
   \\ strip_tac
   \\ imp_res_tac stdo_UNICITY_R
