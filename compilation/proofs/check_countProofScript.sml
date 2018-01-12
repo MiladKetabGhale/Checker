@@ -6,9 +6,8 @@ val _ = new_theory"check_countProof";
 
 val check_count_io_events_def = new_specification("check_count_io_events_def",
   ["check_count_io_events","check_count_fs"],
-  check_count_correct |> Q.GENL[`init_out`,`cls`,`fs`] |> Q.SPEC`strlit""`
-  |> SIMP_RULE bool_ss [SKOLEM_THM,GSYM RIGHT_EXISTS_IMP_THM,RIGHT_EXISTS_AND_THM,
-                        mlstringTheory.strcat_nil]);
+  check_count_correct |> Q.GENL[`init_out`,`cl`,`fs`] |> Q.SPEC`strlit""`
+  |> SIMP_RULE bool_ss [SKOLEM_THM,GSYM RIGHT_EXISTS_IMP_THM,mlstringTheory.strcat_nil]);
 
 val (check_count_sem,check_count_output) = check_count_io_events_def |> SPEC_ALL |> UNDISCH |> CONJ_PAIR
 val (check_count_not_fail,check_count_sem_sing) =
@@ -40,7 +39,7 @@ val compile_correct_applied =
   |> REWRITE_RULE[AND_IMP_INTRO]
 
 val check_count_compiled_thm = Q.store_thm("check_count_compiled_thm",
-  `check_countProof$wfFS fs ∧
+  `wfcl cl ∧ check_countProof$wfFS fs ∧
    x64_installed check_count_compiled (basis_ffi cl fs) mc ms
    ⇒
    ∃io_events fs'.
@@ -49,11 +48,13 @@ val check_count_compiled_thm = Q.store_thm("check_count_compiled_thm",
    extract_fs fs io_events = SOME fs' ∧
    (stdout fs' (strlit "Certificate OK\n") ⇔
     Check_Certificate (lines_of (implode (get_stdin fs))))`,
-  simp[wfFS_def,Once (GSYM AND_IMP_INTRO)]
+  simp[wfFS_def,CONJ_ASSOC]
+  \\ simp[Once (GSYM AND_IMP_INTRO)]
+  \\ simp[GSYM CONJ_ASSOC]
   \\ disch_then assume_tac
   \\ simp[x64_installed_def,check_count_compiled_def]
   \\ disch_then assume_tac
-  \\ qmatch_asmsub_rename_tac`basis_ffi cls`
+  \\ qmatch_asmsub_rename_tac`basis_ffi cl`
   \\ assume_tac (UNDISCH compile_correct_applied)
   \\ asm_exists_tac
   \\ simp[check_count_output]
