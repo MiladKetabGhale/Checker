@@ -174,22 +174,20 @@ Definition~\ref{jud:hol} specifies the exact HOL encoding of the sates of the co
 \end{holthmenv}
 \end{definition}
 
-
-
-As a formal certificate is constituted of judgements each representing a state of the count, to check it for correctness, we need to know how transition between each two consecutive judgements in the list has occurred. According to clauses of the protocol, there are steps that one may take only legitimately to move from one state of the count to the next. The steps, which we call the counting rules, are composed of some side conditions meant as constraints on how and when one can legally apply a rule. We express these constraints by means of auxiliary predicative assertions. There are also implicit conditions hidden in the protocol clauses. For example, we expect a valid certificate to have no duplication in the list of elected or continuing candidates, and every candidate must have only one tally and one pile at every non-final judgement. Therefore, we need to define some auxiliary predicates to check such subtleties implicitly existing in the mathematical specification.  Conjunction of these auxiliary definitions formalises individual counting rules in HOL.
+As a formal certificate is constituted of judgements each representing a state of the count, to check it for correctness, we need to know how transition between each two consecutive judgements in the list has occurred. According to clauses of the protocol, there are steps that one may only legitimately take to move from one state of the count to the next. The steps, which we call the counting rules, are composed of some side conditions meant as constraints on how and when one can legally apply a rule. We express these constraints by means of auxiliary predicative assertions. There are also implicit conditions hidden in the protocol clauses. For example, we expect a valid certificate to have no duplication in the list of elected or continuing candidates, and every candidate must have only one tally and one pile at every non-final judgement. Therefore, we need to define some auxiliary predicates to check such subtleties implicitly existing in the protocol.  Conjunction of these auxiliary definitions formalises individual counting rules in HOL.
 
 
 The second step is to define functions in HOL which are meant to be the computational counterparts of the HOL specification in the step above. Conjunction of appropriate computational definitions constitutes the computational definition for individual counting rules. These functions are later translated by the built-in mechanisms of CakeML for the purpose of actual computations on an actual certificate.
 
 
-The last step is to prove equivalence of the HOL specification and the computational assertions. By establishing this correspondence, we demonstrate that the computational parts meet the expectation of their specification. We therefore validate a formal certificate if and when it is indeed valid. To show how the process concretely proceeds, we indicate the aformentioned phases put togather for the case of \emph{elim} rule. However, we should note that our actual formalisation seperates the three steps to enhance readability and clearance of the programming.
+The last step is to prove equivalence of the HOL specification and the computational assertions. By establishing this correspondence, we demonstrate that the computational parts meet the expectation of their specification. We therefore validate a formal certificate if and when it is indeed valid. To show how the process concretely proceeds, we indicate the aformentioned phases put together for the case of \emph{elimination} rule. However, we should note that our actual formalisation seperates the three steps to enhance readability and clearance of the encoding.
 
 \subsection{The Case of the Elimination Rule}
-As mentioned, the mathematical specification of rules in section~3 hides some  conditions. Among the implicit conditions for \emph{elim} rule is that every candidate's name appears only once in the initial list of competing candidates. The predicate \textsf{Valid\_Init\_CandList} encapsulates this constraint.
+There are implicit conditions in the protocol. For example, the name of each candidate appears only once in the initial list of competing candidates. Also no one is assigned with more than a single pile and a unique tally. Therefore for formalising the legislation, we define predicates that correspond to such implicit requirements. For instance, the predicate \textsf{Valid\_Init\_CandList} restricts legal initial lists of candidates to those which are non-empty and have no duplicate. 
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.Valid_Init_CandList_def}
 \end{holthmenv}
-Moreover, every candidate has exactly one tally in the premise and conclusion of the rule. We express this condition by the following.
+Moreover, at every stage of the count, every candidate has exactly one tally and one pile. Therefore, if a judgement in a certificate meliciously allocates more than one tally to a single candidate, the bug is detected and the certificate rejected as invalid.  We express this condition by the following.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
@@ -210,19 +208,20 @@ Also the specification \textsf{Valid\_PileTally\_def} implies correctness of \te
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC2}
 \end{holthmenv}
-Conversely, correctness of the computational definition \textsf{Valid\_PileTally\_dec1} entails that every element appearing as the first component of a pair in $t$,  belongs to the list $l$.
-\begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.PileTally_DEC1_to_PileTally}
-\end{holthmenv}
-The same theorem guarantees that if \textsf{Valid\_PileTally\_dec1} holds, then every element of $l$ is the first component of a pair in $t$.
-\begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.PileTally_DEC2_IMP_PileTally}
-\end{holthmenv}
-Hence, putting the four theorems togather, we obtain equivalence of the specification \textsf{Valid\_PileTally\_def} with its computational counterparts.
+Conversely, correctness of the computational definition \textsf{Valid\_PileTally\_dec1} and  \textsf{Valid\_PileTally\_dec2} entails their respective specifications. Therefore, we obtain a perfect equivalence between the specification and computational condition for tallies and piles to be distinctively allocated to candidates. 
 
 
 
-Aside from the implicit conditions, \emph{elim} has explicit constraints to meet for its legal applications. For example, item~2.2 in definition~\ref{elim:rule} states that the difference between the continuing list of candidates in the premise of the rule with the one in the conclusion is that the weakest candidate is no longer a continuing candidate in the comclusion of the rule. The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
+Aside from the implicit conditions, \emph{elimination} has explicit constraints to meet for its legal applications. For example, item~9 of the protocl states that 
+\begin{small}
+\begin{center}
+\begin{minipage}{10cm}
+\emph{choose the candidate with the least amount of votes and exclude
+them from the list of continuing candidates}.
+\end{minipage}
+\end{center}
+\end{small}
+So the difference between the continuing list of candidates in the premise of the rule with the one in the conclusion is that the weakest candidate is no longer a continuing candidate in the comclusion of the rule. The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
@@ -238,11 +237,7 @@ Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} 
  \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
-Therefore, when we validate an instance of elimination rule application, the list of continuing candidates in the premise and conclusion of the rule are proven to be the same with the exception of one candidate removed from the former. The fact that the candidate removed is the weakest, is established by other assertions which are expressed along with \textsf{equal\_except} as conjuncts of the elimination rule's defintion.
-
-
-
-Having defined the implicit and explicit side conditions in the definition of \emph{elim}, we can present the formlisation of this rule in HOL as a predicate.
+The fact that the candidate removed is the weakest, is established by another stand-alone assertion which is expressed as a conjunct of the elimination rule's defintion. Having defined the implicit and explicit side conditions in the definition of \emph{elimination}, we can present the formlisation of this rule in HOL as a predicate.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
@@ -251,15 +246,7 @@ Having defined the implicit and explicit side conditions in the definition of \e
 \begin{holthmenv}
   \HOLthm[width=80]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
-We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain entailment of the computational \textsf{ELIM\_CAND\_dec} by its specification.
-\begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.Logical_elim_to_Functional_Elim}
-\end{holthmenv}
-Furthermore, correctness of the computational elimination rule implies satisfcation of  its predicative formalisation.
-\begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.Functional_Elim_to_Logical_elim}
-\end{holthmenv}
-The same procedure is followed to acheive formal specification and computational definitions for the rest of counting rules in the section~3.
+We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to acheive formal specification,  computational definitions, and their correspondence for the rest of counting rules.
 
 \subsection{The Checker formalisation}
 To check a given formal certificate for correctness, we mainly need to validate if a transition from an element in the judgement list to the next element is legitimately doable by application of a rule. On the other hand, rules have been proven applicable only when they meet their respective specification. Since rules have some side conditions which make them distinct, this implies that at every stage actually only one of them applies. Therefore, we specify the correct transition-check to be a disjunction of the predicative counting rules.
