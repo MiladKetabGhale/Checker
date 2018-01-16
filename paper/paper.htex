@@ -249,28 +249,25 @@ The fact that the candidate removed is the weakest, is established by another st
 We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to acheive formal specification,  computational definitions, and their correspondence for the rest of counting rules.
 
 \subsection{The Checker formalisation}
-To check a given formal certificate for correctness, we mainly need to validate if a transition from an element in the judgement list to the next element is legitimately doable by application of a rule. On the other hand, rules have been proven applicable only when they meet their respective specification. Since rules have some side conditions which make them distinct, this implies that at every stage actually only one of them applies. Therefore, we specify the correct transition-check to be a disjunction of the predicative counting rules.
+In certified computations, to scrutinise a certificate output by a program, one can design a second (probably verified) program that independently performs the computations again\cite{}. Then the result of the two could be checked against each other for validation. On the other hand, certificate verification can be approached in a significantly more efficient way. Instead of redoing the computations, one can encode a checker that validates if steps visualised in a certificate to reach from an initial state of the computation to an end state have correctly taken place. This approach makes the checker design simpler than the implementation which produced the certificate. As a result, accomplishing verification of the checker becomes considerably easier than that of the implementation which produces the certificates. Moreover, the checker carries computations out faster than the original program.   
+
+
+
+
+In light of the above understanding, to check a given formal certificate for correctness, we mainly need to validate if the first judgement of the certificate is a valid initial state of the count, if transitions from an element in the judgement list to the next element is legitimately doable by application of a rule, and if the last judgement of the certificate is a legal final stage of the computation.  As we demonstrated, rules are applicable only when they meet their respective specification. Since rules have some side conditions which make them distinct, this implies that at every stage actually only one of them applies. Therefore, we specify the correct transition-check \textsf{valid\_judgements} to be a disjunction of the predicative counting rules and prove it matches with the computational counterpart. 
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.valid_judgements_def}
 \end{holthmenv}
- To compute correct transitions between consecutive formal certificate elements, we recursively call the disjunction of the computational counting rules.
-\begin{holthmenv}
-  \HOLthm[width=80]{Checker.valid_judgements_dec_def}
-\end{holthmenv}
-The specification \textsf{valid\_judgements} matches with its computational twin.
-\begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.valid_judgements_thm}
-\end{holthmenv}
-Note that we require the last judgement of a formal certificate to be of final type.
- Moreover, we impose the condition that the first element of a judgement be an \emph{intial} judgement. An intial judgement is one in which every candidates tally is intially set to zero, their piles are empty, and the backlog and the list of elected candidates are both emoty as well. For checking a formal certifcate we therefore first  certify if the the certificate starts at an initial stage. Then recursively we continue checking if transitions have happened correctly, and if the terminating state is a final one where winners are declared.
+ 
+Correct end result of each instance of a computation depends on validity of its start point.  A legitimate intial judgement is one in which every candidates tally is intially set to zero, their piles are empty, and the backlog and the list of elected candidates are both emoty as well. 
  \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.valid_certificate_def}
 \end{holthmenv}
-  The above specification of the checker, therefore, corresponds to the following computational formal certificate checker.
+ For checking a formal certifcate we therefore first  certify if the the certificate starts at an initial stage. Then recursively we continue checking if transitions have happened correctly, and if the terminating state is a final one where winners are declared. The above specification of the checker, therefore, corresponds to the following computational formal certificate checker.
  \begin{holthmenv}
   \HOLthm[width=80]{Checker.Check_Parsed_Certificate_def}
 \end{holthmenv}
-Hence a formal certificate is validated if and when it is valid according to the HOL specification of \textsf{valid\_certificate}. As we showed, the HOL specification is a formalisation of the mathematical specification. The mathematical specification is simply a symbolic representation of the counting protocol. Consequently, a formal certificate is validated if and only if it matches with the protocol.
+Consequently a formal certificate is validated if and when it is valid according to the HOL specification of \textsf{valid\_certificate}. Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation.
 
 
 \section{Translation into CakeML and Code Extraction}
