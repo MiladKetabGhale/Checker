@@ -277,7 +277,7 @@ Hence a formal certificate is validated if and when it is valid according to the
 
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
-Legislative Assembly elections in ACT for years 2008 and 2012 (figure\ref{ref;figure2}). The certificates have been produced by the Haskell program extracted from our previous formalization of ANU\_Union STV in Coq~\cite{MKet}.
+Legislative Assembly elections in ACT for years 2008 and 2012 (Figure\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalization of ANU\_Union STV in Coq~\cite{MKet}.
 \begin{figure}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
@@ -299,6 +299,7 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \caption{ACT Legislative Assembly 2008 and 2012}
 \label{ref;figure2}
 \end{figure}
+Moreover, we have studied behavior of our executable by examining it on certificates output on randomly generated ballots. There are two interesting prameters to study, namely varying the number of ballots and varying the length of each ballot. Figure~\ref{ref;figure3} depicts results on certificates where the number of candidates is fixed at 20, vacancies are 5, and the length of each ballot is 12. It appears that the complexity of the program in the number of ballots is quadratic. Also we keep the number of ballots, vacancies, and length of each ballot fixed at 100000, 1, and 10 respectively, in order to inspect the effect of increase in the length of each ballot (Figure~\ref{ref;figure4}). The complexity of the program seems to be linear with respect to this index. 
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
@@ -307,31 +308,30 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \hline
 ballots &certificate size& time (sec)\\
 \hline
-$300000$&$390.8$&$2076$\\
+$400000$&$523.6$&$4224$\\
 $200000$&$253.3$&$938$\\
 $100000$&$131.1$&$461$\\
 \hline
 \end{tabular}
-\caption{Varying list of ballots size}
+\caption{Varying number of ballots}
 \label{ref;figure3}
 \end{minipage}
 \begin{minipage}{.5\textwidth}
   \centering
 \begin{tabular}{|l |c | c|}
 \hline
-candidates& certificate size& time (sec)\\
+ballot length& certificate size& time (sec)\\
 \hline
-$5$&$16.5$&$118$\\
-$10$&$43.0$&$186$\\
-$20$&&$302$\\
+$6$&$60.2$&$140$\\
+$12$&$124.0$&$298$\\
+$18$&$180.5$&$325$\\
 \hline
 \end{tabular}
-\caption{Varying number of candidates}
+\caption{Varying length of each ballot}
 \label{ref;figure4}
 \end{minipage}
 \end{figure}
 
-Moreover, we have studied behavior of our executable by examining it on certificates output on randomly generated ballots. Figure~\ref{ref;figure3} depicts results on certificates for ranmdomly produced certificates with the number of candidates and vacancies are fix to 20 and 5, respecitively. It appears that the complexity of the program in the number of ballots is quadratic. Also we fix the number of ballots to 100000 and vacancies to one in order to inspect the effect of increase in the number of candidates (Figure~\ref{ref;figure4}).
 \section{Discussion and Conclusion}
 \section{Outline}\label{sec:out}
 
