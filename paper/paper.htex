@@ -129,7 +129,59 @@ transfer of surplus, a continuing candidate exceeds the quota, declare them elec
 \end{enumerate}
 \end{center}
 
-\subsection{The HOL Formalization}
+\subsection{An Actual Certificate Sample}
+Figure~\ref{fig;figure} illustrates an example of an actual certificate for a small election where three candidates $A$, $B$, and $C$ are the initial competing candidates. The list of ballots $ba$ cast to the election consists  
+$b_1=([A,C],1)$, $b_2=([A,B,C],1)$, $b_3=([A,C,B],1)$, 
+$b_4=([B,A],1)$, $b_5=([C,B,A],1)$. 
+From the top, the first three lines of the certificate are the header part visualising the quota of the election as a fractional number, number of seats to be filled, and the list of candidates initially participating in the election. The fourth line depicts the terminal stage of the count where list of final winners are declared. The remainder of the lines show all of the intermediate steps taken from the starting state to obtain the mention final state.  
+\begin{small}
+\begin{figure}[b]
+\begin{tabular}{c@{\hspace{2cm}}c}
+    \AxiomC{\tiny 133\%50}
+    \noLine
+    \UnaryInfC{\tiny 2}
+    \noLine
+    \UnaryInfC{\tiny $[A,B,C]$}
+    \noLine    
+    \UnaryInfC{\scriptsize [A,C]}
+     \RightLabel{\tiny hwin} 
+      \UnaryInfC{\tiny []; A[3\%1] B[111\%100] C[133\%100]; A[] B[] C[$b_{5}$,([C],11\%),([C,B],11\%100),([C],11\%100)]; []; [A]; [C]}
+       \RightLabel{\tiny count}
+    \UnaryInfC{\tiny [$b_4$,([B,C],0.11)]; A[3\%1] B[111\%100] C[122\%100], A[] B[$b_4$,([B,C],11\%100)] C[$b_{5}$,([C],11\%100),([C,B],11\%100)];[];[A];[C]}
+    \RightLabel{\tiny elim}
+    \UnaryInfC{\tiny []; A[3\%1] B[111\%100] C[122\%100], A[] B[$b_4$,([B,C],11\%100)] C[$b_5$,([C],11\%100),([C,B],113\%1000)]; []; [A]; [B,C]}
+     \RightLabel{\tiny count}
+     \UnaryInfC{\tiny [([A,C],11\%100),([A,B,C],11\%100),([A,C,B],11\%100)]; A[3\%1] B[1\%1] C[1\%1]; A[] B[$b_4$] C[$b_5$]; []; [A]; [B,C]}
+      \RightLabel{\tiny transfer}
+      \UnaryInfC{\tiny []; A[3\%1] B[1\%1] C[1\%1]; A[([A,C],11\%100),([A,B,C],11\%100),([A,C,B],11\%100)] B[$b_4$] C[$b_5$]; [A]; [A]; [B,C]}
+      \RightLabel{\tiny elect}
+      \UnaryInfC{\tiny []; A[3\%1] B[1\%1] C[1\%1]; A[$b_1$,$b_2$,$b_3$] B[$b_4$] C[$b_5$]; []; []; [A,B,C]}
+      \RightLabel{\tiny count}
+      \UnaryInfC{\tiny ba; A[0\%1] B[0\%1] C[0\%51]; A[] B[] C[]; []; []; [A,B,C]}
+     \DisplayProof
+\end{tabular}
+\caption{example of a certificate}
+\label{fig;figure}
+\end{figure}
+\end{small}
+
+
+As you see, the non-final stages consist of all necessary and sufficient information for a scrutineer to independently verify the counting process.
+Every non-final line is constituted of six components sepearated from one another by the semi-colon symbol. The first component illustrates the ballots to be counted. Next is the candidates with their tallies. After this, pile of ballots assigned to each candidate is shown. The last three component depict the backlog, the list of elected candidates, and the list of continuing candidates, respectively. Here we describe how according to the protocol counting steps are taken from the initial non-final stage, which is the bottom-most line, to reach the final state. 
+
+
+
+\textbf{count.} First preferences for each candidates are determined and put into their pile. Hence candidate $A$ receives the ballots $b_1$, $b_2$, and $b_3$. Candidate B receives the ballot $b_4$, and C receives $b_5$. Tallies are updated so that tally of A becomes $3$, and candidate B and C reach to $1$.\\
+\textbf{elect.} Candidate A exceeds the quota, he is elected and value of surplus votes changes to $0.11$ according to the mentioned formula (\ref{eq:tv}). The updated pile of A is $([A,C],0.11)$, $([A,B,C],0.11)$, and $([A,C,B],0.11)$. Nothing changes about C and B at this stage.\\
+\textbf{transfer.} As there are vacancies and no one else has reached or exceeded the quota, surplus of A is dealt with. The list of uncounted ballots is updated to contain the surplus of A. \\
+\textbf{count.} The list of uncounted ballots is dealt with and votes are distributed according to next continuing preference. Therefore, C receives  two new votes (each of value $0.11$) which are $([C],0.11)$ and $([C,B],0.113)$. Candidate B receives one vote, which is $([B,C],0.11)$.\\ 
+\textbf{elim.} No continuing candidate has reached the quota, one vacancy is left, and there are no more votes to deal with. So the weakest candidate is found and excluded, which is B.\\
+\textbf{count.} Candidate C receives the vote $([c],0.11)$ from the excluded candidate B.\\
+\textbf{hwin.} The only continuing candidate, that is C, is elected and as we have filled all the vacancies, a final stage has been obtained.
+
+
+Such actual certificates are the printout counterparts of their formal representatives. The connection between the actual and formal certificate is established by a parser. In short, we explain how the certificate is formalised and how the parser performs the parsing. 
+\subsection{The HOL Formalisation}
 The counting process is constituted of some key components, all of which appear in a comprehensive certificate of the count:
 \begin{enumerate}
 \item candidates competing in the election
@@ -259,7 +311,7 @@ In light of the above understanding, to check a given formal certificate for cor
   \HOLthm[width=80]{CheckerSpec.valid_judgements_def}
 \end{holthmenv}
  
-Correct end result of each instance of a computation depends on validity of its start point.  A legitimate intial judgement is one in which every candidates tally is intially set to zero, their piles are empty, and the backlog and the list of elected candidates are both emoty as well. 
+Correct end result of each instance of a computation depends on validity of its start point.  A legitimate intial judgement is one in which every candidate's tally is intially set to zero, their piles are empty, and the backlog and the list of elected candidates are both emoty as well. 
  \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.valid_certificate_def}
 \end{holthmenv}
