@@ -380,7 +380,28 @@ $18$&$180.5$&$325$\\
 \label{ref;figure4}
 \end{minipage}
 \end{figure}
-
+We have implemented the protocol in an unverified certifying Haskell program as well to check the program for correctness. Figure~\ref{} illustrates the result of execution of this program on the ACT legislative Assembly elections for the same years as above. In tow of them, even though the final winners are announced correctly, one of the steps taken from line 6 to line 5 in the certificate is invalid. Therefore, the checker rejects the whole output as invalid.  
+\begin{figure}
+\centering
+%\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
+\begin{tabular}{|l |c |c |c |c |c|}
+\hline
+electoral & ballots& vacancies& candidates& checker output&year\\
+\hline
+%\end{tabular}
+%\begin{tabu} to 0.86\textwidth {X[l] | X[c]  | X[c] | X[c] | X[c] | X[c]}
+%\begin{tabular}{c c c c c c}
+Brindabella &$63334$&$5$&$19$&invalid line 6&2008\\
+Ginninderra &$60049$&$5$&$27$&invalid line 6&2008\\
+Molonglo &$88266$&$7$&$40$&certificate OK&2008\\
+Brindabella&$63562$&$5$&$20$&certificate OK&2012\\
+Ginninderra&$66076$&$5$&$28$&certificate OK&2012\\
+Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
+\hline
+\end{tabular}
+\caption{Unverified Haskell program with ACT elections}
+\label{ref;figure6}
+\end{figure}
 \section{Discussion and Conclusion}
 \section{Outline}\label{sec:out}
 
