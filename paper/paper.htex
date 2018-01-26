@@ -31,10 +31,10 @@ We approach electronic vote counting as a certified computation where for each e
 \section{Introduction}\label{sec:intro}
 
 The main contribution of this paper is a new framework for
-verifiably correct vote counting. 
+verifiably correct vote counting.
 %
-Electronic voting is becoming more and more prevalent worldwide. 
-But almost scandalously, 
+Electronic voting is becoming more and more prevalent worldwide.
+But almost scandalously,
 the current state of affairs leaves much
 to be
 desired as the public vote is a cornerstone of
@@ -43,29 +43,29 @@ Indeed electronic techniques as they are used now may be seen as a step back fro
 paper based elections.
 
 For example, the vote counting software that is used in Australia's
-most populous 
-state, the state of New South Wales, 
+most populous
+state, the state of New South Wales,
 was found to contain errors that had an impact in at least one seat that
 was wrongly filled with high probability.
 This was not only reported in specialist publications
 \cite{Conway:2017:ANS} but
 also in the national press \cite{Brooks:2017:NCE}.
- 
+
 When counting ballots by hand,  the counting is monitored by
 scrutineers, usually members of the general public or stakeholders
-such as party representatives and members of the general public. 
+such as party representatives and members of the general public.
 %
-In contrast,  computer software that is used to count ballots 
+In contrast,  computer software that is used to count ballots
 merely produces a final result. Moreover, in many cases, the source
 code of these programs is commercial in confidence, and there is no
 evidence of the correctness of the count that could be seen as
 analogous to scrutineers in traditional, paper-based vote counting.
 
 It is universally recognised that transparent and verifiable vote
-counting is a key constituent to 
-establish trustworthiness, and subsequently trust, in the final outcome. 
-The computer-based methods 
-currently in use fail to meet both expectations.  
+counting is a key constituent to
+establish trustworthiness, and subsequently trust, in the final outcome.
+The computer-based methods
+currently in use fail to meet both expectations.
 
 In the literature on electronic voting, the notion of \emph{universal
 verifiability} of vote counting (any voter can check that the
@@ -87,10 +87,10 @@ theorem proving to address this challenge. In a nutshell, a
 every execution, an easily-verifiable certificate of the correctness
 of the computed result.  This certificate can then be scrutinised by
 a verifier, independently of the tools, hardware or software that
-were used to create the certificate. 
+were used to create the certificate.
 
 Our focus in this paper is on the \emph{verifier}. We briefly
-discuss a 
+discuss a
 concise formal specification of \emph{single transferable vote}, a
 complex, preferential voting system used e.g. in Ireland, Malta, New
 Zealand and Australia. From this specification, we develop a notion
@@ -98,22 +98,22 @@ of \emph{certificate} so that correct certificates guarantee
 correctness of election results. The main body of our work concerns
 the \emph{verifier} (certificate checker), and we present a
 synthesis of the verifier that is itself fully verified down to the
-machine level. 
+machine level.
 
 
-This proceeds in four steps. 
+This proceeds in four steps.
 First, we formalise  the vote counting protocol as a sequence of
 steps inside the HOL theorem prover where every step by and large
 corresponds to an action taken by a counting officer in a
 paper-based setting.  There are two kinds of stages that we call
 \emph{judgements} in analogy to typing assertions in type theory.
-\emph{Final} judgements decleare a set of winners. 
+\emph{Final} judgements declare a set of winners.
 \emph{Non-final} judgements represent the current state of the count
 as a multi-component tuple, corresponding to a snapshot of the stage
 of the count in a paper-based setting.  The formalisation of the
 voting protocol then takes the form of \emph{rules} that specify how
 to advance from one judgement to the next, thereby advancing the
-count. The applicability of particular rules are described 
+count. The applicability of particular rules are described
 by side conditions that are in turn formalised by HOL predicates.  A
 correct certificate is then simply a sequence of judgements where
 each judgement is justified through its predecessor by means of a
@@ -127,7 +127,7 @@ Second, in tandem with the logical specification of each rule, we
 define a boolean function that checks whether or not the rule has
 been applied correctly.  This then directly gives rise to the
 verifier that, at every step, just checks whether any of the rules
-is applicable, using the corresponding boolean function. 
+is applicable, using the corresponding boolean function.
 
 Third, we establish correspondence between the logical
 definitions and their computational counterparts. This simply boils
@@ -143,14 +143,14 @@ In a forth, and last step, we synthesise an executable for the
 verifier that is correct down to the machine level.  This is
 achieved by automatically translating HOL-definitions into CakeML
 the machine code. This guarantees that the ensuing CakeML functions
-are coputationally equivalent to their HOL counterparts. 
+are computationally equivalent to their HOL counterparts.
 To perform computation on an actual certificate, we define a formal
 syntax of the latter, and a parser in HOL, that we combine with the
-I/O mechanisms of CakeML to obtain the verifier. 
+I/O mechanisms of CakeML to obtain the verifier.
 In particular, this allows us to prove correctness of the verifier
-with respect to a high-level specification. 
+with respect to a high-level specification.
 HOL. This finally induces an executable the correctness of which is
-verified down to the machine level. 
+verified down to the machine level.
 
 In summary, our slogan is ``verify the verifier''. Rather than
 verifying the \emph{program} that performs an election count, we
@@ -160,7 +160,7 @@ much less labour intensive to verify the verifier, compared with
 program verification. Second, having verifiable certificates at hand
 meets the goal of universal verifiability \cite{Kremer:2010:EVE}.
 Third, we achieve correctness over a minimal trust base through the
-use of CakeML. 
+use of CakeML.
 
 In the remainder of the paper, we describe our framework in detail
 and demonstrate that it can handle real-world size elections by
@@ -168,7 +168,7 @@ evaluating it on historical data of elections conducted in
 Australia.
 
 
-\noindent\textbf{Related Work.} Alkassar et al~\cite{EAlk} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{}, they obtain some pre- and postconditions, which are next generalized syntatically and then implemented in the Isabella theorem prover to be discharged. Even though this metohd introduces a uniform platform for dealing with certifiying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{LNos} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DGre} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation. On the other hand, in context of vote counting verification, merely certifying implementations exist~\cite{DPat,DPati,MKet}. For STV, in particular, Ghale et al~\cite{MKet} and Pattinson et al~\cite{DPati} verify some STV schemes inside Coq and output a certificate for each input upon every execution of the extracted Haskell program. Nonetheless, they do not provide any verified checker to independently scrutinize the certificate for authenticity.
+\noindent\textbf{Related Work.} Alkassar et al~\cite{EAlk} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{}, they obtain some pre- and postconditions, which are next generalized syntactically and then implemented in the Isabella theorem prover to be discharged. Even though this method introduces a uniform platform for dealing with certifying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{LNos} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DGre} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation. On the other hand, in context of vote counting verification, merely certifying implementations exist~\cite{DPat,DPati,MKet}. For STV, in particular, Ghale et al~\cite{MKet} and Pattinson et al~\cite{DPati} verify some STV schemes inside Coq and output a certificate for each input upon every execution of the extracted Haskell program. Nonetheless, they do not provide any verified checker to independently scrutinize the certificate for authenticity.
 
 \section{The Protocol and Its HOL Formalization}
 STV is an election scheme used in multi-seated constituencies and is designed to reflect the proportional preferences of voters in that district for competing candidates. The preference is expressed by ordering candidates on each ballot. Then the count proceeds by assigning the value of the ballot to the most preferred continuing candidate. A continuing candidate is one who has neither been elected nor eliminated from the initial list of competing candidates. When a candidate is not continuing any more, they are not considered in the preferences of ballots any further. Additionally, transfer of ballots of the elected or eliminated candidates may occur until all vacancies are filled.
@@ -233,10 +233,10 @@ transfer of surplus, a continuing candidate exceeds the quota, declare them elec
 \end{center}
 
 \subsection{An Actual Certificate Sample}
-Figure~\ref{fig;figure} illustrates an example of an actual certificate for a small election where three candidates $A$, $B$, and $C$ are the initial competing candidates. The list of ballots $ba$ cast to the election consists  
-$b_1=([A,C],1)$, $b_2=([A,B,C],1)$, $b_3=([A,C,B],1)$, 
-$b_4=([B,A],1)$, $b_5=([C,B,A],1)$. 
-From the top, the first three lines of the certificate are the header part visualising the quota of the election as a fractional number, number of seats to be filled, and the list of candidates initially participating in the election. The fourth line depicts the terminal stage of the count where list of final winners are declared. The remainder of the lines show all of the intermediate steps taken from the starting state to obtain the mention final state.  
+Figure~\ref{fig;figure} illustrates an example of an actual certificate for a small election where three candidates $A$, $B$, and $C$ are the initial competing candidates. The list of ballots $ba$ cast to the election consists
+$b_1=([A,C],1)$, $b_2=([A,B,C],1)$, $b_3=([A,C,B],1)$,
+$b_4=([B,A],1)$, $b_5=([C,B,A],1)$.
+From the top, the first three lines of the certificate are the header part visualising the quota of the election as a fractional number, number of seats to be filled, and the list of candidates initially participating in the election. The fourth line depicts the terminal stage of the count where list of final winners are declared. The remainder of the lines show all of the intermediate steps taken from the starting state to obtain the mention final state.
 \begin{small}
 \begin{figure}[b]
 \begin{tabular}{c@{\hspace{2cm}}c}
@@ -245,9 +245,9 @@ From the top, the first three lines of the certificate are the header part visua
     \UnaryInfC{\tiny 2}
     \noLine
     \UnaryInfC{\tiny $[A,B,C]$}
-    \noLine    
+    \noLine
     \UnaryInfC{\scriptsize [A,C]}
-     \RightLabel{\tiny hwin} 
+     \RightLabel{\tiny hwin}
       \UnaryInfC{\tiny []; A[3\%1] B[111\%100] C[133\%100]; A[] B[] C[$b_{5}$,([C],11\%),([C,B],11\%100),([C],11\%100)]; []; [A]; [C]}
        \RightLabel{\tiny count}
     \UnaryInfC{\tiny [$b_4$,([B,C],0.11)]; A[3\%1] B[111\%100] C[122\%100], A[] B[$b_4$,([B,C],11\%100)] C[$b_{5}$,([C],11\%100),([C,B],11\%100)];[];[A];[C]}
@@ -270,20 +270,20 @@ From the top, the first three lines of the certificate are the header part visua
 
 
 As you see, the non-final stages consist of all necessary and sufficient information for a scrutineer to independently verify the counting process.
-Every non-final line is constituted of six components sepearated from one another by the semi-colon symbol. The first component illustrates the ballots to be counted. Next is the candidates with their tallies. After this, pile of ballots assigned to each candidate is shown. The last three component depict the backlog, the list of elected candidates, and the list of continuing candidates, respectively. Here we describe how according to the protocol counting steps are taken from the initial non-final stage, which is the bottom-most line, to reach the final state. 
+Every non-final line is constituted of six components separated from one another by the semi-colon symbol. The first component illustrates the ballots to be counted. Next is the candidates with their tallies. After this, pile of ballots assigned to each candidate is shown. The last three component depict the backlog, the list of elected candidates, and the list of continuing candidates, respectively. Here we describe how according to the protocol counting steps are taken from the initial non-final stage, which is the bottom-most line, to reach the final state.
 
 
 
 \textbf{count.} First preferences for each candidates are determined and put into their pile. Hence candidate $A$ receives the ballots $b_1$, $b_2$, and $b_3$. Candidate B receives the ballot $b_4$, and C receives $b_5$. Tallies are updated so that tally of A becomes $3$, and candidate B and C reach to $1$.\\
 \textbf{elect.} Candidate A exceeds the quota, he is elected and value of surplus votes changes to $0.11$ according to the mentioned formula (\ref{eq:tv}). The updated pile of A is $([A,C],0.11)$, $([A,B,C],0.11)$, and $([A,C,B],0.11)$. Nothing changes about C and B at this stage.\\
 \textbf{transfer.} As there are vacancies and no one else has reached or exceeded the quota, surplus of A is dealt with. The list of uncounted ballots is updated to contain the surplus of A. \\
-\textbf{count.} The list of uncounted ballots is dealt with and votes are distributed according to next continuing preference. Therefore, C receives  two new votes (each of value $0.11$) which are $([C],0.11)$ and $([C,B],0.113)$. Candidate B receives one vote, which is $([B,C],0.11)$.\\ 
+\textbf{count.} The list of uncounted ballots is dealt with and votes are distributed according to next continuing preference. Therefore, C receives  two new votes (each of value $0.11$) which are $([C],0.11)$ and $([C,B],0.113)$. Candidate B receives one vote, which is $([B,C],0.11)$.\\
 \textbf{elim.} No continuing candidate has reached the quota, one vacancy is left, and there are no more votes to deal with. So the weakest candidate is found and excluded, which is B.\\
 \textbf{count.} Candidate C receives the vote $([c],0.11)$ from the excluded candidate B.\\
 \textbf{hwin.} The only continuing candidate, that is C, is elected and as we have filled all the vacancies, a final stage has been obtained.
 
 
-Such actual certificates are the printout counterparts of their formal representatives. The connection between the actual and formal certificate is established by a parser. In short, we explain how the certificate is formalised and how the parser performs the parsing. 
+Such actual certificates are the printout counterparts of their formal representatives. The connection between the actual and formal certificate is established by a parser. In short, we explain how the certificate is formalised and how the parser performs the parsing.
 \subsection{The HOL Formalisation}
 The counting process is constituted of some key components, all of which appear in a comprehensive certificate of the count:
 \begin{enumerate}
@@ -301,7 +301,7 @@ In an election, assuming we have a quota $qu$, initial number of vacancies $st$,
 $qu,st,\mathcal{L}   \vdash  \mathsf{Final}(w)$
 \end{center}
 \end{definition}
-Furthermore, before reaching to a final stage in any count, the process may go through several intermediate satges where, for example, counting of ballots happens or some candidates are elected or eliminated. To formalize such non-final stages, we introduce the constructor \textsf{Non-Final}. At every non-final stage of the counting, we need to know that if there are ballots to be counted, how the votes have been distributed up to now, what is the tally of each candidate, and if any candidate was elected or eliminated from the election. Therefore, for stages of the count to thoroughly inform the scrutineers of how the situation of the count is at the moment, it is necessary and sufficient to contain the following components:
+Furthermore, before reaching to a final stage in any count, the process may go through several intermediate stages where, for example, counting of ballots happens or some candidates are elected or eliminated. To formalize such non-final stages, we introduce the constructor \textsf{Non-Final}. At every non-final stage of the counting, we need to know that if there are ballots to be counted, how the votes have been distributed up to now, what is the tally of each candidate, and if any candidate was elected or eliminated from the election. Therefore, for stages of the count to thoroughly inform the scrutineers of how the situation of the count is at the moment, it is necessary and sufficient to contain the following components:
 \begin{enumerate}
 \item the (possibly) uncounted ballots
 \item the tally of votes of each candidate
@@ -315,7 +315,7 @@ Furthermore, before reaching to a final stage in any count, the process may go t
 In an election, assuming we have a quota $qu$, initial number of vacancies $st$, and a list $\mathcal{L}$ of all candidates competing in the election, \textsf{NonFinal}$(ba,t,p,bl,e,h)$ is an intermediate stage of the computation, where $ba$ is the list of uncounted ballots at this point, $t$ is the tally list recording the number of votes of each candidate has received up to this point, $p$ is the pile list of votes assigned to each candidate, $bl$ is the list of elected whose surplus have not yet been transferred, $e$ is the list of elected candidates by this point, and $h$ is the list of continuing candidates up to this stage.
 \end{small}
 \begin{center}
-$qu,st,\mathcal{L}   \vdash  \mathsf{NonFinal}(ba,t,p,bl,e,h)$ 
+$qu,st,\mathcal{L}   \vdash  \mathsf{NonFinal}(ba,t,p,bl,e,h)$
 \end{center}
 \end{definition}
 Definition~\ref{jud:hol} specifies the exact HOL encoding of the sates of the computation. We should note that the use of lists, instead of sets, for ballots, and continuing or elected candidates is simply for the convenience of formalisation in a theorem prover. But the counting rules ,defined shortly afterwards, make no essential use of this representation. Furthermore, by choosing to formalize the tally and pile as lists rather than functions operating on the list of candidates, judgements become an instance of the equality type class which we use later on in specification and reasoning on counting rules. Additionally, this formulation reduces the gap between an actual certificate and its abstract syntactic representation which we refer to as a \emph{formal certificate that is simply a list of judgements}.
@@ -335,14 +335,14 @@ As a formal certificate is constituted of judgements each representing a state o
 The second step is to define functions in HOL which are meant to be the computational counterparts of the HOL specification in the step above. Conjunction of appropriate computational definitions constitutes the computational definition for individual counting rules. These functions are later translated by the built-in mechanisms of CakeML for the purpose of actual computations on an actual certificate.
 
 
-The last step is to prove equivalence of the HOL specification and the computational assertions. By establishing this correspondence, we demonstrate that the computational parts meet the expectation of their specification. We therefore validate a formal certificate if and when it is indeed valid. To show how the process concretely proceeds, we indicate the aformentioned phases put together for the case of \emph{elimination} rule. However, we should note that our actual formalisation seperates the three steps to enhance readability and clearance of the encoding.
+The last step is to prove equivalence of the HOL specification and the computational assertions. By establishing this correspondence, we demonstrate that the computational parts meet the expectation of their specification. We therefore validate a formal certificate if and when it is indeed valid. To show how the process concretely proceeds, we indicate the aforementioned phases put together for the case of \emph{elimination} rule. However, we should note that our actual formalisation separates the three steps to enhance readability and clearance of the encoding.
 
 \subsection{The Case of the Elimination Rule}
-There are implicit conditions in the protocol. For example, the name of each candidate appears only once in the initial list of competing candidates. Also no one is assigned with more than a single pile and a unique tally. Therefore for formalising the legislation, we define predicates that correspond to such implicit requirements. For instance, the predicate \textsf{Valid\_Init\_CandList} restricts legal initial lists of candidates to those which are non-empty and have no duplicate. 
+There are implicit conditions in the protocol. For example, the name of each candidate appears only once in the initial list of competing candidates. Also no one is assigned with more than a single pile and a unique tally. Therefore for formalising the legislation, we define predicates that correspond to such implicit requirements. For instance, the predicate \textsf{Valid\_Init\_CandList} restricts legal initial lists of candidates to those which are non-empty and have no duplicate.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.Valid_Init_CandList_def}
 \end{holthmenv}
-Moreover, at every stage of the count, every candidate has exactly one tally and one pile. Therefore, if a judgement in a certificate meliciously allocates more than one tally to a single candidate, the bug is detected and the certificate rejected as invalid.  We express this condition by the following.
+Moreover, at every stage of the count, every candidate has exactly one tally and one pile. Therefore, if a judgement in a certificate maliciously allocates more than one tally to a single candidate, the bug is detected and the certificate rejected as invalid.  We express this condition by the following.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
@@ -350,7 +350,7 @@ We also have the computational twins for both of the predicates above. Assume th
 \begin{holthmenv}
   \HOLthm[width=80]{Checker.Valid_PileTally_dec1_def}
 \end{holthmenv}
-Additionally, the function \textsf{Valid\_PileTally\_dec2} determins if each element of $l$ appears as the first component of a pair in $t$.
+Additionally, the function \textsf{Valid\_PileTally\_dec2} determines if each element of $l$ appears as the first component of a pair in $t$.
 \begin{holthmenv}
   \HOLthm[width=80]{Checker.Valid_PileTally_dec2_def}
 \end{holthmenv}
@@ -363,11 +363,11 @@ Also the specification \textsf{Valid\_PileTally\_def} implies correctness of \te
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC2}
 \end{holthmenv}
-Conversely, correctness of the computational definition \textsf{Valid\_PileTally\_dec1} and  \textsf{Valid\_PileTally\_dec2} entails their respective specifications. Therefore, we obtain a perfect equivalence between the specification and computational condition for tallies and piles to be distinctively allocated to candidates. 
+Conversely, correctness of the computational definition \textsf{Valid\_PileTally\_dec1} and  \textsf{Valid\_PileTally\_dec2} entails their respective specifications. Therefore, we obtain a perfect equivalence between the specification and computational condition for tallies and piles to be distinctively allocated to candidates.
 
 
 
-Aside from the implicit conditions, \emph{elimination} has explicit constraints to meet for its legal applications. For example, item~9 of the protocl states that 
+Aside from the implicit conditions, \emph{elimination} has explicit constraints to meet for its legal applications. For example, item~9 of the protocol states that
 \begin{small}
 \begin{center}
 \begin{minipage}{10cm}
@@ -376,7 +376,7 @@ them from the list of continuing candidates}.
 \end{minipage}
 \end{center}
 \end{small}
-So the difference between the continuing list of candidates in the premise of the rule with the one in the conclusion is that the weakest candidate is no longer a continuing candidate in the comclusion of the rule. The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
+So the difference between the continuing list of candidates in the premise of the rule with the one in the conclusion is that the weakest candidate is no longer a continuing candidate in the conclusion of the rule. The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
@@ -392,7 +392,7 @@ Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} 
  \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
-The fact that the candidate removed is the weakest, is established by another stand-alone assertion which is expressed as a conjunct of the elimination rule's defintion. Having defined the implicit and explicit side conditions in the definition of \emph{elimination}, we can present the formlisation of this rule in HOL as a predicate.
+The fact that the candidate removed is the weakest, is established by another stand-alone assertion which is expressed as a conjunct of the elimination rule's definition. Having defined the implicit and explicit side conditions in the definition of \emph{elimination}, we can present the formalisation of this rule in HOL as a predicate.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
@@ -401,24 +401,24 @@ The fact that the candidate removed is the weakest, is established by another st
 \begin{holthmenv}
   \HOLthm[width=80]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
-We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to acheive formal specification,  computational definitions, and their correspondence for the rest of counting rules.
+We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules.
 
 \subsection{The Checker formalisation}
-In certified computations, to scrutinise a certificate output by a program, one can design a second (probably verified) program that independently performs the computations again\cite{}. Then the result of the two could be checked against each other for validation. On the other hand, certificate verification can be approached in a significantly more efficient way. Instead of redoing the computations, one can encode a checker that validates if steps visualised in a certificate to reach from an initial state of the computation to an end state have correctly taken place. This approach makes the checker design simpler than the implementation which produced the certificate. As a result, accomplishing verification of the checker becomes considerably easier than that of the implementation which produces the certificates. Moreover, the checker carries computations out faster than the original program.   
+In certified computations, to scrutinise a certificate output by a program, one can design a second (probably verified) program that independently performs the computations again\cite{}. Then the result of the two could be checked against each other for validation. On the other hand, certificate verification can be approached in a significantly more efficient way. Instead of redoing the computations, one can encode a checker that validates if steps visualised in a certificate to reach from an initial state of the computation to an end state have correctly taken place. This approach makes the checker design simpler than the implementation which produced the certificate. As a result, accomplishing verification of the checker becomes considerably easier than that of the implementation which produces the certificates. Moreover, the checker carries computations out faster than the original program.
 
 
 
 
-In light of the above understanding, to check a given formal certificate for correctness, we mainly need to validate if the first judgement of the certificate is a valid initial state of the count, if transitions from an element in the judgement list to the next element is legitimately doable by application of a rule, and if the last judgement of the certificate is a legal final stage of the computation.  As we demonstrated, rules are applicable only when they meet their respective specification. Since rules have some side conditions which make them distinct, this implies that at every stage actually only one of them applies. Therefore, we specify the correct transition-check \textsf{valid\_judgements} to be a disjunction of the predicative counting rules and prove it matches with the computational counterpart. 
+In light of the above understanding, to check a given formal certificate for correctness, we mainly need to validate if the first judgement of the certificate is a valid initial state of the count, if transitions from an element in the judgement list to the next element is legitimately doable by application of a rule, and if the last judgement of the certificate is a legal final stage of the computation.  As we demonstrated, rules are applicable only when they meet their respective specification. Since rules have some side conditions which make them distinct, this implies that at every stage actually only one of them applies. Therefore, we specify the correct transition-check \textsf{valid\_judgements} to be a disjunction of the predicative counting rules and prove it matches with the computational counterpart.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.valid_judgements_def}
 \end{holthmenv}
- 
-Correct end result of each instance of a computation depends on validity of its start point.  A legitimate intial judgement is one in which every candidate's tally is intially set to zero, their piles are empty, and the backlog and the list of elected candidates are both emoty as well. 
+
+Correct end result of each instance of a computation depends on validity of its start point.  A legitimate initial judgement is one in which every candidate's tally is initially set to zero, their piles are empty, and the backlog and the list of elected candidates are both empty as well.
  \begin{holthmenv}
   \HOLthm[width=80]{CheckerSpec.valid_certificate_def}
 \end{holthmenv}
- For checking a formal certifcate we therefore first  certify if the the certificate starts at an initial stage. Then recursively we continue checking if transitions have happened correctly, and if the terminating state is a final one where winners are declared. The above specification of the checker, therefore, corresponds to the following computational formal certificate checker.
+ For checking a formal certificate we therefore first  certify if the certificate starts at an initial stage. Then recursively we continue checking if transitions have happened correctly, and if the terminating state is a final one where winners are declared. The above specification of the checker, therefore, corresponds to the following computational formal certificate checker.
  \begin{holthmenv}
   \HOLthm[width=80]{Checker.Check_Parsed_Certificate_def}
 \end{holthmenv}
@@ -451,7 +451,7 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \caption{ACT Legislative Assembly 2008 and 2012}
 \label{ref;figure2}
 \end{figure}
-Moreover, we have studied behavior of our executable by examining it on certificates output on randomly generated ballots. There are two interesting prameters to study, namely varying the number of ballots and varying the length of each ballot. Figure~\ref{ref;figure3} depicts results on certificates where the number of candidates is fixed at 20, vacancies are 5, and the length of each ballot is 12. It appears that the complexity of the program in the number of ballots is quadratic. Also we keep the number of ballots, vacancies, and length of each ballot fixed at 100000, 1, and 10 respectively, in order to inspect the effect of increase in the length of each ballot (Figure~\ref{ref;figure4}). The complexity of the program seems to be linear with respect to this index. 
+Moreover, we have studied behavior of our executable by examining it on certificates output on randomly generated ballots. There are two interesting parameters to study, namely varying the number of ballots and varying the length of each ballot. Figure~\ref{ref;figure3} depicts results on certificates where the number of candidates is fixed at 20, vacancies are 5, and the length of each ballot is 12. It appears that the complexity of the program in the number of ballots is quadratic. Also we keep the number of ballots, vacancies, and length of each ballot fixed at 100000, 1, and 10 respectively, in order to inspect the effect of increase in the length of each ballot (Figure~\ref{ref;figure4}). The complexity of the program seems to be linear with respect to this index.
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
@@ -483,7 +483,7 @@ $18$&$180.5$&$325$\\
 \label{ref;figure4}
 \end{minipage}
 \end{figure}
-We have implemented the protocol in an unverified certifying Haskell program as well to check the program for correctness. Figure~\ref{} illustrates the result of execution of this program on the ACT legislative Assembly elections for the same years as above. In tow of them, even though the final winners are announced correctly, one of the steps taken from line 6 to line 5 in the certificate is invalid. Therefore, the checker rejects the whole output as invalid.  
+We have implemented the protocol in an unverified certifying Haskell program as well to check the program for correctness. Figure~\ref{} illustrates the result of execution of this program on the ACT legislative Assembly elections for the same years as above. In tow of them, even though the final winners are announced correctly, one of the steps taken from line 6 to line 5 in the certificate is invalid. Therefore, the checker rejects the whole output as invalid.
 \begin{figure}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
@@ -509,7 +509,7 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \section{Outline}\label{sec:out}
 
 
-Certificable / Verifiable Computation.
+Certifiable / Verifiable Computation.
 \begin{itemize}
   \item programs produce results with correctness proofs
   \item much easier than, and orthogonal to, verification
