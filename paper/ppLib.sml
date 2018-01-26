@@ -13,6 +13,13 @@ val _ = overload_on("Some",``SOME``);
 val _ = overload_on("option_choice",``OPTION_CHOICE``);
 val _ = overload_on("mapm",``OPT_MMAP``);
 
+val _ = overload_on("fst",``FST``);
+val _ = overload_on("snd",``SND``);
+
+val _ = overload_on("true",``T``);
+val _ = overload_on("false",``F``);
+
+val _ = overload_on("distinct",``ALL_DISTINCT``);
 val _ = overload_on("rev",``REVERSE``);
 val _ = overload_on("sorted",``SORTED``);
 val _ = overload_on("flat",``FLAT``);

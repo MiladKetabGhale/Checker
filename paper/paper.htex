@@ -286,16 +286,16 @@ The counting process is constituted of some key components, all of which appear 
 \item quota of the election
 \item stages of the counting (or computation)
 \end{enumerate}
-Stages of the count are symbolized representations of necessary information which one needs to know in order to understand how the procedure of the count has exactly advanced. We encapsulate the concept of states of the count in terms of typing judgements with two value constructors named \textsf{NonFinal} and \textsf{Final}. The latter one is used for expressing a terminal state of the count where winners of the election are declared. More specifically, a final judgement asserts the following.
+Stages of the count are symbolized representations of necessary information which one needs to know in order to understand how the procedure of the count has exactly advanced. We encapsulate the concept of states of the count in terms of typing judgements with two value constructors named \HOLtm{NonFinal} and \HOLtm{Final}. The latter one is used for expressing a terminal state of the count where winners of the election are declared. More specifically, a final judgement asserts the following.
 \begin{definition}[Final Judgement]
 \begin{small}
-In an election, assuming we have a quota $qu$, initial number of vacancies $st$, and a list $\mathcal{L}$ of all candidates competing in the election, \textsf{Final}$(w)$ is a final stage of the computation, where $w$ is the final list consisting of all of the declared elected candidates.
+In an election, assuming we have a quota $qu$, initial number of vacancies $st$, and a list $\mathcal{L}$ of all candidates competing in the election, \HOLtm{Final w} is a final stage of the computation, where $w$ is the final list consisting of all of the declared elected candidates.
 \end{small}
 \begin{center}
-$qu,st,\mathcal{L}   \vdash  \mathsf{Final}(w)$
+$qu,st,\mathcal{L}   \vdash  \HOLtm{Final w}$
 \end{center}
 \end{definition}
-Furthermore, before reaching to a final stage in any count, the process may go through several intermediate stages where, for example, counting of ballots happens or some candidates are elected or eliminated. To formalize such non-final stages, we introduce the constructor \textsf{Non-Final}. At every non-final stage of the counting, we need to know that if there are ballots to be counted, how the votes have been distributed up to now, what is the tally of each candidate, and if any candidate was elected or eliminated from the election. Therefore, for stages of the count to thoroughly inform the scrutineers of how the situation of the count is at the moment, it is necessary and sufficient to contain the following components:
+Furthermore, before reaching to a final stage in any count, the process may go through several intermediate stages where, for example, counting of ballots happens or some candidates are elected or eliminated. To formalize such non-final stages, we introduce the constructor \HOLtm{NonFinal}. At every non-final stage of the counting, we need to know that if there are ballots to be counted, how the votes have been distributed up to now, what is the tally of each candidate, and if any candidate was elected or eliminated from the election. Therefore, for stages of the count to thoroughly inform the scrutineers of how the situation of the count is at the moment, it is necessary and sufficient to contain the following components:
 \begin{enumerate}
 \item the (possibly) uncounted ballots
 \item the tally of votes of each candidate
@@ -306,10 +306,10 @@ Furthermore, before reaching to a final stage in any count, the process may go t
 \end{enumerate}
 \begin{definition}[Non-Final Judgement]
 \begin{small}
-In an election, assuming we have a quota $qu$, initial number of vacancies $st$, and a list $\mathcal{L}$ of all candidates competing in the election, \textsf{NonFinal}$(ba,t,p,bl,e,h)$ is an intermediate stage of the computation, where $ba$ is the list of uncounted ballots at this point, $t$ is the tally list recording the number of votes of each candidate has received up to this point, $p$ is the pile list of votes assigned to each candidate, $bl$ is the list of elected whose surplus have not yet been transferred, $e$ is the list of elected candidates by this point, and $h$ is the list of continuing candidates up to this stage.
+  In an election, assuming we have a quota $qu$, initial number of vacancies $st$, and a list $\mathcal{L}$ of all candidates competing in the election, \HOLtm{NonFinal (ba,t,p,bl,e,h)} is an intermediate stage of the computation, where $ba$ is the list of uncounted ballots at this point, $t$ is the tally list recording the number of votes of each candidate has received up to this point, $p$ is the pile list of votes assigned to each candidate, $bl$ is the list of elected whose surplus have not yet been transferred, $e$ is the list of elected candidates by this point, and $h$ is the list of continuing candidates up to this stage.
 \end{small}
 \begin{center}
-$qu,st,\mathcal{L}   \vdash  \mathsf{NonFinal}(ba,t,p,bl,e,h)$
+$qu,st,\mathcal{L}   \vdash  \HOLtm{NonFinal (ba,t,p,bl,e,h)}$
 \end{center}
 \end{definition}
 Definition~\ref{jud:hol} specifies the exact HOL encoding of the sates of the computation. We should note that the use of lists, instead of sets, for ballots, and continuing or elected candidates is simply for the convenience of formalisation in a theorem prover. But the counting rules ,defined shortly afterwards, make no essential use of this representation. Furthermore, by choosing to formalize the tally and pile as lists rather than functions operating on the list of candidates, judgements become an instance of the equality type class which we use later on in specification and reasoning on counting rules. Additionally, this formulation reduces the gap between an actual certificate and its abstract syntactic representation which we refer to as a \emph{formal certificate that is simply a list of judgements}.
@@ -332,32 +332,35 @@ The second step is to define functions in HOL which are meant to be the computat
 The last step is to prove equivalence of the HOL specification and the computational assertions. By establishing this correspondence, we demonstrate that the computational parts meet the expectation of their specification. We therefore validate a formal certificate if and when it is indeed valid. To show how the process concretely proceeds, we indicate the aforementioned phases put together for the case of \emph{elimination} rule. However, we should note that our actual formalisation separates the three steps to enhance readability and clearance of the encoding.
 
 \subsection{The Case of the Elimination Rule}
-There are implicit conditions in the protocol. For example, the name of each candidate appears only once in the initial list of competing candidates. Also no one is assigned with more than a single pile and a unique tally. Therefore for formalising the legislation, we define predicates that correspond to such implicit requirements. For instance, the predicate \textsf{Valid\_Init\_CandList} restricts legal initial lists of candidates to those which are non-empty and have no duplicate.
+There are implicit conditions in the protocol. For example, the name of each candidate appears only once in the initial list of competing candidates. Also no one is assigned with more than a single pile and a unique tally. Therefore for formalising the legislation, we define predicates that correspond to such implicit requirements.
+For instance, the predicate \HOLConst{Valid_Init_CandList} restricts legal initial lists of candidates to those which are non-empty and have no duplicate.
 \begin{holthmenv}
-  \HOLthm[width=80]{CheckerSpec.Valid_Init_CandList_def}
+  \HOLthm[def,width=80]{CheckerSpec.Valid_Init_CandList_def}
 \end{holthmenv}
 Moreover, at every stage of the count, every candidate has exactly one tally and one pile. Therefore, if a judgement in a certificate maliciously allocates more than one tally to a single candidate, the bug is detected and the certificate rejected as invalid.  We express this condition by the following.
 \begin{holthmenv}
-  \HOLthm[width=80]{CheckerSpec.Valid_PileTally_def}
+  \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
-We also have the computational twins for both of the predicates above. Assume the lists $t$ and $l$ are given. Then the function \textsf{Valid\_PileTally\_dec1} decides if every first element of each pair in $t$ is a member of $l$.
+We also have the computational twins for both of the predicates above.
+Given lists $t$ and $l$, the function \HOLConst{Valid_PileTally_dec1} decides if every first element of each pair in $t$ is a member of $l$.
 \begin{holthmenv}
-  \HOLthm[width=80]{Checker.Valid_PileTally_dec1_def}
+  \HOLthm[def,width=80]{Checker.Valid_PileTally_dec1_def}
 \end{holthmenv}
-Additionally, the function \textsf{Valid\_PileTally\_dec2} determines if each element of $l$ appears as the first component of a pair in $t$.
+Additionally, the function \HOLConst{Valid_PileTally_dec2} determines if each element of $l$ appears as the first component of a pair in $t$.
 \begin{holthmenv}
-  \HOLthm[width=80]{Checker.Valid_PileTally_dec2_def}
+  \HOLthm[def,width=80]{Checker.Valid_PileTally_dec2_def}
 \end{holthmenv}
-W prove that the formal specification \textsf{Valid\_PileTally\_def} enforces correctness of the function \textsf{Valid\_PileTally\_dec1}.
+We prove that the formal specification \HOLConst{Valid_PileTally} enforces correctness of the function \HOLConst{Valid_PileTally_dec1}.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC1}
 \end{holthmenv}
 
-Also the specification \textsf{Valid\_PileTally\_def} implies correctness of \textsf{Valid\_PileTally\_dec2} witnessed by the theorem below.
+Also the specification \HOLConst{Valid_PileTally} implies correctness of \HOLConst{Valid_PileTally_dec2} witnessed by the theorem below.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC2}
 \end{holthmenv}
-Conversely, correctness of the computational definition \textsf{Valid\_PileTally\_dec1} and  \textsf{Valid\_PileTally\_dec2} entails their respective specifications. Therefore, we obtain a perfect equivalence between the specification and computational condition for tallies and piles to be distinctively allocated to candidates.
+Conversely, correctness of the computational definition \HOLConst{Valid_PileTally_dec1} and \HOLConst{Valid_PileTally_dec2} entails their respective specifications.
+Therefore, we obtain a perfect equivalence between the specification and computational condition for tallies and piles to be distinctively allocated to candidates.
 
 
 
@@ -372,11 +375,11 @@ them from the list of continuing candidates}.
 \end{small}
 So the difference between the continuing list of candidates in the premise of the rule with the one in the conclusion is that the weakest candidate is no longer a continuing candidate in the conclusion of the rule. The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
 \begin{holthmenv}
-  \HOLthm[width=80]{CheckerSpec.equal_except_def}
+  \HOLthm[def,width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
 To compute when indeed two list match with the exception of one element, we define the function \textsf{equal\_except\_dec}.
 \begin{holthmenv}
-  \HOLthm[width=80]{Checker.equal_except_dec_def}
+  \HOLthm[def,width=80]{Checker.equal_except_dec_def}
 \end{holthmenv}
 This function is proven to satisfy the specification laid down by \textsf{equal\_except} predicate.
 \begin{holthmenv}

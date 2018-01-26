@@ -1,3 +1,2 @@
 LaTeXNIL 2 \ensuremath{[\,]}
-T 4 \HOLConst{true}
-F 5 \HOLConst{false}
+MEM 3 \HOLConst{mem}
