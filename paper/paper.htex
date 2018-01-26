@@ -432,15 +432,23 @@ Since the HOL specification realises the protocol, a formal certificate is valid
 
 \section{Translation into CakeML and Code Extraction}
 
-The computational version of the certificate checking function, \HOLConst{Check_Parsed_Certificate} described above, is
+The verified certificate checking function, \HOLConst{Check_Parsed_Certificate}, described above, is a good starting point for a certificate checking program, but as it stands it has two drawbacks: firstly, it is a function in logic rather than an executable program, and secondly, relatedly, its input arguments must be provided as values in the correct types (parameters, and a list of judgements).
+In this section we describe how we overcome these two drawbacks and obtain a verified executable for checking count certficates.
+Our final theorem about the executable is presented in Section~\ref{sec:final-thm}.
 
-\subsection{Final Theorem}
-\begin{holthmenv}
-  \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
-\end{holthmenv}
+\subsection{Parsing}
 
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
+\end{holthmenv}
+
+\subsection{Translation into CakeML}
+
+\subsection{I/O Wrapper and Compilation}
+
+\subsection{Final Theorem}\label{sec:final-thm}
+\begin{holthmenv}
+  \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
 \end{holthmenv}
 
 \section{Experimental Results}
