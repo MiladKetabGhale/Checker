@@ -91,7 +91,7 @@ were used to create the certificate.
 
 Our focus in this paper is on the \emph{verifier}. We briefly
 discuss a
-concise formal specification of \emph{single transferable vote}, a
+concise formal specification of \emph{single transferable vote} (STV), a
 complex, preferential voting system used e.g. in Ireland, Malta, New
 Zealand and Australia. From this specification, we develop a notion
 of \emph{certificate} so that correct certificates guarantee
@@ -107,8 +107,8 @@ steps inside the HOL theorem prover where every step by and large
 corresponds to an action taken by a counting officer in a
 paper-based setting.  There are two kinds of stages that we call
 \emph{judgements} in analogy to typing assertions in type theory.
-\emph{Final} judgements declare a set of winners.
-\emph{Non-final} judgements represent the current state of the count
+\HOLtm{Final} judgements declare a set of winners.
+\HOLtm{NonFinal} judgements represent the current state of the count
 as a multi-component tuple, corresponding to a snapshot of the stage
 of the count in a paper-based setting.  The formalisation of the
 voting protocol then takes the form of \emph{rules} that specify how
@@ -124,40 +124,34 @@ logical.
 
 
 Second, in tandem with the logical specification of each rule, we
-define a boolean function that checks whether or not the rule has
+define a Boolean-valued function that checks whether or not the rule has
 been applied correctly.  This then directly gives rise to the
 verifier that, at every step, just checks whether any of the rules
-is applicable, using the corresponding boolean function.
+is applicable, using the corresponding Boolean-valued function.
 
 Third, we establish correspondence between the logical
 definitions and their computational counterparts. This simply boils
 down to formally establishing that the logical specification holds
-if and only if the boolean function returns \emph{true}. This then
+if and only if the Boolean-valued function returns \HOLtm{T}. This then
 straightforwardly implies the correctness of the certificate
 verifier. This allows us to conclude that a valid certificate indeed
 implies that the election protocol has been carried out in
 accordance to the specification.
 
 
-In a forth, and last step, we synthesise an executable for the
-verifier that is correct down to the machine level.  This is
-achieved by automatically translating HOL-definitions into CakeML
-the machine code. This guarantees that the ensuing CakeML functions
-are computationally equivalent to their HOL counterparts.
+In the fourth, and last step, we synthesise a machine-code implementation of  the verifier and produce a proof this implementation's correctness.  This is
+achieved by using proof-producing synthesis~\cite{JFP14} of CakeML code from the HOL definitions, then using the verified CakeML compiler~\cite{DBLP:conf/icfp/TanMKFON16} to produce the machine code.
 To perform computation on an actual certificate, we define a formal
-syntax of the latter, and a parser in HOL, that we combine with the
+syntax for certificates, and a parser in HOL, that we combine with the
 I/O mechanisms of CakeML to obtain the verifier.
-In particular, this allows us to prove correctness of the verifier
-with respect to a high-level specification.
-HOL. This finally induces an executable the correctness of which is
-verified down to the machine level.
+The result is a verifier executable which, we have proved, admits a vote counting certificate if and only if the certificate is valid according to our logical specification of the election protocol.
 
 In summary, our slogan is ``verify the verifier''. Rather than
 verifying the \emph{program} that performs an election count, we
 demand that a program produces a certificate that we can then
 independently verify. This has several advantages. For one, it is
 much less labour intensive to verify the verifier, compared with
-program verification. Second, having verifiable certificates at hand
+verifying the counting program. Second, having verifiable certificates at hand
 meets the goal of universal verifiability \cite{Kremer:2010:EVE}.
 Third, we achieve correctness over a minimal trust base through the
 use of CakeML.
