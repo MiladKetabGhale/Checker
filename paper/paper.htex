@@ -424,6 +424,15 @@ Consequently a formal certificate is validated if and when it is valid according
 
 \section{Translation into CakeML and Code Extraction}
 
+\subsection{Final Theorem}
+\begin{holthmenv}
+  \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
+\end{holthmenv}
+
+\begin{holthmenv}
+  \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
+\end{holthmenv}
+
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
 Legislative Assembly elections in ACT for years 2008 and 2012 (Figure\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalization of ANU\_Union STV in Coq~\cite{MKet}.
@@ -503,6 +512,7 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \label{ref;figure6}
 \end{figure}
 \section{Discussion and Conclusion}
+
 \section{Outline}\label{sec:out}
 
 
@@ -555,33 +565,6 @@ Our contribution.
   \item smallest possible trust base: microprocessor, basic IO
   system calls
 \end{itemize}
-
-
-\section{Single Transferable Vote and Certification}
-
-\section{Final Theorem}
-\begin{holthmenv}
-  \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
-\end{holthmenv}
-
-\begin{holthmenv}
-  \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
-\end{holthmenv}
-
-\section{Evaluation}
-\begin{itemize}
-  \item to be done.
-\end{itemize}
-
-\section{Related Work}
-\begin{itemize}
-  \item Verifiability and electronic voting
-  \item Verified / certified computation in general
-  \item CakeML stuff??
-
-\end{itemize}
-
-\section{Conclusion}
 
 \bibliographystyle{splncs03}
 \bibliography{paper}
