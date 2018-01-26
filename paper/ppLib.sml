@@ -4,6 +4,8 @@ open preamble check_countProofTheory
 
 val _ = patternMatchesLib.ENABLE_PMATCH_CASES();
 
+val _ = max_print_depth := ~1;
+
 val _ = overload_on("stdFS",``STD_streams``);
 val _ = overload_on("x64_regs",``heap_regs x64_backend_config.stack_conf.reg_names``);
 
@@ -30,6 +32,7 @@ val _ = overload_on("foldl",``FOLDL``);
 val _ = overload_on("assoc",``ALOOKUP``);
 val _ = overload_on("drop",``DROP``);
 val _ = overload_on("take",``TAKE``);
+val _ = overload_on("last",``LAST``);
 val _ = overload_on("update",``LUPDATE``);
 val _ = overload_on("null",``NULL``);
 val _ = overload_on("hd",``HD``);

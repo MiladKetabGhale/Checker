@@ -1,6 +1,6 @@
 open preamble CheckerSpecTheory CheckerTheory
 open ratTheory
- 
+
 val _ = new_theory "CheckerProof";
 
 val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
@@ -1070,19 +1070,19 @@ val logical_to_functional_update_pile = Q.store_thm ("logical_to_functional_upda
           >- (`MEM (h,get_cand_pile h p2) p2` by metis_tac [MEM,GET_CAND_PILE_MEM]
             >> metis_tac [MEM])));
 
- 
+
 val tally_comparison_total = Q.store_thm ("tally_comparison_total",
  `!t c1 c2. ((tally_comparison t) c1 c2) \/ ((tally_comparison t) c2 c1)`,
-  ((REPEAT STRIP_TAC 
-    >> rw[tally_comparison_def] 
-     >> ASSUME_TAC RAT_LES_TOTAL 
-      >> first_assum (qspecl_then [`get_cand_tally c2 t`,`get_cand_tally c1 t`] strip_assume_tac)) 
-         >- (DISJ1_TAC 
-          >> metis_tac [RAT_LES_IMP_LEQ]) 
+  ((REPEAT STRIP_TAC
+    >> rw[tally_comparison_def]
+     >> ASSUME_TAC RAT_LES_TOTAL
+      >> first_assum (qspecl_then [`get_cand_tally c2 t`,`get_cand_tally c1 t`] strip_assume_tac))
+         >- (DISJ1_TAC
+          >> metis_tac [RAT_LES_IMP_LEQ])
          >- (DISJ1_TAC
           >> metis_tac [RAT_LEQ_REF])
          >- (DISJ2_TAC
-          >> metis_tac [RAT_LES_IMP_LEQ]))); 
+          >> metis_tac [RAT_LES_IMP_LEQ])));
 
 
 val tally_comparison_total_COR = Q.store_thm ("tally_comparison_total_COR",
@@ -1092,7 +1092,7 @@ val tally_comparison_total_COR = Q.store_thm ("tally_comparison_total_COR",
      >> STRIP_TAC
        >> first_assum (qspecl_then [`tally_comparison t`] strip_assume_tac)
          >> metis_tac [tally_comparison_total]));
- 
+
 
 
 val tally_comparison_trans = Q.store_thm ("tally_comparison_trans",
@@ -1103,7 +1103,7 @@ val tally_comparison_trans = Q.store_thm ("tally_comparison_trans",
        by (REPEAT STRIP_TAC
         >> metis_tac [tally_comparison_def,RAT_LEQ_TRANS])
           >> metis_tac[transitive_def]));
- 
+
 val Logical_to_Functional_elect = Q.store_thm ("Logical_to_Functional_elect",
  `! st (qu: rat) l j1 j2. ELECT (qu,st,l) j1 j2 ==> ELECT_dec (qu,st,l) j1 j2`,
 
@@ -1244,6 +1244,10 @@ val ELECT_thm = Q.store_thm("ELECT_thm",
 val ELIM_CAND_thm = Q.store_thm("ELIM_CAND_thm",
   `ELIM_CAND_dec = ELIM_CAND`,
   simp[FUN_EQ_THM,Logical_elim_to_Functional_Elim,Functional_Elim_to_Logical_elim,FORALL_PROD,EQ_IMP_THM]);
+
+val initial_judgement_thm = Q.store_thm("initial_judgement_thm",
+  `Initial_Judgement_dec = initial_judgement`,
+  rw[FUN_EQ_THM,Initial_Judgement_IMP_TheLogical,Logical_to_Functional_Initial_Judgement,EQ_IMP_THM]);
 
 val valid_judgements_thm = Q.store_thm("valid_judgements_thm",
   `valid_judgements_dec = valid_judgements`,
