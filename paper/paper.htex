@@ -29,40 +29,143 @@ We approach electronic vote counting as a certified computation where for each e
 
 \end{abstract}
 \section{Introduction}\label{sec:intro}
-Members of the general public outsource the task of vote counting of an election in a democratic system to authorities in order to safeguard their preferences. Therefore    correct, publicly verifiable, transparent election count is a key constituent of establishing trustworthiness in the final outcome. Vote counting methods currently in use fail to meet such expectations. In hand counting methods, to provide the public with some evidence for the process, scrutiny sheets are published. Also independent scrutineers are welcomed to monitor the counting process. However scrutiny sheets are inadequate as costly mistakes have happened in the traditional hand counting methods\cite{}. As a result, computers have come to perform the computation for elections with different counting algorithms including the Single Transferable Vote scheme. These program merely output a final result where winners of the election are announced. Moreover, their source code is kept secret under the excuse of \lq\lq commercial in confidence\rq\rq. On the other hand, elections with STV scheme are complex and have corner cases which are left open to interpretation and, therefore, implementations. Hence efforts to reproduce the same results output by the commercial programs is usually unsuccessful. Consequently the public has no choice other than having plain faith in numerous components employed throughout this process. 
 
+The main contribution of this paper is a new framework for
+verifiably correct vote counting. 
+%
+Electronic voting is becoming more and more prevalent worldwide. 
+But almost scandalously, 
+the current state of affairs leaves much
+to be
+desired as the public vote is a cornerstone of
+modern democracy.
+Indeed electronic techniques as they are used now may be seen as a step back from traditional
+paper based elections.
+
+For example, the vote counting software that is used in Australia's
+most populous 
+state, the state of New South Wales, 
+was found to contain errors that had an impact in at least one seat that
+was wrongly filled with high probability.
+This was not only reported in specialist publications
+\cite{Conway:2017:ANS} but
+also in the national press \cite{Brooks:2017:NCE}.
  
+When counting ballots by hand,  the counting is monitored by
+scrutineers, usually members of the general public or stakeholders
+such as party representatives and members of the general public. 
+%
+In contrast,  computer software that is used to count ballots 
+merely produces a final result. Moreover, in many cases, the source
+code of these programs is commercial in confidence, and there is no
+evidence of the correctness of the count that could be seen as
+analogous to scrutineers in traditional, paper-based vote counting.
+
+It is universally recognised that transparent and verifiable vote
+counting is a key constituent to 
+establish trustworthiness, and subsequently trust, in the final outcome. 
+The computer-based methods 
+currently in use fail to meet both expectations.  
+
+In the literature on electronic voting, the notion of \emph{universal
+verifiability} of vote counting (any voter can check that the
+announced result is correct on the basis of the published ballots
+\cite{Kremer:2010:EVE}) has long been recognised as being
+central,
+both for guaranteeing  correctness, and building trust,
+in electronic elections. For vote-counting (on which we focus in
+this paper), verifiability means that every stakeholder, or indeed
+any
+member of the general public, has the means to check that the
+computation
+of election winners is correct.
+
+The approach presented here combines the concept of certifying
+algorithms \cite{McConnell:2011:CA} with formal specification and
+theorem proving to address this challenge. In a nutshell, a
+\emph{certifying algorithm} is an algorithm that produces, with
+every execution, an easily-verifiable certificate of the correctness
+of the computed result.  This certificate can then be scrutinised by
+a verifier, independently of the tools, hardware or software that
+were used to create the certificate. 
+
+Our focus in this paper is on the \emph{verifier}. We briefly
+discuss a 
+concise formal specification of \emph{single transferable vote}, a
+complex, preferential voting system used e.g. in Ireland, Malta, New
+Zealand and Australia. From this specification, we develop a notion
+of \emph{certificate} so that correct certificates guarantee
+correctness of election results. The main body of our work concerns
+the \emph{verifier} (certificate checker), and we present a
+synthesis of the verifier that is itself fully verified down to the
+machine level. 
 
 
-Our approach combines the concept of certifying programs with the theorem proving to address the probelm. A cost-effective solution for verification of vote counting programs is to modify them in a way that upon each execution of the program, a certificate is produced which stands as a correctness witness for the output result. A checker can, then, independently of the tools used to produce the certificates, checks them for correctness. Validation of the program therefore reduces to verification of the certificate checker. 
+This proceeds in four steps. 
+First, we formalise  the vote counting protocol as a sequence of
+steps inside the HOL theorem prover where every step by and large
+corresponds to an action taken by a counting officer in a
+paper-based setting.  There are two kinds of stages that we call
+\emph{judgements} in analogy to typing assertions in type theory.
+\emph{Final} judgements decleare a set of winners. 
+\emph{Non-final} judgements represent the current state of the count
+as a multi-component tuple, corresponding to a snapshot of the stage
+of the count in a paper-based setting.  The formalisation of the
+voting protocol then takes the form of \emph{rules} that specify how
+to advance from one judgement to the next, thereby advancing the
+count. The applicability of particular rules are described 
+by side conditions that are in turn formalised by HOL predicates.  A
+correct certificate is then simply a sequence of judgements where
+each judgement is justified through its predecessor by means of a
+correct rule application.  The task of the verifier is then simply
+to process a list of judgements and ascertain that this is indeed
+the case.  In particular, our specification of rules is purely
+logical.
 
 
+Second, in tandem with the logical specification of each rule, we
+define a boolean function that checks whether or not the rule has
+been applied correctly.  This then directly gives rise to the
+verifier that, at every step, just checks whether any of the rules
+is applicable, using the corresponding boolean function. 
 
-Here, we demonstrate how to carry the task out for STV elections. To this end, we take four steps. First, we formalise  vote counting algorithm  inside the theorem prover HOL as a sequence of logical rule applications to stages of the count. Stages of the count, are formalised as typing judgements which are of two kind; non-final and final. The former is constituted of six components that put together provide all the necessary information to know what the current status of the count is. It informs the scrutineers of the ballots which (possibly) need to be counted, tally of each candidate, pile of the votes allocated to each candidate according to the preferences, list of candidates whose votes may be distributed later, and list of elected and continuing candidates at this stage. The latter judgement is a terminal stage of the process whereby winners of the election are announced. A list of judgements is called a \emph{formal certificate}.
-
-
-
-Moreover, The election protocol implicitly specifies steps for advancing the counting process. These steps which tell us when and how to move from one stage of the count (judgement) to another are formalised as logical rules. These rules have side conditions that must be met before such transitions can happen. Side conditions are, essentially, the formal counterpart of the protocol laid down by the legislation, and are expressed by standalone HOL predicates. By satisfying these side conditions, one makes sure that the process has proceeded in accordance to the protocol of the election. We shall refer to such assertions as predicative definitions or \emph{specification}. Finally, We specify the checker a disjunction of the predicative counting rules. Therefore to validate a given formal certificate, the checker merely needs to verify if each two consecutive list elements match against a premise and conclusion of a legitimate rule instance application.
-
-
-
-Second, We have HOL functions defined for the purpose of performing computation with. Some of these functions are auxiliary computational components which we use to assert computational counterparts of the predicative counting rules. In essence, each computational counting rule is expressed as a conjunction of some of these auxiliary definitions. The computational checker, which certifies a given formal certificate, is formalised a disjunction of the computational counting rules.
-
-
-
-Third, we establish correspondence between the predicative definitions and their respective computational definitions. All of the functions which we have defined in the second step and did not exist in HOL libraries are proven correct with respect to their specification laid down in the first step. Therefore, we prove that the computational checker validates a formal certificate if and only if its specification is met. Hence, we only validate a formal certificate when and if it has been obtained in accordance to steps specified by the protocol of the election.
-
-
-
-Our fourth step is extraction of executable that is correct down to the machine code. To accomplish this final step, we first translate our HOL definitions into CakeML equivalent definitions by calling the built-in \textsf{translate} function. Therefore we are able to uplift whatever properties proved for our HOL computational definitions to CakeML embedded equivalent functions. As a result the computational behaviour of the CakeML translated functions on a formal certificate is the same as their original HOL counterparts. Furthermore, to perform computation on an actual certificate, we combine our parser defined in HOL with I/O functions of CakeML, and the computational checker. These are put together as a deeply embedded CakeML function, named \textsf{check\_count}. The behaviour of this function is proven correct with respect to a top-level specification. Consequently, we come to verify that \textsf{check\_count} is extensionally equivalent to the computational checker in the HOL. Hence, we validate an actual certificate if and only if its corresponding  formal certificate is valid. Finally we obtain executable code which behaves on the machine level as its source program does on the formal HOL level.
+Third, we establish correspondence between the logical
+definitions and their computational counterparts. This simply boils
+down to formally establishing that the logical specification holds
+if and only if the boolean function returns \emph{true}. This then
+straightforwardly implies the correctness of the certificate
+verifier. This allows us to conclude that a valid certificate indeed
+implies that the election protocol has been carried out in
+accordance to the specification.
 
 
+In a forth, and last step, we synthesise an executable for the
+verifier that is correct down to the machine level.  This is
+achieved by automatically translating HOL-definitions into CakeML
+the machine code. This guarantees that the ensuing CakeML functions
+are coputationally equivalent to their HOL counterparts. 
+To perform computation on an actual certificate, we define a formal
+syntax of the latter, and a parser in HOL, that we combine with the
+I/O mechanisms of CakeML to obtain the verifier. 
+In particular, this allows us to prove correctness of the verifier
+with respect to a high-level specification. 
+HOL. This finally induces an executable the correctness of which is
+verified down to the machine level. 
 
+In summary, our slogan is ``verify the verifier''. Rather than
+verifying the \emph{program} that performs an election count, we
+demand that a program produces a certificate that we can then
+independently verify. This has several advantages. For one, it is
+much less labour intensive to verify the verifier, compared with
+program verification. Second, having verifiable certificates at hand
+meets the goal of universal verifiability \cite{Kremer:2010:EVE}.
+Third, we achieve correctness over a minimal trust base through the
+use of CakeML. 
 
-Our formalization has some advantages. We accomplish the phenomenal degree of verification down to machine code  in a very cost-effective way.Also all of the steps are taken inside verified environments. We do not outsource any part of our task to other sources such as third party theorem provers or code verifiers through untrusted, unverified translation methods. Moreover, it enjoys modularity. Most of STV algorithms differ mainly in some small aspects. On the other hand, we capture the protocol in terms of stand-alone HOL assertions. Thereofore to formalise other STV algorithms, we essentially need to modify specific part of one or some rules and then discharge the related proofs rather than throwing the entire formalization away to strat from the scratch. Furhtermore, our work extends beyond mere theorem proving as the executable extracted from CakeML is capable of dealing with real size elections.
-
-
-
+In the remainder of the paper, we describe our framework in detail
+and demonstrate that it can handle real-world size elections by
+evaluating it on historical data of elections conducted in
+Australia.
 
 
 \noindent\textbf{Related Work.} Alkassar et al~\cite{EAlk} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{}, they obtain some pre- and postconditions, which are next generalized syntatically and then implemented in the Isabella theorem prover to be discharged. Even though this metohd introduces a uniform platform for dealing with certifiying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{LNos} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DGre} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation. On the other hand, in context of vote counting verification, merely certifying implementations exist~\cite{DPat,DPati,MKet}. For STV, in particular, Ghale et al~\cite{MKet} and Pattinson et al~\cite{DPati} verify some STV schemes inside Coq and output a certificate for each input upon every execution of the extracted Haskell program. Nonetheless, they do not provide any verified checker to independently scrutinize the certificate for authenticity.
