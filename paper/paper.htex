@@ -160,9 +160,8 @@ In the remainder of the paper, we describe our framework in detail
 and demonstrate that it can handle real-world size elections by
 evaluating it on historical data of elections conducted in
 Australia.
+ 
 
-
-\noindent\textbf{Related Work.} Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, they obtain some pre- and postconditions, which are next generalized syntactically and then implemented in the Isabella theorem prover to be discharged. Even though this method introduces a uniform platform for dealing with certifying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{DBLP:conf/nfm/NoschinskiRM14} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation. On the other hand, in context of vote counting verification, merely certifying implementations exist~\cite{DBLP:conf/ausai/PattinsonS15,DBLP:conf/itp/PattinsonT17,DBLP:conf/voteid/GhaleGP17}. For STV, in particular, Ghale et al~\cite{DBLP:conf/voteid/GhaleGP17} and Pattinson et al~\cite{DBLP:conf/itp/PattinsonT17} verify some STV schemes inside Coq and output a certificate for each input upon every execution of the extracted Haskell program. Nonetheless, they do not provide any verified checker to independently scrutinize the certificate for authenticity.
 
 \section{The Protocol and Its HOL Formalization}
 STV is an election scheme used in multi-seated constituencies and is designed to reflect the proportional preferences of voters in that district for competing candidates. The preference is expressed by ordering candidates on each ballot. Then the count proceeds by assigning the value of the ballot to the most preferred continuing candidate. A continuing candidate is one who has neither been elected nor eliminated from the initial list of competing candidates. When a candidate is not continuing any more, they are not considered in the preferences of ballots any further. Additionally, transfer of ballots of the elected or eliminated candidates may occur until all vacancies are filled.
@@ -530,6 +529,18 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \label{ref;figure6}
 \end{figure}
 \section{Discussion and Conclusion}
+
+\section{Related Work}
+Our work originally combines the notion of certified computation and verification tools, each of which has existed before for algorithms other than vote counting schemes. Here we briefly   discuss existing literature on certifying algorithms for vote counting, and the work on integrating verification methods with certifying algorithms. 
+
+
+
+
+In vote counting, there are few work which provide a certificate with their output~\cite{DBLP:conf/ausai/PattinsonS15,DBLP:conf/itp/PattinsonT17,DBLP:conf/voteid/GhaleGP17}. They mainly formalise a voting protocol inside the theorem prover Coq and then prove some desired properties about the formalised specification. Then, they extract programs into Haskell or OCaml languages to perform computations. Since the semantic of the target and source of the extraction method differ, and there is no proof that the translation occurs in a semantic-preserving way, verification of the specification does not legitimately extend to the extracted program. Moreover, these work are either not accompanied by a checker\cite{DBLP:conf/voteid/GhaleGP17}, or their checker is an unverified Haskell/OCaml program\cite{DBLP:conf/itp/PattinsonT17}. One therefore has to trust the extraction means and correct computations carried out by GHC or OCaml compiler.   
+
+
+
+On the other hand, there are frameworks combining certification and verifications tools for verifying algorithms. Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, they obtain some pre- and postconditions, which are next generalized syntactically and then implemented in the Isabella theorem prover to be discharged. Even though this method introduces a uniform platform for dealing with certifying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{DBLP:conf/nfm/NoschinskiRM14} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation.
 
 \section{Outline}\label{sec:out}
 
