@@ -530,6 +530,14 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \label{ref;figure6}
 \end{figure}
 \section{Discussion and Conclusion}
+We introduced a framework for verification of computer programs computing election results. We employ HOL for its rich, trusted set of rewriting tactics and libraries, and its provably semantic-conservative connection to the verified CakeML compiler. The executable code produced by the CakeML is guaranteed to satisfy the expectations of the protocol down to the machine code. Therefore, the framework and its output produced upon each invocation are fully trustworthy products. Furthermore, besides concision and clarity, the framework is efficient. As the experimental results witnesses, certificates of the Molonglo district, the biggest Legislative Assembly electorate in Australia, are checked in merely five minutes. 
+
+
+
+
+Our approach offers a twofold modularity which stems from the way we have formalised the counting protocol in HOL. At one layer, the formalisation realises the counting scheme as standalone logical rules. At another layer, each of the logical rules are composed of independent assertions. Since every STV election consists of counting, elimination, transfer, electing and declaration of winners, in order to capture a variant of the STV demonstrated here, we do not need to dismiss the foundational rule-based formulation. Moreover, STV schemes differ merely in one or some moderate aspects from one another. For example, the STV version used in the Senate elections of Australia requires transfer of excessive votes of an elected candidate before any other rule can apply. This difference can be formalised in our system simply by modifying a single component of the \textsf{TRANSFER} rule. So for establishing verification results, we simply have to discharge a few correspondences in HOL. Furthermore, the steps of translation into CakeML and executable extraction process mainly remain unaffected. 
+
+
 
 \section{Related Work}
 Our work originally combines the notion of certified computation and verification tools, each of which has existed before for algorithms other than vote counting schemes. Here we briefly   discuss existing literature on certifying algorithms for vote counting, and the work on integrating verification methods with certifying algorithms. 
