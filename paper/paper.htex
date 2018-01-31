@@ -108,7 +108,7 @@ of \emph{certificate} so that correct certificates guarantee
 correctness of election results. The main body of our work concerns
 the \emph{verifier} (certificate checker), and we present a
 synthesis of the verifier that is itself fully verified down to the
-machine level.
+machine-code level.
 
 
 This proceeds in four steps.
@@ -117,8 +117,8 @@ steps inside the HOL theorem prover where every step
 corresponds to an action taken by a counting officer in a
 paper-based setting.  There are two kinds of stages that we call
 \emph{judgements} in analogy to typing assertions in type theory.
-Final judgements just declare the set of winners.
-\emph{NonFinal} judgements represent the current state of the count
+\HOLtm{Final} judgements just declare the set of winners.
+\HOLtm{NonFinal} judgements represent the current state of the count
 as a tuple, corresponding to a snapshot of the stage
 of the count in a paper-based setting.  The formalisation of the
 voting protocol then takes the form of \emph{rules} that specify how
