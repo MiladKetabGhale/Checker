@@ -727,10 +727,16 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \label{ref;figure6}
 \end{figure}
 \section{Discussion and Conclusion}
+The framework introduced is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs offered in HOL environment makes our formalisation clear so that external scrutineers may simply examine the specification of the frame work to understand what it does, rather than necessarily bothering with proofs and computational components. Also rich rewriting tactics and libraries of HOL allows us to express the protocol and discharge related proofs with a minimum amount of lines of encoding. Moreover, the verified connection of HOL with CakeML enables verification performed inside the theorem prover to be pushed down to machine level. Furthermore, besides concision and clarity, the framework is efficient. As the experimental results witnesses, certificates of the Molonglo district, the biggest Legislative Assembly electorate in Australia, are checked in merely five minutes.   
+
+
+
+Our framework enjoys a twofold modularity which stems from the way we have formalised the counting protocol in HOL. At one layer, the formalisation realises the counting scheme as standalone logical rules. At another layer, each of the logical rules are composed of independent assertions. Since every STV election consists of counting, elimination, transfer, electing and declaration of winners, in order to capture a variant of the STV demonstrated here, we do not need to dismiss the foundational rule-based formulation. Moreover, STV schemes differ merely in one or some moderate aspects from one another. For example, the STV version used in the Senate elections of Australia requires transfer of excessive votes of an elected candidate before any other rule can apply. This difference can be formalised in our system simply by modifying a single component of the \textsf{TRANSFER} rule. So for establishing verification results, we simply have to discharge a few correspondences in HOL. Furthermore, the steps of translation into CakeML and executable extraction process mainly remain unaffected. 
+
+
 
 \section{Related Work}
-Our work originally combines the notion of certified computation and verification tools, each of which has existed before for algorithms other than vote counting schemes. Here we briefly   discuss existing literature on certifying algorithms for vote counting, and the work on integrating verification methods with certifying algorithms. 
-
+ There is some work combining methods of theorem proving with certification for verification intentions. However they are not carried out for vote counting. On the other hand, in context of vote counting, merely few certifying algorithms exist which are not accompanied by any verified checker. 
 
 
 
@@ -740,58 +746,6 @@ In vote counting, there are few work which provide a certificate with their outp
 
 On the other hand, there are frameworks combining certification and verifications tools for verifying algorithms. Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, they obtain some pre- and postconditions, which are next generalized syntactically and then implemented in the Isabella theorem prover to be discharged. Even though this method introduces a uniform platform for dealing with certifying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{DBLP:conf/nfm/NoschinskiRM14} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation.
 
-\section{Outline}\label{sec:out}
-
-
-Certifiable / Verifiable Computation.
-\begin{itemize}
-  \item programs produce results with correctness proofs
-  \item much easier than, and orthogonal to, verification
-  \item however need to prove that valid certificates imply valid
-  results (soundness), maybe also that every correct result is
-  certifiable.
-  \item in particular, this is independent of the program that
-  produces the results.
-  \item mainly used to offload computation to untrusted clients.
-  \item reliability is given by verifying the \emph{checker} rather
-  than the program that carries out computation.
-\end{itemize}
-
-\noindent
-Vote counting.
-
-\begin{itemize}
-  \item here, we employ certified computation with a different goal:
-  vote counting
-  \item difference: general public / election authority is outsourcing
-  computation to us.
-  \item state of the art: no verifiability, black box, sometimes not
-  even open source.
-  \item this is a real problem -- e.g. NSW 2012 Griffith
-  \item large trust base, including to trust that the right program
-  has been run!
-  \item indeed in evoting research: concept of ``universal
-  verifiability'' means precisely that. Is the holy grail of any
-  evoting system.
-  \item for vote counting, this is a paradigm shift: don't verify
-  the program, but verify the checker -- down to machine level!
-  \item this happens in a fully verified / verifiable environment
-  \item higher guarantees by machine level verification
-\end{itemize}
-
-\noindent
-Our contribution.
-\begin{itemize}
-  \item Have formalised STV (complex, preferential voting scheme
-  used in Malta, Scotland, etc.) in HOL
-  \item rule based to minimise gap between law and code
-  \item Have designed a notion of certificate that establishes the
-  correctness of STV counts. Think about this more \dots
-  \item Have developed a verified checker
-  \item Used CakeML to give correctness down to machine level
-  \item smallest possible trust base: microprocessor, basic IO
-  system calls
-\end{itemize}
 
 \bibliographystyle{splncs03}
 \bibliography{paper}
