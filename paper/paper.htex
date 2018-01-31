@@ -1,4 +1,5 @@
 \documentclass{llncs}
+\usepackage{etoolbox}
 \usepackage{wrapfig}
 \usepackage{graphicx}
 \usepackage{bussproofs}
@@ -10,10 +11,13 @@
 \renewcommand{\HOLTyOp}[1]{\textsf{\itshape #1}}
 \renewcommand{\HOLSymConst}[1]{\HOLConst{#1}}
 \renewcommand{\HOLTokenBar}{\ensuremath{\mathtt{|}}}
+
+\ifdef{\dpspecial}{
 %% tmp by Dirk
 \newcommand{\HOLtm}[1]{\texttt{#1}}
 \newcommand{\HOLty}[1]{\texttt{#1}}
 \newcommand{\HOLthm}[2][]{\texttt{#2}}
+}{}
 \NewEnviron{holthmenv}{
   \begin{equation*}
   \begin{array}[t]{l}
@@ -748,6 +752,6 @@ On the other hand, there are frameworks combining certification and verification
 
 
 \bibliographystyle{splncs03}
-\bibliography{paper}
+\bibliography{paper,delta2,ev}
 \end{document}
 % vim: ft=tex
