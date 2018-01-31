@@ -35,9 +35,7 @@ Ramana~Kumar\inst{2}}
 Data61, CSIRO and UNSW}
 \maketitle
 \begin{abstract}
-We introduce a new framework for verifying electronic vote counting results that are based on the Single Transferable Vote scheme (STV). Our approach frames electronic vote counting as certified computation where each execution of the counting algorithm is accompanied by a certificate that witnesses the correctness of the output. These certificates are then checked for correctness independently of the means employed to produce them. In particular, we advocate to verify the verifier rather than the software used to produce the result. We use the theorem prover HOL to formalise the counting protocol of an STV scheme to obtain full static verification of the checker. By means of built-in mechanisms that connect HOL with the verified CakeML compiler, we then extract an executable that is computationally equivalent to the verified verifier. The executable is guaranteed to be behave correctly with respect to the formalised specification of the protocol down to the machine level. Moreover, it can check certificates of real-size elections efficiently. Our encoding is modular so that repeating the same process for different STV schemes requires a minimal amount of additional work.
-
-
+We introduce a new framework for verifying electronic vote counting results that are based on the Single Transferable Vote scheme (STV). Our approach frames electronic vote counting as a certified computation where each execution of the counting algorithm is accompanied by a certificate that witnesses the correctness of the output. These certificates are then checked for correctness independently of the means employed to produce them. In particular, we advocate to verify the verifier rather than the software used to produce the result. We use the theorem prover HOL to formalise the counting protocol of an STV scheme to obtain full static verification of the checker. By means of built-in mechanisms that connect HOL with the verified CakeML compiler, we then extract an executable that is computationally equivalent to the verified verifier. The executable machine code is guaranteed to behave correctly with respect to the formalised specification of the protocol. Moreover, it can check certificates of real-size elections efficiently. Our encoding is modular, so repeating the same process for another different STV scheme would require a minimal amount of additional work.
 \end{abstract}
 \section{Introduction}\label{sec:intro}
 
@@ -90,7 +88,7 @@ any
 member of the general public, has the means to check that the
 computation
 of election winners is correct, independently of how the result has
-been produced. 
+been produced.
 
 The approach presented here combines the concept of certifying
 algorithms \cite{DBLP:journals/csr/McConnellMNS11} with formal specification and
@@ -115,7 +113,7 @@ machine level.
 
 This proceeds in four steps.
 First, we formalise  the vote counting protocol as a sequence of
-steps inside the HOL theorem prover where every step 
+steps inside the HOL theorem prover where every step
 corresponds to an action taken by a counting officer in a
 paper-based setting.  There are two kinds of stages that we call
 \emph{judgements} in analogy to typing assertions in type theory.
@@ -145,7 +143,7 @@ Third, we establish correspondence between the logical
 definitions and their computational counterparts. This boils
 down to formally establishing that the logical specification holds
 if and only if the Boolean-valued function returns true, which in
-turn implies the correctness of the certificate verifier. 
+turn implies the correctness of the certificate verifier.
 This allows us to conclude that a valid certificate indeed
 implies that the election protocol has been carried out in
 accordance to the specification.
@@ -174,14 +172,14 @@ In the remainder of the paper, we describe our framework in detail
 and demonstrate that it can handle real-world size elections by
 evaluating it on historical data of elections conducted in
 Australia.
- 
+
 
 
 \section{The Protocol and its HOL Formalisation}
 Single Transferable Vote is a preferential voting scheme that is
 used in multi-seat constituencies. Voters rank (possibly
 a subset of) candidates by assigning numerical preferences to
-candidates as in 
+candidates as in
 \begin{wrapfigure}{r}[0cm]{0.4\textwidth}
   \begin{center}
     %\raisebox{0pt}[-1cm]
@@ -195,7 +193,7 @@ candidates as in
 the ballot on the right, where no two candidates may be given the
 same preference. This allows us to represent ballots as duplicate
 free lists of candidates where the list order reflects the
-preference order. 
+preference order.
 
 Each election defines a \emph{quota}, i.e. a minimal set of votes
 that a candidate must receive in order to be elected. The count
@@ -221,13 +219,13 @@ elected, whereas elimination honours voters'
 follow-on preferences if their first preference \emph{cannot} be
 elected.  Of course, the key question is precisely which ballots
 should be considered surplus and distributed to the next preferences, as follow-on preferences will
-generally differ. This is the purpose of a third mechanism: 
+generally differ. This is the purpose of a third mechanism:
 
 \begin{enumerate}
 \setcounter{enumi}{2}
 \item Fractional Transfer. \emph{All} suprlus votes are transfered
 to the next preference, but at a \emph{reduced} weight that is
-proportional to the size of the surplus. 
+proportional to the size of the surplus.
 \end{enumerate}
 
 \noindent
@@ -243,7 +241,7 @@ $1$.
 There are various versions of STV. They mainly differ in how  and
 when ballots are transferred and candidates are elected, the
 calculation of the transfer value, and the various tie breaking
-methods used to determine which candidate is to be excluded. 
+methods used to determine which candidate is to be excluded.
 Here, we deal with a generic version of STV that
 incorporates all three mechanisms outlined above, and is very
 similar to the method used to elect members of the Australian
@@ -252,21 +250,21 @@ student's union of the first and second author. Design decisions in
 the precise formulation of the scheme are resolved as follows:
 
 \begin{description}
-\item[Step-by-step surplus transfer.] Surplus votes of 
+\item[Step-by-step surplus transfer.] Surplus votes of
 elected candidates that have exceeded the quota  are transferred
 in order of number of first preferences received.  That is, surplus
 votes of the candidate with the largest number of first preferences
-are transferred first. 
+are transferred first.
 \item[Electing after each transfer.] After each
 transfer of surpluses, candidates that reach the quota after
-surplus votes are being elected immediately. 
+surplus votes are being elected immediately.
 \end{description}
 
 
 \noindent
 The description of the formal protocol that we are analysing uses
 the following terminology. A \emph{continuing candidate} is a
-candidate that has neither been elected nor eliminated. 
+candidate that has neither been elected nor eliminated.
 The \emph{first preference} of a
 ballot is the most preferred continuing candidate, and the
 \emph{transfer value} of a ballot is the fractional weight of a
@@ -290,21 +288,21 @@ that represent a total order of preferences over a subset of
 candidates, each of which receives an initial transfer value of $1$.
 \item determine the number of first preference votes (the tally) for each
 continuing candidate. In doing this, record which vote is counted for which
-candidate by adding the ballot paper to the respective pile. 
+candidate by adding the ballot paper to the respective pile.
 \item if there are unfilled seats, all
 candidates that have reached the quota are elected, and are added to
 the transfer
 queue  in order of their tally
 \item if all the vacancies have been filled, counting terminates and the result
-is announced.  
+is announced.
 \item if the number of unfilled vacancies equals or exceeds the number
 of continuing candidates, all continuing candidates are elected and the
-result is announced.  
+result is announced.
 \item if there are still vacancies, all ballots are counted, and the
 transfer queue is not empty, remove the first candidate from the
-transfer queue and transfer their votes (the votes on their pile) 
+transfer queue and transfer their votes (the votes on their pile)
 to the next preference by declaring these votes to be uncounted and
-the transfer value given by 
+the transfer value given by
 
 \begin{equation}  \label{eq:tv} \mbox{new value} =
 \frac{\mbox{number of votes of elected candidate} -
@@ -312,17 +310,17 @@ the transfer value given by
 \end{equation}
 
 \noindent Subsequent transfer values are computed as the product of
-the current value with previous transfer value.  
+the current value with previous transfer value.
 \item if there are
 still vacancies, all ballots are counted, and all surplus votes
 are transferred, choose the candidate with the least amount of first
 preference votes and exclude that candidate from the set of
 continuing candidates. All votes counted in favour of the eliminated
 candidate are transferred to the next preference (with unchanged
-transfer value). 
+transfer value).
 \end{enumerate} \end{center}
 
-\subsection{An Example Certificate} 
+\subsection{An Example Certificate}
 
 As argued in the introduction, in the framework of certified
 computation, each step of the protocol is evidenced. Each of the
@@ -331,22 +329,22 @@ count. Rules have side conditions (e.g. candidates having reached
 the quota, or all ballots being counted) and rule application
 changes the data that we track throughout the count (e.g. updating
 the tally, or removing a candidate from the set of continuing
-candidates). We given an example certificate in 
+candidates). We given an example certificate in
 Figure~\ref{fig;figure}.
-Here, we have a 
+Here, we have a
 small election
 with three candidates $A$, $B$ and $C$, and an initial set of
-ballots containing 
+ballots containing
 $b_1=([A,C],1)$, $b_2=([A,B,C],1)$, $b_3=([A,C,B],1)$,
 $b_4=([B,A],1)$, $b_5=([C,B,A],1)$.  Each ballot is a pair, where
 the first component is a preference-ordered list of candidates, and
 the second is the transfer value (initially set to $1$). The
 certificate consists of a \emph{header} that specifies the quota as
 a fraction, the number of seats to be filled, and the list of
-candidates being voted on. 
+candidates being voted on.
 The fourth line is the election result, and the remainder of the
 certificate consists of the intermediate steps that lead to this
-outcome. 
+outcome.
 \begin{small} \begin{figure}[b]
 \begin{tabular}{c@{\hspace{2cm}}c} \AxiomC{\tiny 133\%50} \noLine
 \UnaryInfC{\tiny 2} \noLine \UnaryInfC{\tiny $[A,B,C]$} \noLine
@@ -368,7 +366,7 @@ B[$b_4$] C[$b_5$]; [A]; [A]; [B,C]} \RightLabel{\tiny elect}
 \UnaryInfC{\tiny []; A[3\%1] B[1\%1] C[1\%1]; A[$b_1$,$b_2$,$b_3$]
 B[$b_4$] C[$b_5$]; []; []; [A,B,C]} \RightLabel{\tiny count}
 \UnaryInfC{\tiny ba; A[0\%1] B[0\%1] C[0\%51]; A[] B[] C[]; []; [];
-[A,B,C]} \DisplayProof \end{tabular} \caption{Example 
+[A,B,C]} \DisplayProof \end{tabular} \caption{Example
 Certificate} \label{fig;figure} \end{figure} \end{small}
 
 The certificate records every step of the count, where a step
@@ -376,7 +374,7 @@ corresponds to a rule application, where the rules themselves are
 modelled on valid actions that of counting officers to progress the
 count. The inspection of a certificate therefore corresponds to
 witnessing all the individual steps that take place in a
-hypothetical counting station. 
+hypothetical counting station.
 
 Intermediate stages of the count record six pieces of information,
 separated by semicolons:  the ballots the are still to be counted,
@@ -390,10 +388,10 @@ the protocol step-by-step.
 \begin{description}
 \item[count.] First preferences for each candidates are computed,
 and ballots counted in favour of particular candidates are placed
-onto that candidate's pile. Here, $A$ is the first preference on 
+onto that candidate's pile. Here, $A$ is the first preference on
 $b_1$, $b_2$, and $b_3$ (leading to a tally of 3), and $B$ receives $b_4$, and
 C receives $b_5$. Tallies are updated so that tally of A becomes
-$3$, and B and C each reach $1$. 
+$3$, and B and C each reach $1$.
 \item[elect.] Candidate A exceeds the quota, and is elected. The
 transfer value of all ballots counted in $A$'s favour  changes to
 $0.11$ according to formula (\ref{eq:tv}). The updated pile of A
@@ -403,10 +401,10 @@ associated with $B$ and $C$ doesn't change.
 \item[transfer.] As there are vacancies and no one else has reached
 or exceeded the quota, the surplus of A is dealt with. The list of
 uncounted ballots is updated to contain the votes for $A$ (with
-transfer values updated in the previous step). 
+transfer values updated in the previous step).
 \item[count.] As there are uncounted ballots (again), tallies are
 updated. As $A$ is no longer a continuing candidate, the votes are
-counted in favour of the highest-ranked continuing candidate. 
+counted in favour of the highest-ranked continuing candidate.
 That is, C receives  two new votes (each of value $0.11$) which
 are $([C],0.11)$ and $([C,B],0.113)$. Candidate B receives one vote,
 which is $([B,C],0.11)$.
@@ -442,7 +440,7 @@ intermediate stages of the execution of the protocol.
 We formalise judgements as a datatype with two constructors. The
 first constructor, \HOLtm{Final w} represents a final stage of the
 computation, where $w$ is the final list consisting of all of the
-declared elected candidates. The second constructor, 
+declared elected candidates. The second constructor,
 \HOLtm{NonFinal (ba,t,p,bl,e,h)} is an intermediate stage of the
 computation, where $\mathit{ba}$ is the list of uncounted ballots at this
 point, $t$ is the tally list recording the number of votes of each
@@ -458,7 +456,7 @@ Definition~\ref{jud:hol} below gives our straight forward HOL
 encoding of judgements. We use lists (instead of sets, or multisets)
 mainly for convenience of formalisation in HOL, but this is not used
 in an essential way either in the definition, or in the
-formalisation, of the counting rules that we give later. 
+formalisation, of the counting rules that we give later.
 By choosing to
 formalize the tally and pile as lists rather than functions
 operating on the list of candidates, judgements become an instance
@@ -483,7 +481,7 @@ Remove?}
 \noindent
 As a certificate consists of a sequence of judgements, each of
 which represents a state of the count, we need to verify the
-correctness of the transitions between successive judgements. 
+correctness of the transitions between successive judgements.
 Each rule consists of three main components:
 \begin{itemize}
   \item a specification of how premiss and conclusion relate
@@ -528,7 +526,7 @@ elimination rule are identical to those of other rules.
 For example, the name of each candidate appears only once in the
 initial list of competing candidates. Also, all candidates need to
 have precisely one tally and one unique associated pile (of votes
-counted in their favour). 
+counted in their favour).
 For instance, the predicate
 \HOLConst{Valid_Init_CandList} restricts legal initial lists of
 candidates to those which are non-empty and have no duplicate.
@@ -547,7 +545,7 @@ this condition as follows.
 
 \noindent
 Both predicates are paired with computational twins, and soundness
-and completeness connect both.  Here, 
+and completeness connect both.  Here,
 given lists $t$ and $l$, the function \HOLConst{Valid_PileTally_dec1} decides if every first element of each pair in $t$ is a member of $l$.
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec1_def}
@@ -572,7 +570,7 @@ Therefore, we obtain a perfect match between the specification and computational
 \paragraph{Side Conditions.}
 On top of the integrity constraints, the elimination rule  has
 explicit constraints that specify when it is applicable. For
-instance, the protocol states that 
+instance, the protocol states that
 \begin{small}
 \begin{center}
 \begin{minipage}{10cm}
@@ -598,7 +596,7 @@ Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} 
   \HOLthm[width=80]{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
 The fact that the candidate removed is the weakest, is established
-by another assertion which is part of the side condition. 
+by another assertion which is part of the side condition.
 Having defined the implicit integrity constraints, and the
 explicit side conditions in the definition of \emph{elimination}, we
 can present the formalisation of this rule in HOL as a predicate.
@@ -751,20 +749,20 @@ framework for verifying STV election results down to the machine code.
 
 
 
-The framework introduced is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs offered in HOL environment makes our formalisation clear so that external scrutineers may simply examine the specification of the frame work to understand what it does, rather than necessarily bothering with proofs and computational components. Also rich rewriting tactics and libraries of HOL allows us to express the protocol and discharge related proofs with a minimum amount of lines of encoding. Moreover, the verified connection of HOL with CakeML enables verification performed inside the theorem prover to be pushed down to machine level. Furthermore, besides concision and clarity, the framework is efficient. As the experimental results witnesses, certificates of the Molonglo district, the biggest Legislative Assembly electorate in Australia, are checked in merely five minutes.   
+The framework introduced is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs offered in HOL environment makes our formalisation clear so that external scrutineers may simply examine the specification of the frame work to understand what it does, rather than necessarily bothering with proofs and computational components. Also rich rewriting tactics and libraries of HOL allows us to express the protocol and discharge related proofs with a minimum amount of lines of encoding. Moreover, the verified connection of HOL with CakeML enables verification performed inside the theorem prover to be pushed down to machine level. Furthermore, besides concision and clarity, the framework is efficient. As the experimental results witnesses, certificates of the Molonglo district, the biggest Legislative Assembly electorate in Australia, are checked in merely five minutes.
 
 
 
-Our framework enjoys a twofold modularity which stems from the way we have formalised the counting protocol in HOL. At one layer, the formalisation realises the counting scheme as standalone logical rules. At another layer, each of the logical rules are composed of independent assertions. Since every STV election consists of counting, elimination, transfer, electing and declaration of winners, in order to capture a variant of the STV demonstrated here, we do not need to dismiss the foundational rule-based formulation. Moreover, STV schemes differ merely in one or some moderate aspects from one another. For example, the STV version used in the Senate elections of Australia requires transfer of excessive votes of an elected candidate before any other rule can apply. This difference can be formalised in our system simply by modifying a single component of the \textsf{TRANSFER} rule. So for establishing verification results, we simply have to discharge a few correspondences in HOL. Furthermore, the steps of translation into CakeML and executable extraction process mainly remain unaffected. 
+Our framework enjoys a twofold modularity which stems from the way we have formalised the counting protocol in HOL. At one layer, the formalisation realises the counting scheme as standalone logical rules. At another layer, each of the logical rules are composed of independent assertions. Since every STV election consists of counting, elimination, transfer, electing and declaration of winners, in order to capture a variant of the STV demonstrated here, we do not need to dismiss the foundational rule-based formulation. Moreover, STV schemes differ merely in one or some moderate aspects from one another. For example, the STV version used in the Senate elections of Australia requires transfer of excessive votes of an elected candidate before any other rule can apply. This difference can be formalised in our system simply by modifying a single component of the \textsf{TRANSFER} rule. So for establishing verification results, we simply have to discharge a few correspondences in HOL. Furthermore, the steps of translation into CakeML and executable extraction process mainly remain unaffected.
 
 
 
 \section{Related Work}
- There is some work combining methods of theorem proving with certification for verification intentions. However they are not carried out for vote counting. On the other hand, in context of vote counting, merely few certifying algorithms exist which are not accompanied by any verified checker. 
+ There is some work combining methods of theorem proving with certification for verification intentions. However they are not carried out for vote counting. On the other hand, in context of vote counting, merely few certifying algorithms exist which are not accompanied by any verified checker.
 
 
 
-In vote counting, there are few work which provide a certificate with their output~\cite{DBLP:conf/ausai/PattinsonS15,DBLP:conf/itp/PattinsonT17,DBLP:conf/voteid/GhaleGP17}. They mainly formalise a voting protocol inside the theorem prover Coq and then prove some desired properties about the formalised specification. Then, they extract programs into Haskell or OCaml languages to perform computations. Since the semantic of the target and source of the extraction method differ, and there is no proof that the translation occurs in a semantic-preserving way, verification of the specification does not legitimately extend to the extracted program. Moreover, these work are either not accompanied by a checker\cite{DBLP:conf/voteid/GhaleGP17}, or their checker is an unverified Haskell/OCaml program\cite{DBLP:conf/itp/PattinsonT17}. One therefore has to trust the extraction means and correct computations carried out by GHC or OCaml compiler.   
+In vote counting, there are few work which provide a certificate with their output~\cite{DBLP:conf/ausai/PattinsonS15,DBLP:conf/itp/PattinsonT17,DBLP:conf/voteid/GhaleGP17}. They mainly formalise a voting protocol inside the theorem prover Coq and then prove some desired properties about the formalised specification. Then, they extract programs into Haskell or OCaml languages to perform computations. Since the semantic of the target and source of the extraction method differ, and there is no proof that the translation occurs in a semantic-preserving way, verification of the specification does not legitimately extend to the extracted program. Moreover, these work are either not accompanied by a checker\cite{DBLP:conf/voteid/GhaleGP17}, or their checker is an unverified Haskell/OCaml program\cite{DBLP:conf/itp/PattinsonT17}. One therefore has to trust the extraction means and correct computations carried out by GHC or OCaml compiler.
 
 
 
