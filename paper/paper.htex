@@ -55,8 +55,8 @@ state, the state of New South Wales,
 was found to contain errors that had an impact in at least one seat that
 was wrongly filled with high probability.
 This was not only reported in specialist publications
-\cite{Conway:2017:ANS} but
-also in the national press \cite{Brooks:2017:NCE}.
+\cite{Conway2017ANS} but
+also in the national press \cite{Brooks2017NCE}.
 
 When counting ballots by hand,  the counting is monitored by
 scrutineers, usually members of the general public or stakeholders
@@ -170,21 +170,21 @@ Australia.
  
 
 
-\section{The Protocol and its HOL Formalization}
+\section{The Protocol and its HOL Formalisation}
 Single Transferable Vote is a preferential voting scheme that is
 generally used in multi-seated constituencies. Voters rank (possibly
 a subset of) candidates by assigning numerical preferences to
 candidates as in 
-\begin{wrapfigure}{r}[0cm]{0.4\textwidth}
-  \begin{center}
+%\begin{wrapfigure}{r}[0cm]{0.4\textwidth}
+%  \begin{center}
     %\raisebox{0pt}[-1cm]
-    \raisebox{0pt}[\dimexpr\height-2.5\baselineskip\relax]
-    {\includegraphics[width=0.37\textwidth]{ballot.png}}
-    \vspace*{-8ex}
+%    \raisebox{0pt}[\dimexpr\height-2.5\baselineskip\relax]
+%    {\includegraphics[width=0.37\textwidth]{ballot.png}}
+%    \vspace*{-8ex}
     %\raisebox{0pt}[\dimexpr\height-8.5\baselineskip\relax]{xx}
     %\includegraphics[width=4cm]{ballot.png}
-  \end{center}
-\end{wrapfigure}
+%  \end{center}
+%\end{wrapfigure}
 the ballot on the right, where no two candidates may be given the
 same preference. This allows us to represent ballots as duplicate
 free lists of candidates where the list order reflects the
@@ -470,7 +470,7 @@ certificate that is simply a list of judgements}.
 \end{definition}
 
 \noindent
-As a certificate is consists of a sequence of judgements, each of
+As a certificate consists of a sequence of judgements, each of
 which represents a state of the count, we need to verify the
 correctness of the transitions between successive judgements. 
 Each rule consists of three main components:
@@ -495,7 +495,7 @@ on whether the rule is applicable or not. The decision procedure and
 the formal specification are connected by (formal) proofs of
 soundess and completeness, as shown in the figure below.
 
-\includegraphics[scale=0.35]{spec-dec-cropped.pdf}
+%\includegraphics[scale=0.35]{spec-dec-cropped.pdf}
 
 Here, \emph{soundness} refers to the fact that the decision
 procedure only stipulates that a rule has been correctly applied if
