@@ -727,6 +727,15 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \label{ref;figure6}
 \end{figure}
 \section{Discussion and Conclusion}
+Members of the general public outsource the task of vote counting of an election
+in a democratic system to authorities in order to safeguard their preferences.Therefore correct, publicly verifiable, transparent election count is a key constituent of establishing trustworthiness in the final outcome. We have employed
+tools of theorem proving with certification techniques to accomplish this task in
+a cost-effective way. The tool developed here has clarity in encoding, precision
+in formulation, and modularity in implementation so that it can be taken as a
+framework for verifying STV election results down to the machine code.
+
+
+
 The framework introduced is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs offered in HOL environment makes our formalisation clear so that external scrutineers may simply examine the specification of the frame work to understand what it does, rather than necessarily bothering with proofs and computational components. Also rich rewriting tactics and libraries of HOL allows us to express the protocol and discharge related proofs with a minimum amount of lines of encoding. Moreover, the verified connection of HOL with CakeML enables verification performed inside the theorem prover to be pushed down to machine level. Furthermore, besides concision and clarity, the framework is efficient. As the experimental results witnesses, certificates of the Molonglo district, the biggest Legislative Assembly electorate in Australia, are checked in merely five minutes.   
 
 
