@@ -48,7 +48,7 @@ Electronic voting is becoming more and more prevalent worldwide.
 But almost scandalously,
 the current state of affairs leaves much
 to be
-desired as the public vote is a cornerstone of
+desired, given that the public vote is a cornerstone of
 modern democracy.
 Indeed electronic techniques as they are used now may be seen as a step back from traditional
 paper based elections.
@@ -59,8 +59,8 @@ state, the state of New South Wales,
 was found to contain errors that had an impact in at least one seat that
 was wrongly filled with high probability.
 This was not only reported in specialist publications
-\cite{Conway2017ANS} but
-also in the national press \cite{Brooks2017NCE}.
+\cite{Conway:2017:ANS} but
+also in the national press \cite{Brooks:2017:NCE}.
 
 When counting ballots by hand,  the counting is monitored by
 scrutineers, usually members of the general public or stakeholders
@@ -89,7 +89,8 @@ this paper), verifiability means that every stakeholder, or indeed
 any
 member of the general public, has the means to check that the
 computation
-of election winners is correct.
+of election winners is correct, independently of how the result has
+been produced. 
 
 The approach presented here combines the concept of certifying
 algorithms \cite{DBLP:journals/csr/McConnellMNS11} with formal specification and
@@ -104,7 +105,7 @@ Our focus in this paper is on the \emph{verifier}. We briefly
 discuss a
 concise formal specification of \emph{single transferable vote} (STV), a
 complex, preferential voting system used e.g. in Ireland, Malta, New
-Zealand and Australia. From this specification, we develop a notion
+Zealand and Australia for multi-seat constituencies. From this specification, we develop a notion
 of \emph{certificate} so that correct certificates guarantee
 correctness of election results. The main body of our work concerns
 the \emph{verifier} (certificate checker), and we present a
@@ -114,13 +115,13 @@ machine level.
 
 This proceeds in four steps.
 First, we formalise  the vote counting protocol as a sequence of
-steps inside the HOL theorem prover where every step by and large
+steps inside the HOL theorem prover where every step 
 corresponds to an action taken by a counting officer in a
 paper-based setting.  There are two kinds of stages that we call
 \emph{judgements} in analogy to typing assertions in type theory.
-\HOLtm{Final} judgements declare a set of winners.
-\HOLtm{NonFinal} judgements represent the current state of the count
-as a multi-component tuple, corresponding to a snapshot of the stage
+Final judgements just declare the set of winners.
+\emph{NonFinal} judgements represent the current state of the count
+as a tuple, corresponding to a snapshot of the stage
 of the count in a paper-based setting.  The formalisation of the
 voting protocol then takes the form of \emph{rules} that specify how
 to advance from one judgement to the next, thereby advancing the
@@ -141,21 +142,23 @@ verifier that, at every step, just checks whether any of the rules
 is applicable, using the corresponding Boolean-valued function.
 
 Third, we establish correspondence between the logical
-definitions and their computational counterparts. This simply boils
+definitions and their computational counterparts. This boils
 down to formally establishing that the logical specification holds
-if and only if the Boolean-valued function returns \HOLtm{T}. This then
-straightforwardly implies the correctness of the certificate
-verifier. This allows us to conclude that a valid certificate indeed
+if and only if the Boolean-valued function returns true, which in
+turn implies the correctness of the certificate verifier. 
+This allows us to conclude that a valid certificate indeed
 implies that the election protocol has been carried out in
 accordance to the specification.
 
 
-In the fourth, and last step, we synthesise a machine-code implementation of  the verifier and produce a proof this implementation's correctness.  This is
+In the fourth, and last step, we synthesise an implementation of  the verifier and produce a proof this implementation's correctness.  This is
 achieved by using proof-producing synthesis~\cite{JFP14} of CakeML code from the HOL definitions, then using the verified CakeML compiler~\cite{DBLP:conf/icfp/TanMKFON16} to produce the machine code.
-To perform computation on an actual certificate, we define a formal
+To perform computation on an actual certificate, we define the formal
 syntax for certificates, and a parser in HOL, that we combine with the
 I/O mechanisms of CakeML to obtain the verifier.
-The result is a verifier executable which, we have proved, admits a vote counting certificate if and only if the certificate is valid according to our logical specification of the election protocol.
+The result is an executable verifier that provably validates a
+certificate if and only if the certificate witnesses a correct
+execution of the vote counting protocol.
 
 In summary, our slogan is ``verify the verifier''. Rather than
 verifying the \emph{program} that performs an election count, we
@@ -176,19 +179,19 @@ Australia.
 
 \section{The Protocol and its HOL Formalisation}
 Single Transferable Vote is a preferential voting scheme that is
-generally used in multi-seated constituencies. Voters rank (possibly
+used in multi-seat constituencies. Voters rank (possibly
 a subset of) candidates by assigning numerical preferences to
 candidates as in 
-%\begin{wrapfigure}{r}[0cm]{0.4\textwidth}
-%  \begin{center}
+\begin{wrapfigure}{r}[0cm]{0.4\textwidth}
+  \begin{center}
     %\raisebox{0pt}[-1cm]
-%    \raisebox{0pt}[\dimexpr\height-2.5\baselineskip\relax]
-%    {\includegraphics[width=0.37\textwidth]{ballot.png}}
-%    \vspace*{-8ex}
+    \raisebox{0pt}[\dimexpr\height-2.5\baselineskip\relax]
+    {\includegraphics[width=0.37\textwidth]{ballot.png}}
+    \vspace*{-8ex}
     %\raisebox{0pt}[\dimexpr\height-8.5\baselineskip\relax]{xx}
     %\includegraphics[width=4cm]{ballot.png}
-%  \end{center}
-%\end{wrapfigure}
+  \end{center}
+\end{wrapfigure}
 the ballot on the right, where no two candidates may be given the
 same preference. This allows us to represent ballots as duplicate
 free lists of candidates where the list order reflects the
@@ -210,14 +213,15 @@ election, and their votes are then distributed to the next listed
 preference on the ballot.
 \end{enumerate}
 
+\noindent
 We give a precise definition of STV below. The main idea of
 distributing surplus votes is to account for \emph{additional}
 candidates favoured by a voter if their first preference is already
-elected, whereas the idea of elimination is to honour voters'
+elected, whereas elimination honours voters'
 follow-on preferences if their first preference \emph{cannot} be
 elected.  Of course, the key question is precisely which ballots
-should be considered surplus, as their follow-on preferences will
-generally differ, and the purpose of a third mechanism:
+should be considered surplus and distributed to the next preferences, as follow-on preferences will
+generally differ. This is the purpose of a third mechanism: 
 
 \begin{enumerate}
 \setcounter{enumi}{2}
@@ -240,11 +244,10 @@ There are various versions of STV. They mainly differ in how  and
 when ballots are transferred and candidates are elected, the
 calculation of the transfer value, and the various tie breaking
 methods used to determine which candidate is to be excluded. 
-breaking methods for determining which candidate is the weakest to
-exclude.  Here, we deal with a generic version of STV that
-incorporates the three mechanisms outlined above, and is very
+Here, we deal with a generic version of STV that
+incorporates all three mechanisms outlined above, and is very
 similar to the method used to elect members of the Australian
-Senate, and incidentally also to elect the representatives of the
+Senate, and incidentally also to the scheme used elect the representatives of the
 student's union of the first and second author. Design decisions in
 the precise formulation of the scheme are resolved as follows:
 
@@ -257,9 +260,10 @@ are transferred first.
 \item[Electing after each transfer.] After each
 transfer of surpluses, candidates that reach the quota after
 surplus votes are being elected immediately. 
-formula.\end{description}
+\end{description}
 
 
+\noindent
 The description of the formal protocol that we are analysing uses
 the following terminology. A \emph{continuing candidate} is a
 candidate that has neither been elected nor eliminated. 
@@ -318,7 +322,7 @@ candidate are transferred to the next preference (with unchanged
 transfer value). 
 \end{enumerate} \end{center}
 
-\subsection{An Actual Certificate Sample} 
+\subsection{An Example Certificate} 
 
 As argued in the introduction, in the framework of certified
 computation, each step of the protocol is evidenced. Each of the
@@ -328,7 +332,6 @@ the quota, or all ballots being counted) and rule application
 changes the data that we track throughout the count (e.g. updating
 the tally, or removing a candidate from the set of continuing
 candidates). We given an example certificate in 
-
 Figure~\ref{fig;figure}.
 Here, we have a 
 small election
@@ -365,8 +368,8 @@ B[$b_4$] C[$b_5$]; [A]; [A]; [B,C]} \RightLabel{\tiny elect}
 \UnaryInfC{\tiny []; A[3\%1] B[1\%1] C[1\%1]; A[$b_1$,$b_2$,$b_3$]
 B[$b_4$] C[$b_5$]; []; []; [A,B,C]} \RightLabel{\tiny count}
 \UnaryInfC{\tiny ba; A[0\%1] B[0\%1] C[0\%51]; A[] B[] C[]; []; [];
-[A,B,C]} \DisplayProof \end{tabular} \caption{example of a
-certificate} \label{fig;figure} \end{figure} \end{small}
+[A,B,C]} \DisplayProof \end{tabular} \caption{Example 
+Certificate} \label{fig;figure} \end{figure} \end{small}
 
 The certificate records every step of the count, where a step
 corresponds to a rule application, where the rules themselves are
@@ -420,6 +423,7 @@ excluded candidate B.
 \texttt{DP: Why isn't $C$ elected immediately after $B$ is
 eliminated?}
 
+\noindent
 To validate certificates of this form, we first parse the textual
 representation into actual data structures, and then check the
 certificates for correctness on the basis of a HOL formalisation
@@ -449,20 +453,23 @@ candidates by this point, and $h$ is the list of continuing
 (hopeful) candidates up to this stage.
 \end{definition}
 
+\noindent
 Definition~\ref{jud:hol} below gives our straight forward HOL
 encoding of judgements. We use lists (instead of sets, or multisets)
 mainly for convenience of formalisation in HOL, but this is not used
 in an essential way either in the definition, or in the
 formalisation, of the counting rules that we give later. 
-But the counting rules ,defined shortly afterwards, make no
-essential use of this representation. Furthermore, by choosing to
+By choosing to
 formalize the tally and pile as lists rather than functions
 operating on the list of candidates, judgements become an instance
 of the equality type class which we use later on in specification
-and reasoning on counting rules. Additionally, this formulation
+and reasoning about counting rules. Additionally, this formulation
 reduces the gap between an actual certificate and its abstract
 syntactic representation which we refer to as a \emph{formal
-certificate that is simply a list of judgements}.
+certificate} that is simply a list of judgements.
+
+\texttt{DP: the distinction between actual and formal is not clear.
+Remove?}
 \begin{definition}\label{jud:hol}
   Assume \HOLty{:ballots}, \HOLty{:tallies}, and \HOLty{:piles} are type synonyms for
   \HOLty[-ballots,-alist]{:ballots},
@@ -487,6 +494,7 @@ of the data.
 
 \texttt{DP: concrete example here?}
 
+\noindent
 For example, we expect a valid certificate to have no duplication in
 the list of elected or continuing candidates, and every candidate
 must have only one tally and one pile at every non-final judgement.
@@ -499,8 +507,9 @@ on whether the rule is applicable or not. The decision procedure and
 the formal specification are connected by (formal) proofs of
 soundess and completeness, as shown in the figure below.
 
-%\includegraphics[scale=0.35]{spec-dec-cropped.pdf}
+\includegraphics[scale=0.35]{spec-dec-cropped.pdf}
 
+\noindent
 Here, \emph{soundness} refers to the fact that the decision
 procedure only stipulates that a rule has been correctly applied if
 the application is in accordance with the specification and
@@ -536,6 +545,7 @@ this condition as follows.
   \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
 
+\noindent
 Both predicates are paired with computational twins, and soundness
 and completeness connect both.  Here, 
 given lists $t$ and $l$, the function \HOLConst{Valid_PileTally_dec1} decides if every first element of each pair in $t$ is a member of $l$.
@@ -551,6 +561,7 @@ We prove that the formal specification \HOLConst{Valid_PileTally} enforces corre
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC1}
 \end{holthmenv}
 
+\noindent
 Also the specification \HOLConst{Valid_PileTally} implies correctness of \HOLConst{Valid_PileTally_dec2} witnessed by the theorem below.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC2}
