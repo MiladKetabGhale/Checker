@@ -708,25 +708,33 @@ Since the HOL specification realises the protocol, a formal certificate is valid
 
 \section{Translation into CakeML and Code Extraction}
 
-The verified certificate checking function, \HOLtm{Check_Parsed_Certificate}, described above, is a good starting point for a certificate checking program, but as it stands it has two drawbacks: firstly, it is a function in logic rather than an executable program, and secondly, relatedly, its input arguments must be provided as values in the correct types (parameters, and a list of judgements).
-In this section we describe how we overcome these two drawbacks and obtain a verified executable for checking count certficates.
-Our final theorem about the executable is presented in Section~\ref{sec:final-thm}.
+The verified certificate-checking function, \HOLtm{Check_Parsed_Certificate}, described above, is a good starting point for a verifier, but it has two drawbacks: it is a function in logic rather than an executable program, and relatedly, its input arguments must be provided as values in the correct types (parameters, and a list of judgements).
+In this section, we show how we overcome these drawbacks and obtain a verified executable for checking certficates.
+Our final theorem about the verifier executable is presented at the end of this section.
 
-\subsection{Parsing}
-
-The input to the verifier will be a concrete, textual certificate file using a format similar to Figure~\ref{fig;figure}.
-Our formal specification of this certificate is an indirect one: we define an executable specification of a parser for such certificates.
-More specifically, we define functions that, given a string representing a line in the file, return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)} with some data \HOLtm{x} containing the parsed information from the line.
-Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we can write the full certificate checker as a function that operates on lines from a file and calls \HOLtm{Check_Parsed_Certificate} from before to do the actual verification.
+\paragraph{Parsing}
+The input to the verifier is a textual certificate file, in a format similar to Figure~\ref{fig;figure}.
+We specify this file format indirectly, by defining an executable specification of a certificate parser.
+Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line.
+Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, shown below, that operates on lines from a file and calls \HOLtm{Check_Parsed_Certificate} from before to do the actual verification:
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}
 
-\subsection{Translation into CakeML}
+\paragraph{Translation into CakeML and I/O Wrapper}
+Using prior work on proof-producing synthesis~\cite{JFP14} we can automatically synthesise an implementation of the function \HOLtm{Check_Parsed_Certificate} in the programming language CakeML.
+The synthesis tool for CakeML produces a theorem relating the semantics of the synthesised program back to the logical function.
+However, this implementation is a \emph{pure} function that expects the lines of a file as input.
+To actually open the file and read lines from it, we write an impure wrapper (making use of the CakeML Basis Library) around the pure function, and verify the wrapper using Characteristic Formulae for CakeML, as described by Gu\'eneau et al.~\cite{DBLP:conf/esop/GueneauMKN17}.
+The result is a complete CakeML program whose I/O semantics is verified to implement the certificate-checking logical function.
 
-\subsection{I/O Wrapper and Compilation}
+\paragraph{Compilation in Logic}
+Finally, we would like an executable verifier in machine code (rather than CakeML code).
+To produce this, we use the verifed CakeML compiler~\cite{DBLP:conf/icfp/TanMKFON16}, which can be executed within the theorem prover itself.
+This is a time-consuming process: compilation within logic can be a thousand times slower (e.g., half an hour) than running the compiler outside the logic (a second or two).
+But the payoff is a final theorem which only mentions the final generated machine-code implementation: all dependence on the CakeML language and implementation is discharged by proof.
 
-\subsection{Final Theorem}\label{sec:final-thm}
+\paragraph{Final Theorem}
 \begin{holthmenv}
   \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
 \end{holthmenv}
