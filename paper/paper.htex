@@ -538,11 +538,9 @@ one tally and one pile. Therefore, if a judgement in a certificate
 maliciously allocates more than one tally to a single candidate, the
 bug is detected and the certificate rejected as invalid.  We express
 this condition as follows.
-
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
-
 \noindent
 Both predicates are paired with computational twins, and soundness
 and completeness connect both.  Here,
@@ -558,7 +556,6 @@ We prove that the formal specification \HOLConst{Valid_PileTally} enforces corre
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC1}
 \end{holthmenv}
-
 \noindent
 Also the specification \HOLConst{Valid_PileTally} implies correctness of \HOLConst{Valid_PileTally_dec2} witnessed by the theorem below.
 \begin{holthmenv}
@@ -611,7 +608,7 @@ The \textsf{ELIM\_CAND} rule is defined on three kind of input; a candidate, a t
 We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules.
 
 \subsection{The Checker formalisation}
-In certified computations, to scrutinise a certificate output by a program, one can design a second (probably verified) program that independently performs the computations again~\cite{DBLP:conf/stoc/BlumK89}. Then the result of the two could be checked against each other for validation. On the other hand, certificate verification can be approached in a significantly more efficient way. Instead of redoing the computations, one can encode a checker that validates if steps visualised in a certificate to reach from an initial state of the computation to an end state have correctly taken place. This approach makes the checker design simpler than the implementation which produced the certificate. As a result, accomplishing verification of the checker becomes considerably easier than that of the implementation which produces the certificates. Moreover, the checker carries computations out faster than the original program.
+In certified computations, to scrutinise a certificate output by a program, one can design a second (probably verified) program that independently performs the computations again~\cite{DBLP:conf/stoc/BlumK89}. Then the result of the two could be checked against each other for validation. On the other hand, certificate verification can be approached in a significantly more efficient way. Instead of redoing the computations, one can encode a checker that validates if steps visualised in a certificate to reach from an initial state of the computation to an end state have correctly taken place. This approach makes the checker design, and consequently its verification, considerably simpler than the original program whose output is checked. Moreover, the checker carries computations out faster than the program.
 
 
 
