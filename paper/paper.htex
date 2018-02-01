@@ -394,9 +394,9 @@ C receives $b_5$. Tallies are updated so that tally of A becomes
 $3$, and B and C each reach $1$.
 \item[elect.] Candidate A exceeds the quota, and is elected. The
 transfer value of all ballots counted in $A$'s favour  changes to
-$0.11$ according to formula (\ref{eq:tv}). The updated pile of A
+$11/100$ according to formula (\ref{eq:tv}). The updated pile of A
 reflects this change in transfer values, and now contains
-$([A,C],0.11)$, $([A,B,C],0.11)$, and $([A,C,B],0.11)$. The data
+$([A,C],11/100)$, $([A,B,C],11/100)$, and $([A,C,B],11/100)$. The data
 associated with $B$ and $C$ doesn't change.
 \item[transfer.] As there are vacancies and no one else has reached
 or exceeded the quota, the surplus of A is dealt with. The list of
@@ -405,15 +405,15 @@ transfer values updated in the previous step).
 \item[count.] As there are uncounted ballots (again), tallies are
 updated. As $A$ is no longer a continuing candidate, the votes are
 counted in favour of the highest-ranked continuing candidate.
-That is, C receives  two new votes (each of value $0.11$) which
-are $([C],0.11)$ and $([C,B],0.113)$. Candidate B receives one vote,
-which is $([B,C],0.11)$.
+That is, C receives  two new votes (each of value $11/100$) which
+are $([C],11/100)$ and $([C,B],113/1000)$. Candidate B receives one vote,
+which is $([B,C],11/1000)$.
 \item[elim.] No continuing candidate has reached the quota, one
 vacancy is still unfilled, and all ballots are (again) counted.
 Hence the candidate with the lowest tally is eliminated (in this
 case, $B$) and their votes (with unchanged transfer values) are
 again injected into the count.
-\item[count.] Candidate C receives one more vote: the vote $([c],0.11)$ from the
+\item[count.] Candidate C receives one more vote: the vote $([C],11/100)$ from the
 excluded candidate B.
 \item[hwin.] The only continuing candidate, that is C, is elected and as we have filled all the vacancies, a final stage has been obtained.
 \end{description}
@@ -458,7 +458,7 @@ mainly for convenience of formalisation in HOL, but this is not used
 in an essential way either in the definition, or in the
 formalisation, of the counting rules that we give later.
 By choosing to
-formalize the tally and pile as lists rather than functions
+formalise the tally and pile as lists rather than functions
 operating on the list of candidates, judgements become an instance
 of the equality type class which we use later on in specification
 and reasoning about counting rules. Additionally, this formulation
@@ -538,11 +538,9 @@ one tally and one pile. Therefore, if a judgement in a certificate
 maliciously allocates more than one tally to a single candidate, the
 bug is detected and the certificate rejected as invalid.  We express
 this condition as follows.
-
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
-
 \noindent
 Both predicates are paired with computational twins, and soundness
 and completeness connect both.  Here,
@@ -558,7 +556,6 @@ We prove that the formal specification \HOLConst{Valid_PileTally} enforces corre
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC1}
 \end{holthmenv}
-
 \noindent
 Also the specification \HOLConst{Valid_PileTally} implies correctness of \HOLConst{Valid_PileTally_dec2} witnessed by the theorem below.
 \begin{holthmenv}
@@ -642,6 +639,7 @@ The \textsf{ELIM\_CAND} rule is defined on three kind of input; a candidate, a t
   \HOLthm[width=80]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
 We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules.
+
 
 \subsection{The Certificate Verifier}
 
@@ -736,12 +734,8 @@ Our final theorem about the executable is presented in Section~\ref{sec:final-th
 
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
-Legislative Assembly elections in Australian Capital Territory for
-years 2008 and 2012 (Figure\ref{ref;figure2})\footnote{Tests were
-conducted on one core of an Intel Core i7-7500U CPU~\@
-2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been
-produced by the Haskell program extracted from our previous
-formalization of ANU\_Union STV in Coq~\cite{MKet}.  \begin{figure}
+Legislative Assembly elections in ACT for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalization of ANU\_Union STV in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
+\begin{figure}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
 \begin{tabular}{|l |c |c |c |c |c|c|}
@@ -762,7 +756,8 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \caption{ACT Legislative Assembly 2008 and 2012}
 \label{ref;figure2}
 \end{figure}
-Moreover, we have studied behavior of our executable by examining it on certificates output on randomly generated ballots. There are two interesting parameters to study, namely varying the number of ballots and varying the length of each ballot. Figure~\ref{ref;figure3} depicts results on certificates where the number of candidates is fixed at 20, vacancies are 5, and the length of each ballot is 12. It appears that the complexity of the program in the number of ballots is quadratic. Also we keep the number of ballots, vacancies, and length of each ballot fixed at 100000, 1, and 10 respectively, in order to inspect the effect of increase in the length of each ballot (Figure~\ref{ref;figure4}). The complexity of the program seems to be linear with respect to this index.
+
+Moreover, we have studied behaviour of our executable by examining it on certificates output on randomly generated ballots. There are two interesting parameters to study, namely varying the number of ballots and varying the length of each ballot. Figure~\ref{ref;figure3} depicts results on certificates where the number of candidates is fixed at 20, vacancies are 5, and the length of each ballot is 12. It appears that the complexity of the program in the number of ballots is quadratic. Also we keep the number of ballots, vacancies, and length of each ballot fixed at 100000, 1, and 10 respectively, in order to inspect the effect of increase in the length of each ballot (Figure~\ref{ref;figure4}). The complexity of the program seems to be linear with respect to this index.
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
@@ -794,7 +789,7 @@ $18$&$180.5$&$325$\\
 \label{ref;figure4}
 \end{minipage}
 \end{figure}
-We have implemented the protocol in an unverified certifying Haskell program as well to check the program for correctness. Figure~\ref{} illustrates the result of execution of this program on the ACT legislative Assembly elections for the same years as above. In tow of them, even though the final winners are announced correctly, one of the steps taken from line 6 to line 5 in the certificate is invalid. Therefore, the checker rejects the whole output as invalid.
+We have implemented the protocol in an unverified certifying Haskell program as well to check the program for correctness. Figure~\ref{ref;figure5} illustrates the result of execution of this program on the ACT legislative Assembly elections for the same years as above. In two of them, even though the final winners are announced correctly, one of the steps taken from line 6 to line 5 in the certificate is invalid. Therefore, the checker rejects the whole output as invalid.
 \begin{figure}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
@@ -814,7 +809,7 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \hline
 \end{tabular}
 \caption{Unverified Haskell program with ACT elections}
-\label{ref;figure6}
+\label{ref;figure5}
 \end{figure}
 
 \texttt{DP: elaborate on the error in the unverified program.}
@@ -865,7 +860,7 @@ In vote counting, there are few work which provide a certificate with their outp
 
 
 
-On the other hand, there are frameworks combining certification and verifications tools for verifying algorithms. Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, they obtain some pre- and postconditions, which are next generalized syntactically and then implemented in the Isabella theorem prover to be discharged. Even though this method introduces a uniform platform for dealing with certifying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalize the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{DBLP:conf/nfm/NoschinskiRM14} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation.
+On the other hand, there are frameworks combining certification and verifications tools for verifying algorithms. Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, they obtain some pre- and postconditions, which are next generalized syntactically and then implemented in the Isabella theorem prover to be discharged. Even though this method introduces a uniform platform for dealing with certifying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalise the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{DBLP:conf/nfm/NoschinskiRM14} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation.
 
 
 \bibliographystyle{splncs03}
