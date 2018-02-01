@@ -6,6 +6,27 @@ val _ = patternMatchesLib.ENABLE_PMATCH_CASES();
 
 val _ = max_print_depth := ~1;
 
+val _ = remove_termtok { tok = UnicodeChars.iff, term_name = "<=>"}
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  paren_style = OnlyIfNecessary,
+                  fixity = Infix(NONASSOC, 100),
+                  term_name = "<=>",
+                  pp_elements = [HardSpace 1, TOK UnicodeChars.iff, BreakSpace(1,2)]}
+
+val _ = remove_termtok { tok = UnicodeChars.Rightarrow, term_name = "==>"}
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  paren_style = OnlyIfNecessary,
+                  fixity = Infixr 200,
+                  term_name = "==>",
+                  pp_elements = [HardSpace 1, TOK UnicodeChars.Rightarrow, BreakSpace(1,2)]}
+
+val _ = remove_termtok { tok = "=", term_name = "="}
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  paren_style = OnlyIfNecessary,
+                  fixity = Infix(NONASSOC, 450),
+                  term_name = "=",
+                  pp_elements = [HardSpace 1, TOK "=", BreakSpace(1,2)]}
+
 val _ = overload_on("stdFS",``STD_streams``);
 val _ = overload_on("x64_regs",``heap_regs x64_backend_config.stack_conf.reg_names``);
 

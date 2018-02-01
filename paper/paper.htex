@@ -164,7 +164,7 @@ demand that a program produces a certificate that we can then
 independently verify. This has several advantages. For one, it is
 much less labour intensive to verify the verifier, compared with
 verifying the counting program. Second, having verifiable certificates at hand
-meets the goal of universal verifiability\cite{DBLP:conf/esorics/KremerRS10}.
+meets the goal of universal verifiability~\cite{DBLP:conf/esorics/KremerRS10}.
 Third, we achieve correctness over a minimal trust base through the
 use of CakeML.
 
@@ -280,8 +280,8 @@ counted in favour of the respective candidate
 Initially, the queue for surplus transfer, as well as the piles
 associated to the individual candidates are empty, all ballots are
 uncounted, and all
-candidates are continuing. From this initial state, the
-the protocol proceeds as follows:
+candidates are continuing.
+From this initial state, the protocol proceeds as follows:
 \begin{center} \begin{enumerate}
 \item determine the set of \emph{formal} ballots, i.e. those ballots
 that represent a total order of preferences over a subset of
@@ -577,7 +577,7 @@ them from the list of continuing candidates}.
 \end{small}
 
 We formulate the elimination rule with an additional parameter --
-the candidate $c$ to be eliminated. 
+the candidate $c$ to be eliminated.
 
 \paragraph{Side Conditions.} For the elimination rule to be applied
 correctly, we stipulate that
@@ -610,13 +610,13 @@ needs to change in the following way:
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
-The computational twin of this definition decides whether 
+The computational twin of this definition decides whether
 two list match with the exception of one element.  This is the
 function \textsf{equal\_except\_dec}.
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.equal_except_dec_def}
 \end{holthmenv}
-We formally establish that this function implements 
+We formally establish that this function implements
 the specification given by the \textsf{equal\_except} predicate.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.EQE_REMOVE_ONE_CAND}
@@ -630,13 +630,13 @@ Having defined the implicit integrity constraints, and the
 explicit side conditions in the definition of \emph{elimination}, we
 can present the formalisation of this rule in HOL as a predicate.
 \begin{holthmenv}
-  \HOLthm[width=80]{CheckerSpec.ELIM_CAND_def}
+  \HOLthm[def,width=85]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
 
 
 The \textsf{ELIM\_CAND} rule is defined on three kind of input; a candidate, a triple composed of three fixed parameters which are the quota, vacancies, and the initial list of candidates, and two judgements one of which is the premise and the other is the conclusion of the rule. Each of the conjuncts corresponds to a condition specified in the definition~\ref{elim:rule}, as we already demonstrated it for a few cases. \textsf{ELIM\_CAND\_dec} is the computational realisation of the \textsf{ELIM\_CAND}.
 \begin{holthmenv}
-  \HOLthm[width=80]{Checker.ELIM_CAND_dec_def}
+  \HOLthm[def,width=88]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
 We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules.
 
@@ -650,7 +650,7 @@ perfect sense for a \emph{deterministic} program, voting protocols
 generally employ tie-breaking techniques that lead to
 non-determinism. In the case of STV, this for example applies when
 two candidates are tied for exclusion where it is permissible to
-eliminate \emph{either} of the candidates.  
+eliminate \emph{either} of the candidates.
 
 From the perspective of certified computation, this is a non-issue,
 as the certificate simply records which choice has been made (and
@@ -658,14 +658,14 @@ why this choice is permissible). Compared to simply re-computing,
 the verification of a certificate provides another significant
 advantage: in case of diverging results, we gain information
 on precisely what step of the (incorrect) computation is to blame
-for the wrong result. 
+for the wrong result.
 
 Computationally, the additional advantage is simplicity and speed:  the
-verification of the verifier is considerably 
+verification of the verifier is considerably
 simpler than that of a fully-fledged implementation, and certificate
-checking is also generally faster than re-computing. 
+checking is also generally faster than re-computing.
 
-The verification of certificates comprises of the following steps.
+The verification of certificates comprises the following steps.
 We need to validate whether the first
 judgement of the certificate is a valid initial state of the count,
 and whether transitions from one judgement to the next is according to
@@ -679,11 +679,11 @@ individual decision procedures associated with the counting rules.
   \HOLthm[def,width=80]{CheckerSpec.valid_judgements_def}
 \end{holthmenv}
 
-\noindent 
+\noindent
 A valid initial judgement is one
 where candidate's tally is zero, their
 piles are empty, and both the transfer queue and the list of elected candidates
-are both empty as well.  
+are both empty as well.
 \begin{holthmenv}
   \HOLthm[width=80,def]{CheckerSpec.initial_judgement_def}
 \end{holthmenv}
@@ -819,7 +819,7 @@ Members of the general public outsource the task of vote counting of an election
 in a democratic system to authorities in order to safeguard their
 preferences.Therefore correct, publicly verifiable, transparent
 election count is a key constituent of establishing trustworthiness
-in the final outcome. We have combined 
+in the final outcome. We have combined
 tools of theorem proving with certification techniques to accomplish this task in
 a cost-effective way. The tool developed here has clarity in encoding, precision
 in formulation, and modularity in implementation so that it can be taken as a
@@ -831,15 +831,15 @@ The framework introduced is implemented in the HOL theorem prover and CakeML ver
 
 
 
-Our framework is modular in two different ways. 
-On the one hand, 
+Our framework is modular in two different ways.
+On the one hand,
 the formalisation realises the counting scheme as a set of standalone logical
 rules. On the other hand, each of the rules comprises independent
-assertions. 
+assertions.
 Since every STV election consists of
 counting, elimination, transfer, electing and declaration of
 winners, we only need to change some of these rules locally to
-capture different variants. 
+capture different variants.
 For example, the STV version used in the Senate
 elections of Australia requires transfer of excessive votes of an
 elected candidate before any other rule can apply. This difference
