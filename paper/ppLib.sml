@@ -2,6 +2,8 @@ structure ppLib = struct
 
 open preamble check_countProofTheory
 
+val _ = set_grammar_ancestry ["option","pair","bool","list","num","check_countProof"];
+
 val _ = patternMatchesLib.ENABLE_PMATCH_CASES();
 
 val _ = max_print_depth := ~1;
@@ -27,8 +29,8 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   term_name = "=",
                   pp_elements = [HardSpace 1, TOK "=", BreakSpace(1,2)]}
 
-val _ = overload_on("stdFS",``STD_streams``);
-val _ = overload_on("x64_regs",``heap_regs x64_backend_config.stack_conf.reg_names``);
+val _ = overload_on("stdFS",``fsFFIProps$STD_streams``);
+val _ = overload_on("x64_regs",``backendProof$heap_regs (stack_to_lab$config_reg_names (backend$config_stack_conf x64_config$x64_backend_config))``);
 
 val _ = overload_on("the",``THE``);
 val _ = overload_on("None",``NONE``);

@@ -528,7 +528,7 @@ initial list of competing candidates. Also, all candidates need to
 have precisely one tally and one unique associated pile (of votes
 counted in their favour).
 For instance, the predicate
-\HOLConst{Valid_Init_CandList} restricts legal initial lists of
+\HOLtm{Valid_Init_CandList} restricts legal initial lists of
 candidates to those which are non-empty and have no duplicate.
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_Init_CandList_def}
@@ -544,24 +544,24 @@ this condition as follows.
 \noindent
 Both predicates are paired with computational twins, and soundness
 and completeness connect both.  Here,
-given lists $t$ and $l$, the function \HOLConst{Valid_PileTally_dec1} decides if every first element of each pair in $t$ is a member of $l$.
+given lists $t$ and $l$, the function \HOLtm{Valid_PileTally_dec1} decides if every first element of each pair in $t$ is a member of $l$.
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec1_def}
 \end{holthmenv}
-Additionally, the function \HOLConst{Valid_PileTally_dec2} determines if each element of $l$ appears as the first component of a pair in $t$.
+Additionally, the function \HOLtm{Valid_PileTally_dec2} determines if each element of $l$ appears as the first component of a pair in $t$.
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec2_def}
 \end{holthmenv}
-We prove that the formal specification \HOLConst{Valid_PileTally} enforces correctness of the function \HOLConst{Valid_PileTally_dec1}.
+We prove that the formal specification \HOLtm{Valid_PileTally} enforces correctness of the function \HOLtm{Valid_PileTally_dec1}.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC1}
 \end{holthmenv}
 \noindent
-Also the specification \HOLConst{Valid_PileTally} implies correctness of \HOLConst{Valid_PileTally_dec2} witnessed by the theorem below.
+Also the specification \HOLtm{Valid_PileTally} implies correctness of \HOLtm{Valid_PileTally_dec2} witnessed by the theorem below.
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC2}
 \end{holthmenv}
-Conversely, correctness of the computational definition \HOLConst{Valid_PileTally_dec1} and \HOLConst{Valid_PileTally_dec2} entails their respective specifications.
+Conversely, correctness of the computational definition \HOLtm{Valid_PileTally_dec1} and \HOLtm{Valid_PileTally_dec2} entails their respective specifications.
 Therefore, we obtain a perfect match between the specification and computational condition for tallies and piles to be distinctively allocated to candidates.
 
 For elimination of the candidate with the smallest tally (number of
@@ -700,25 +700,24 @@ The above specification of the checker, corresponds to the following computation
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Check_Parsed_Certificate_def}
 \end{holthmenv}
-This definition rests on the equivalences between the specifications
-and their computational counterparts that we have already
-established:
-\HOLthm[tt]{CheckerProof.initial_judgement_thm} and
-\HOLthm[tt]{CheckerProof.valid_judgements_thm}.  Consequently a
-formal certificate is validated if and only if it is valid according to
-the HOL specification of \HOLConst{valid_certificate}.  Since the
-HOL specification realises the protocol, a formal certificate is
-validated if and only if it meets the protocol's expectation.
+The correctness of this definition rests on the equivalences we have already established between the specifications and their computational counterparts, namely, \HOLthm[tt]{CheckerProof.initial_judgement_thm} and \HOLthm[tt]{CheckerProof.valid_judgements_thm}.
+Consequently a formal certificate is validated if and only if it is valid according to
+the HOL specification of \HOLtm{valid_certificate}.
+Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation.
 
 
 \section{Translation into CakeML and Code Extraction}
 
-The verified certificate checking function, \HOLConst{Check_Parsed_Certificate}, described above, is a good starting point for a certificate checking program, but as it stands it has two drawbacks: firstly, it is a function in logic rather than an executable program, and secondly, relatedly, its input arguments must be provided as values in the correct types (parameters, and a list of judgements).
+The verified certificate checking function, \HOLtm{Check_Parsed_Certificate}, described above, is a good starting point for a certificate checking program, but as it stands it has two drawbacks: firstly, it is a function in logic rather than an executable program, and secondly, relatedly, its input arguments must be provided as values in the correct types (parameters, and a list of judgements).
 In this section we describe how we overcome these two drawbacks and obtain a verified executable for checking count certficates.
 Our final theorem about the executable is presented in Section~\ref{sec:final-thm}.
 
 \subsection{Parsing}
 
+The input to the verifier will be a concrete, textual certificate file using a format similar to Figure~\ref{fig;figure}.
+Our formal specification of this certificate is an indirect one: we define an executable specification of a parser for such certificates.
+More specifically, we define functions that, given a string representing a line in the file, return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)} with some data \HOLtm{x} containing the parsed information from the line.
+Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we can write the full certificate checker as a function that operates on lines from a file and calls \HOLtm{Check_Parsed_Certificate} from before to do the actual verification.
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}

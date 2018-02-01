@@ -1,6 +1,8 @@
 paper.pdf : paper.tex holtexbasic.sty llncs.cls splncs03.bst aliascnt.sty remreset.sty
 	latexmk -pdf paper
 
+HOLHEAP = ../compilation/proofs/heap
+
 INCLUDES = $(CAKEMLDIR)/misc .. ../compilation/proofs
 
 DEPS = ppLib ../CheckerProofTheory ../compilation/proofs/check_countProofTheory

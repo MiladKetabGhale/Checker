@@ -4,9 +4,11 @@ open preamble
 
 val _ = new_theory"check_countProof";
 
+val _ = set_grammar_ancestry["bool","pair","num","list","check_countProg","targetSem","semanticsProps","ffi"];
+
 val check_count_io_events_def = new_specification("check_count_io_events_def",
   ["check_count_io_events","check_count_fs"],
-  check_count_correct |> Q.GENL[`init_out`,`cl`,`fs`] |> Q.SPEC`strlit""`
+  check_count_correct |> Q.GENL[`init_out`,`cl`,`fs`] |> Q.SPEC`mlstring$strlit""`
   |> SIMP_RULE bool_ss [SKOLEM_THM,GSYM RIGHT_EXISTS_IMP_THM,mlstringTheory.strcat_nil]);
 
 val (check_count_sem,check_count_output) = check_count_io_events_def |> SPEC_ALL |> UNDISCH |> CONJ_PAIR
@@ -14,17 +16,17 @@ val (check_count_not_fail,check_count_sem_sing) =
   MATCH_MP semantics_prog_Terminate_not_Fail check_count_sem |> CONJ_PAIR
 
 val check_count_compiled_def = Define `
-  check_count_compiled = (code,data,config)`;
+  check_count_compiled = (check_countCompile$code,check_countCompile$data,check_countCompile$config)`;
 
 (* TODO: these are duplicated from wordfreqProof -- they should be elsewhere *)
 val wfFS_def = Define `
-  wfFS fs <=> fsFFIProps$wfFS fs ∧ STD_streams fs ∧ stdout fs (strlit "")`;
+  wfFS fs <=> fsFFIProps$wfFS fs ∧ fsFFIProps$STD_streams fs ∧ TextIOProof$stdo 1 "stdout" fs (mlstring$strlit "")`;
 
 val x64_installed_def = Define `
   x64_installed (c,d,conf) ffi mc ms <=>
-    is_x64_machine_config mc ∧
-    backendProof$installed c d conf.ffi_names ffi
-      (heap_regs x64_backend_config.stack_conf.reg_names) mc ms`
+    x64_configProof$is_x64_machine_config mc ∧
+    backendProof$installed c d (lab_to_target$config_ffi_names conf) ffi
+      (backendProof$heap_regs (stack_to_lab$config_reg_names (backend$config_stack_conf x64_config$x64_backend_config))) mc ms`
 (* -- *)
 
 val compile_correct_applied =
@@ -40,11 +42,11 @@ val compile_correct_applied =
 
 val check_count_compiled_thm = Q.store_thm("check_count_compiled_thm",
   `wfcl cl ∧ check_countProof$wfFS fs ∧
-   x64_installed check_count_compiled (basis_ffi cl fs) mc ms
+   check_countProof$x64_installed check_countProof$check_count_compiled (basis_ffi cl fs) mc ms
    ⇒
    ∃io_events fs'.
-   machine_sem mc (basis_ffi cl fs) ms ⊆
-   extend_with_resource_limit {Terminate Success io_events} ∧
+   targetSem$machine_sem mc (basis_ffi cl fs) ms ⊆
+   semanticsProps$extend_with_resource_limit {ffi$Terminate ffi$Success io_events} ∧
    extract_fs fs io_events = SOME fs' ∧
    (stdout fs' (strlit "Certificate OK\n") ⇔
     Check_Certificate (lines_of (implode (get_stdin fs))))`,
