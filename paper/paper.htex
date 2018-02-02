@@ -18,12 +18,7 @@
 \newcommand{\HOLty}[1]{\texttt{#1}}
 \newcommand{\HOLthm}[2][]{\texttt{#2}}
 }{}
-\NewEnviron{holthmenv}{
-  \begin{equation*}
-  \begin{array}[t]{l}
-  \BODY
-  \end{array}
-  \end{equation*}}
+\NewEnviron{holthmenv}{\[\begin{array}[t]{l}\BODY\end{array}\]}
 \newcommand{\TODO}[1]{{\bf TODO:} #1}
 \begin{document}
 \title{Verified Certificate Checking for Counting Votes}
@@ -420,6 +415,8 @@ certificates for correctness on the basis of a HOL formalisation
 that we now describe.
 
 \subsection{The HOL Formalisation}
+\setlength{\abovedisplayskip}{0.5em}
+\setlength{\belowdisplayskip}{0.5em}
 
 Elections are \emph{parameterised} by the data in the header
 (candidates, quota and number of vacancies) that remain constant
@@ -604,8 +601,8 @@ the specification given by the \textsf{equal\_except} predicate.
   \HOLthm[width=80]{CheckerProof.EQE_REMOVE_ONE_CAND}
 \end{holthmenv}
 Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} is unique.
- \begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
+\begin{holthmenv}
+  \HOLthm{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
 
 Having defined the implicit integrity constraints, and the
@@ -656,11 +653,9 @@ We can therefore check whether a transition from one judgement to
 the next is correct by simply considering the disjunction of all
 rules, and similarly obtain a computational version from the
 individual decision procedures associated with the counting rules.
-
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.valid_judgements_def}
 \end{holthmenv}
-
 \noindent
 A valid initial judgement is one
 where candidate's tally is zero, their
