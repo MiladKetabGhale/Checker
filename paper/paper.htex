@@ -497,7 +497,7 @@ Each rule consists of three main components:
 of the data.
 \end{itemize}
 
-\texttt{DP: concrete example here?}
+%\texttt{DP: concrete example here?}
 \noindent
 For example, we expect a valid certificate to have no duplication in
 the list of elected or continuing candidates, and every candidate
@@ -707,15 +707,13 @@ The correctness of this definition rests on the equivalences we have already est
 Consequently a formal certificate is validated if and only if it is valid according to
 the HOL specification of \HOLtm{valid_certificate}.
 Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation.
-
-
 \section{Translation into CakeML and Code Extraction}
-
 The verified certificate-checking function, \HOLtm{Check_Parsed_Certificate}, described above, is a good starting point for a verifier, but it has two drawbacks: it is a function in logic rather than an executable program, and relatedly, its input arguments must be provided as values in the correct types (parameters, and a list of judgements).
 In this section, we show how we overcome these drawbacks and obtain a verified executable for checking certficates.
 Our final theorem about the verifier executable is presented at the end of this section.
 
-\paragraph{Parsing}
+%\paragraph{Parsing}
+\noindent\emph{Parsing}
 The input to the verifier is a textual certificate file, in a format similar to Figure~\ref{fig;figure}.
 We specify this file format indirectly, by defining an executable specification of a certificate parser.
 Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line.
@@ -724,20 +722,23 @@ Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc.
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}
 
-\paragraph{Translation into CakeML and I/O Wrapper}
+%\paragraph{Translation into CakeML and I/O Wrapper}
+\noindent\emph{Translation into CakeML and I/O Wrapper}
 Using prior work on proof-producing synthesis~\cite{JFP14} we can automatically synthesise an implementation of the function \HOLtm{Check_Certificate} in the programming language CakeML.
 The synthesis tool for CakeML produces a theorem relating the semantics of the synthesised program back to the logical function.
 However, the result is a \emph{pure} function that expects the lines of a file as input.
 To actually open the file and read lines from it, we write an impure wrapper (making use of the CakeML Basis Library) around the pure function, and verify the wrapper using Characteristic Formulae for CakeML, as described by Gu\'eneau et al.~\cite{DBLP:conf/esop/GueneauMKN17}.
 The result is a complete CakeML program whose I/O semantics is verified to implement \HOLtm{Check_Certificate} on lines from standard input.
 
-\paragraph{Compilation in Logic}
+%\paragraph{Compilation in Logic}
+\noindent\emph{Compilation in Logic}
 Finally, we would like an executable verifier in machine code (rather than CakeML code).
 To produce this, we use the verifed CakeML compiler~\cite{DBLP:conf/icfp/TanMKFON16}, which can be executed within the theorem prover itself.
 This is a time-consuming process: compilation within logic can be a thousand times slower (e.g., half an hour) than running the compiler outside the logic (a second or two).
 But the payoff is a final theorem which only mentions the final generated machine-code implementation: all dependence on the CakeML language and implementation is discharged by proof.
 
-\paragraph{Final Theorem}
+%\paragraph{Final Theorem}
+\noindent\emph{Final Theorem}
 The final theorem, which we explain further below, is about the generated machine code, represented by the constant \HOLtm{check_count_compiled}.
 \begin{holthmenv}
   \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
@@ -831,7 +832,7 @@ We have implemented the protocol in an unverified certifying Haskell program as 
 %\label{ref;figure5}
 %\end{figure}
 
-The error message output by the checker informs us that (a) the computation carried out by the unverified Haskell program is invalid, and (b) where to look for possibly debugging the program. Based on the mentioned error message on the above paragraph, we only need to inspect the transition from line 5 to 6. After checking those lines of the concrete certificate, we understand that the protocol's expectation is for the elimination rule to apply. Therefore, the mistake must be happening in the implementation of elimination rule. On the other hand, the same program successfully computes election results of other districts. This implies that the existing error must be very subtle. Exactly because of such delicacies in the STV protocol and hence their implementation, one may hesitate to lay full trust in the meticulousness of any expert programmer.
+The above error message informs us that (a) the computation carried out by the unverified Haskell program on the certificate of Brindabella 2008 is invalid, and (b) where to look for possibly debugging the program. Based on the aforementioned error message, we only need to inspect the transition from line 5 to 6. After checking those lines of the concrete certificate, we understand that the protocol's expectation is for the elimination rule to apply. Therefore, the mistake must be happening in the implementation of elimination rule. On the other hand, the same program successfully computes election results of other districts. This implies that the existing error must be very subtle. Exactly because of such delicacies in the STV protocol and hence their implementation, one may hesitate to lay full trust in the meticulousness of any expert programmer.
 \section{Related Work}
  There is some work combining methods of theorem proving with certification for verification intentions. However they are not carried out for vote counting. On the other hand, in context of vote counting, merely few certifying algorithms exist which are not accompanied by any verified checker.
 
