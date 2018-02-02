@@ -349,11 +349,8 @@ outcome.
 \begin{tabular}{c@{\hspace{2cm}}c} \AxiomC{\tiny 133\%50} \noLine
 \UnaryInfC{\tiny 2} \noLine \UnaryInfC{\tiny $[A,B,C]$} \noLine
 \UnaryInfC{\scriptsize [A,C]} \RightLabel{\tiny hwin}
-\UnaryInfC{\tiny []; A[3\%1] B[111\%100] C[133\%100]; A[] B[]
+\UnaryInfC{\tiny [$b_4$,([B,C],0.11)]]; A[3\%1] B[111\%100] C[133\%100]; A[] B[]
 C[$b_{5}$,([C],11\%),([C,B],11\%100),([C],11\%100)]; []; [A]; [C]}
-\RightLabel{\tiny count} \UnaryInfC{\tiny [$b_4$,([B,C],0.11)];
-A[3\%1] B[111\%100] C[122\%100], A[] B[$b_4$,([B,C],11\%100)]
-C[$b_{5}$,([C],11\%100),([C,B],11\%100)];[];[A];[C]}
 \RightLabel{\tiny elim} \UnaryInfC{\tiny []; A[3\%1] B[111\%100]
 C[122\%100], A[] B[$b_4$,([B,C],11\%100)]
 C[$b_5$,([C],11\%100),([C,B],113\%1000)]; []; [A]; [B,C]}
@@ -413,13 +410,8 @@ vacancy is still unfilled, and all ballots are (again) counted.
 Hence the candidate with the lowest tally is eliminated (in this
 case, $B$) and their votes (with unchanged transfer values) are
 again injected into the count.
-\item[count.] Candidate C receives one more vote: the vote $([C],11/100)$ from the
-excluded candidate B.
 \item[hwin.] The only continuing candidate, that is C, is elected and as we have filled all the vacancies, a final stage has been obtained.
 \end{description}
-
-\texttt{DP: Why isn't $C$ elected immediately after $B$ is
-eliminated?}
 
 \noindent
 To validate certificates of this form, we first parse the textual
@@ -449,11 +441,14 @@ votes assigned to each candidate, $\mathit{bl}$ is the list of elected whose
 surplus have not yet been transferred, $e$ is the list of elected
 candidates by this point, and $h$ is the list of continuing
 (hopeful) candidates up to this stage.
+\begin{holthmenv}
+\HOLthm[width=80]{CheckerSpec.datatype_judgement}
+\end{holthmenv}
 \end{definition}
 
 \noindent
-Definition~\ref{jud:hol} below gives our straight forward HOL
-encoding of judgements. We use lists (instead of sets, or multisets)
+%Definition~\ref{jud:hol} below gives our straight forward HOLencoding of judgements. 
+We use lists (instead of sets, or multisets)
 mainly for convenience of formalisation in HOL, but this is not used
 in an essential way either in the definition, or in the
 formalisation, of the counting rules that we give later.
@@ -466,17 +461,6 @@ reduces the gap between an actual certificate and its abstract
 syntactic representation which we refer to as a \emph{formal
 certificate} that is simply a list of judgements.
 
-\texttt{DP: the distinction between actual and formal is not clear.
-Remove?}
-\begin{definition}\label{jud:hol}
-  Assume \HOLty{:ballots}, \HOLty{:tallies}, and \HOLty{:piles} are type synonyms for
-  \HOLty[-ballots,-alist]{:ballots},
-  \HOLty[-tallies,-alist]{:tallies}, and
-  \HOLty[-piles,-alist]{:piles} respectively.
-\begin{holthmenv}
-\HOLthm[width=80]{CheckerSpec.datatype_judgement}
-\end{holthmenv}
-\end{definition}
 
 \noindent
 As a certificate consists of a sequence of judgements, each of
@@ -491,7 +475,6 @@ of the data.
 \end{itemize}
 
 \texttt{DP: concrete example here?}
-
 \noindent
 For example, we expect a valid certificate to have no duplication in
 the list of elected or continuing candidates, and every candidate
@@ -633,11 +616,11 @@ can present the formalisation of this rule in HOL as a predicate.
 \end{holthmenv}
 
 
-The \textsf{ELIM\_CAND} rule is defined on three kind of input; a candidate, a triple composed of three fixed parameters which are the quota, vacancies, and the initial list of candidates, and two judgements one of which is the premise and the other is the conclusion of the rule. Each of the conjuncts corresponds to a condition specified in the definition~\ref{elim:rule}, as we already demonstrated it for a few cases. \textsf{ELIM\_CAND\_dec} is the computational realisation of the \textsf{ELIM\_CAND}.
+The \textsf{ELIM\_CAND} rule is defined on three kind of input; a candidate, a triple composed of three fixed parameters which are the quota, vacancies, and the initial list of candidates, and two judgements one of which is the premise and the other is the conclusion of the rule. Each of the conjuncts corresponds to a condition specified in the item 7 of the protocol, as we already demonstrated for a few cases. \textsf{ELIM\_CAND\_dec} is the computational realisation of the \textsf{ELIM\_CAND}.
 \begin{holthmenv}
   \HOLthm[def,width=88]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
-We already have demonstrated how the specification of the predicative assertions imply  correctness of the corresponding computational parts. By drawing on these theorems we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules.
+By drawing on the theorems establishing correspondence of conjuncts, we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules.
 
 
 \subsection{The Certificate Verifier}
