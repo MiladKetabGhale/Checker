@@ -171,10 +171,6 @@ Australia.
 
 
 \section{The Protocol and its HOL Formalisation}
-Single Transferable Vote is a preferential voting scheme that is
-used in multi-seat constituencies. Voters rank (possibly
-a subset of) candidates by assigning numerical preferences to
-candidates as in
 \begin{wrapfigure}{r}[0cm]{0.4\textwidth}
   \begin{center}
     %\raisebox{0pt}[-1cm]
@@ -185,10 +181,15 @@ candidates as in
     %\includegraphics[width=4cm]{ballot.png}
   \end{center}
 \end{wrapfigure}
-the ballot on the right, where no two candidates may be given the
+Single Transferable Vote is a preferential voting scheme that is
+used in multi-seat constituencies. Voters rank (possibly
+a subset of) candidates by assigning numerical preferences to
+candidates as in the ballot on the right, where no two candidates may be given the
 same preference. This allows us to represent ballots as duplicate
 free lists of candidates where the list order reflects the
 preference order.
+
+
 
 Each election defines a \emph{quota}, i.e. a minimal set of votes
 that a candidate must receive in order to be elected. The count
