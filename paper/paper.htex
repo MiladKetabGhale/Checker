@@ -819,8 +819,7 @@ Molonglo&$91534$&$7$&$27$&certificate OK&2012\\
 \label{ref;figure5}
 \end{figure}
 
-\texttt{DP: elaborate on the error in the unverified program.}
-
+The error message output by the checker informs us that (a) the computation carried out by the unverified Haskell program is invalid, and (b) where to look for possibly debugging the program. Based on the error message given in figure 5, we only need to inspect the transition from line 5 to 6. After checking those lines of the concrete certificate, we understand that the protocol's expectation is for the elimination rule to apply. Therefore, the mistake must be happening in the implementation of elimination rule. On the other hand, the same program successfully computes election results of other districts. This implies that the existing error must be very subtle. Exactly because of such delicacies in the STV protocol and hence their implementation, one may hesitate to lay full trust in the meticulousness of any expert programmer. 
 \section{Related Work}
  There is some work combining methods of theorem proving with certification for verification intentions. However they are not carried out for vote counting. On the other hand, in context of vote counting, merely few certifying algorithms exist which are not accompanied by any verified checker.
 
