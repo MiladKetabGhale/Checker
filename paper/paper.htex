@@ -341,6 +341,12 @@ candidate are transferred to the next preference (with unchanged
 transfer value).
 \end{enumerate} \end{center}
 
+\noindent
+The purpose of setting aside the ballots counted for particular
+candidates in the second step is precisely for the purpose of
+possibly transferring these ballots later, in case the candidate is
+either elected or eliminated.
+
 \subsection{An Example Certificate}
 
 As argued in the introduction, in the framework of certified
@@ -581,11 +587,13 @@ them from the list of continuing candidates}.
 \end{center}
 \end{small}
 
+\noindent
 We formulate the elimination rule with an additional parameter --
 the candidate $c$ to be eliminated.
 
-\paragraph{Side Conditions.} For the elimination rule to be applied
-correctly, we stipulate that
+\paragraph{Side Conditions.} For correctness of the elimination
+rule,
+we stipulate that
 \begin{itemize}
   \item the candidate $c$ to be eliminated is indeed a continuing
   candidate
@@ -594,6 +602,7 @@ correctly, we stipulate that
   \item there are no pending transfers.
 \end{itemize}
 
+\noindent
 The fact that the candidate to be removed is indeed the weakest is established
 by another assertion which is part of the side condition.
 
@@ -611,7 +620,8 @@ needs to change in the following way:
   of ballots that are to be counted (again).
 \end{itemize}
 
- The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
+\noindent
+The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
@@ -631,6 +641,7 @@ Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} 
   \HOLthm{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
 
+\noindent
 Having defined the implicit integrity constraints, and the
 explicit side conditions in the definition of \emph{elimination}, we
 can present the formalisation of this rule in HOL as a predicate.
@@ -639,7 +650,11 @@ can present the formalisation of this rule in HOL as a predicate.
 \end{holthmenv}
 
 
-The \textsf{ELIM\_CAND} rule is defined on three kind of input; a candidate, a triple composed of three fixed parameters which are the quota, vacancies, and the initial list of candidates, and two judgements one of which is the premise and the other is the conclusion of the rule. Each of the conjuncts corresponds to a condition specified in the item 7 of the protocol, as we already demonstrated for a few cases. \textsf{ELIM\_CAND\_dec} is the computational realisation of the \textsf{ELIM\_CAND}.
+\noindent
+The \textsf{ELIM\_CAND} rule is defined on three kind of input; a
+candidate, a triple composed of three fixed parameters which are the
+quota, vacancies, and the initial list of candidates, and two
+judgements (the premiss and the conclusion of the rule). Each of the conjuncts corresponds to a condition specified in the item 7 of the protocol, as we already demonstrated for a few cases. \textsf{ELIM\_CAND\_dec} is the computational realisation of the \textsf{ELIM\_CAND}.
 \begin{holthmenv}
   \HOLthm[def,width=88]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
@@ -694,9 +709,10 @@ Putting this together with the specification of a valid sequence of judgements, 
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.valid_certificate_def}
 \end{holthmenv}
-For checking a formal certificate we therefore first  certify if the
-certificate starts at an initial stage. Then recursively we continue
-checking if transitions have happened correctly, and if the
+For checking a formal certificate we therefore first  verify that
+certificate starts at a permissible initial stage. We then
+iteratively 
+check that transitions have happened correctly, and that the
 terminating state is a final one where winners are declared.
 
 The above specification of the checker, corresponds to the following computational formal certificate checker.
@@ -708,9 +724,18 @@ Consequently a formal certificate is validated if and only if it is valid accord
 the HOL specification of \HOLtm{valid_certificate}.
 Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation.
 \section{Translation into CakeML and Code Extraction}
-The verified certificate-checking function, \HOLtm{Check_Parsed_Certificate}, described above, is a good starting point for a verifier, but it has two drawbacks: it is a function in logic rather than an executable program, and relatedly, its input arguments must be provided as values in the correct types (parameters, and a list of judgements).
-In this section, we show how we overcome these drawbacks and obtain a verified executable for checking certficates.
-Our final theorem about the verifier executable is presented at the end of this section.
+
+The verified certificate-checking function,
+\HOLtm{Check_Parsed_Certificate}, described above, is a good
+starting point for a verifier, but still has two shortcomings: it is a
+function in logic rather than an executable program, and a
+consequence, 
+its inputs must be provided as elements of the respective data
+types, whereas certificates are purely textual.
+We now demonstrate how to address these shortcomings
+and obtain a verified executable for
+checking certificates.  Our final theorem about the verifier
+executable is presented at the end of this section.
 
 %\paragraph{Parsing}
 \noindent\emph{Parsing}
@@ -748,7 +773,7 @@ The conclusion of the theorem concerns the semantics (\HOLtm{machine_sem}) of ex
 
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
-Legislative Assembly elections in ACT for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
+Legislative Assembly elections in the Australian Capital Territory for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
 \begin{figure}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
@@ -771,7 +796,18 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \label{ref;figure2}
 \end{figure}
 
-Moreover, we have studied behaviour of our executable by examining it on certificates output on randomly generated ballots. There are two interesting parameters to study, namely varying the number of ballots and varying the length of each ballot. Figure~\ref{ref;figure3} depicts results on certificates where the number of candidates is fixed at 20, vacancies are 5, and the length of each ballot is 12. It appears that the complexity of the program in the number of ballots is quadratic. Also we keep the number of ballots, vacancies, and length of each ballot fixed at 100000, 1, and 10 respectively, in order to inspect the effect of increase in the length of each ballot (Figure~\ref{ref;figure4}). The complexity of the program seems to be linear with respect to this index.
+\noindent
+We also evaluated the verifier on certificates obtained through
+randomly generated ballots. We vary two parameters: the number of
+ballots and the size of each ballot. Figure~\ref{ref;figure3} shows
+the results on certificates where the number of candidates is fixed
+at 20, vacancies are 5, and the length of each ballot is 12. We
+observe quadratic runtime behaviour in the number of ballots. Also
+we keep the number of ballots, vacancies, and length of each ballot
+fixed at 100000, 1, and 10 respectively, in order to see the
+effect of increase in the length of each ballot
+(Figure~\ref{ref;figure4}). The complexity of the program appears to
+be linear in this dimension.
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
@@ -806,7 +842,19 @@ $18$&$180.5$&$325$\\
 
 
 
-We have implemented the protocol in an unverified certifying Haskell program as well. The unverified program was then tested on ballots of the same ACT Legislative Assembly elections mentioned above. Then we checked the certificates produced by this program for each of the districts. The result shows that the certificates of the districts for the year 2012 are valid. Also the certificate of Molonglo electorate 2008 is verified as correct. However, the two electorates of Brindabella and Ginninderra 2008, despite declaring the final winners correctly, are invalid as an error occurs in an intermediate transition. In both cases the ckecker invalidates the transition from  line 5 to line 6.
+\noindent
+We have also implemented the protocol in an unverified certifying
+Haskell program. The unverified program was then tested on
+ballots of the same ACT Legislative Assembly elections.
+We have then verified the certificates produced by this program for
+each of the districts. The result shows that the certificates of the
+districts for the year 2012 are valid. Also the certificate of
+Molonglo electorate 2008 is verified as correct. However, the two
+electorates of Brindabella and Ginninderra 2008, despite declaring
+the final winners correctly, were \emph{invalid} as an error occurs in an
+intermediate transition. 
+%In both cases the ckecker invalidates the
+%transition from  line 5 to line 6.
 
 
 %Figure~\ref{ref;figure5} illustrates the result of execution of this program on the ACT legislative Assembly elections for the same years as above. In two of them, even though the final winners are announced correctly, one of the steps taken from line 6 to line 5 in the certificate is invalid. Therefore, the checker rejects the whole output as invalid.
@@ -832,32 +880,100 @@ We have implemented the protocol in an unverified certifying Haskell program as 
 %\label{ref;figure5}
 %\end{figure}
 
-The above error message informs us that (a) the computation carried out by the unverified Haskell program on the certificate of Brindabella 2008 is invalid, and (b) where to look for possibly debugging the program. Based on the aforementioned error message, we only need to inspect the transition from line 5 to 6. After checking those lines of the concrete certificate, we understand that the protocol's expectation is for the elimination rule to apply. Therefore, the mistake must be happening in the implementation of elimination rule. On the other hand, the same program successfully computes election results of other districts. This implies that the existing error must be very subtle. Exactly because of such delicacies in the STV protocol and hence their implementation, one may hesitate to lay full trust in the meticulousness of any expert programmer.
+The error message informs us that (a) the computation carried out by
+the unverified Haskell program on the certificate of Brindabella
+2008 is invalid, and (b) where to look for possibly debugging the
+program. Based on the aforementioned error message, we only need to
+inspect a very small part of the certificate. Upon closer
+inspection, we have uncovered a subtle error in the implementation
+of the elimination rule 
+On the other hand, the same program successfully (and correctly) computes election
+results of other districts which substantiates the subtlety of the
+error.
+We argue that precisely because of such delicacies in the STV
+protocol and hence their implementation, we advocate that vote
+counting be carried out in a certified way, with a minimal trust
+base such as demonstrated in this paper.
 \section{Related Work}
- There is some work combining methods of theorem proving with certification for verification intentions. However they are not carried out for vote counting. On the other hand, in context of vote counting, merely few certifying algorithms exist which are not accompanied by any verified checker.
+While there is prior work that combines theorem proving with
+certified computation, we are not aware of any approach where this
+is carried out in the context of electronic voting. Orthogonally,
+while there are cerfifying algorithms for vote
+counting~\cite{DBLP:conf/ausai/PattinsonS15,DBLP:conf/itp/PattinsonT17,DBLP:conf/voteid/GhaleGP17}, none of
+them  are
+accompanied by any verified checker.
 
 
 
-In vote counting, there are few work which provide a certificate with their output~\cite{DBLP:conf/ausai/PattinsonS15,DBLP:conf/itp/PattinsonT17,DBLP:conf/voteid/GhaleGP17}. They mainly formalise a voting protocol inside the theorem prover Coq and then prove some desired properties about the formalised specification. Then, they extract programs into Haskell or OCaml languages to perform computations. Since the semantic of the target and source of the extraction method differ, and there is no proof that the translation occurs in a semantic-preserving way, verification of the specification does not legitimately extend to the extracted program. Moreover, these work are either not accompanied by a checker\cite{DBLP:conf/voteid/GhaleGP17}, or their checker is an unverified Haskell/OCaml program\cite{DBLP:conf/itp/PattinsonT17}. One therefore has to trust the extraction means and correct computations carried out by GHC or OCaml compiler.
+The existing certificate-producing implemetations of vote counting
+mainly formalise a voting protocol inside the Coq theorem prover
+and then prove some desired properties about the formalised
+specification, and then extract the development into Haskell or
+OCaml programs.
+Since the semantics of the target
+and source of the extraction method differ, and there is no proof
+that the translation occurs in a semantic-preserving way,
+verification of the specification does not provably extend to
+the extracted program. Moreover, these work are either not
+accompanied by a checker\cite{DBLP:conf/voteid/GhaleGP17}, or their
+checker is an unverified Haskell/OCaml
+program\cite{DBLP:conf/itp/PattinsonT17}. One therefore has to trust
+both 
+the extraction mechanism and the compiler used to produce the
+executable.
 
 
-
-On the other hand, there are frameworks combining certification and verifications tools for verifying algorithms. Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified computation and theorem proving with methods of code verification to establish a framework for validation of certifying algorithms. First they implement algorithms in C language. Then by using the VCC tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, they obtain some pre- and postconditions, which are next generalized syntactically and then implemented in the Isabella theorem prover to be discharged. Even though this method introduces a uniform platform for dealing with certifying algorithms, the user has to trust the VCC tool, and there is duplication of effort in that one has to generalise the conditions imposed by the VCC and then implement them manually in Isabella to prove. To ameliorate this disadvantage, Noschinski et al~\cite{DBLP:conf/nfm/NoschinskiRM14} replaced the intermediate step where VCC is invoked by the AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which provably correctly translates (part of) C language into Isabella in a semantic preserving manner. Although the latter method is much superior in the degree of the verification achieved, one can not guarantee that the machine code behaves in the same way as its top-level C implementation.
+In the context of certified computation, 
+Alkassar et
+al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified
+computation and theorem proving with methods of code verification to
+establish a framework for validation of certifying algorithms in the
+C programming language. 
+With the help of the VCC
+tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, pre- and
+postconditions are generated that are syntactically generalized
+syntactically and discharged in the Isabelle 
+theorem prover to be discharged. Even
+though this method introduces a uniform platform for dealing with
+certifying algorithms, the user has to trust the VCC tool, and there
+is duplication of effort in that one has to generalise the
+conditions imposed by the VCC and then implement them manually in
+Isabella to prove. To ameliorate this disadvantage, Noschinski et
+al~\cite{DBLP:conf/nfm/NoschinskiRM14} replace the intermediate
+step where VCC is invoked by the
+AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which
+provably correctly translates (part of) the C language into Isabelle in
+a semantic preserving manner. Although the latter method is much
+superior in the degree of the verification achieved, one can not
+guarantee that the machine code behaves in the same way as its
+top-level C implementation.
 
 \section{Discussion and Conclusion}
-Members of the general public outsource the task of vote counting of an election
-in a democratic system to authorities in order to safeguard their
-preferences.Therefore correct, publicly verifiable, transparent
+Correct, publicly verifiable, transparent
 election count is a key constituent of establishing trustworthiness
-in the final outcome. We have combined
+in election outcomes. We have combined
 tools of theorem proving with certification techniques to accomplish this task in
-a cost-effective way. The tool developed here has clarity in encoding, precision
+a cost-effective way. Our implementation strives for the best clarity in encoding, precision
 in formulation, and modularity in implementation so that it can be taken as a
 framework for verifying STV election results down to machine level.
 
 
 
-The framework introduced is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs offered in HOL environment makes our formalisation clear so that external scrutineers may simply examine the specification of the frame work to understand what it does, rather than necessarily bothering with proofs and computational components. Also rich rewriting tactics and libraries of HOL allows us to express the protocol and discharge related proofs with a minimum amount of lines of encoding. Moreover, the verified connection of HOL with CakeML enables verification performed inside the theorem prover to be pushed down to machine level. Furthermore, besides concision and clarity, the framework is efficient. As the experimental results witnesses, certificates of the Molonglo district, the biggest Legislative Assembly electorate in Australia, are checked in merely five minutes.
+The framework introduced is implemented in the HOL theorem prover
+and CakeML verified compiler. Separation of program from proofs
+offered in HOL environment makes our formalisation clear so that
+external scrutineers may simply examine the specification of the
+frame work to understand what it does, rather than necessarily
+bothering with proofs and computational components. Also rich
+rewriting tactics and libraries of HOL allows us to express the
+protocol and discharge related proofs with a minimum amount of lines
+of encoding. Moreover, the verified connection of HOL with CakeML
+enables verification performed inside the theorem prover to be
+pushed down to machine level. We have demonstrated the practical
+feasibility of our approach by means of case studies. For example,
+the certificates of the Molonglo
+district, the biggest Legislative Assembly electorate in Australia,
+are checked in just five minutes.
 
 
 
