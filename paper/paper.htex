@@ -17,6 +17,7 @@
 \newcommand{\HOLtm}[1]{\texttt{#1}}
 \newcommand{\HOLty}[1]{\texttt{#1}}
 \newcommand{\HOLthm}[2][]{\texttt{#2}}
+\newcommand{\n}{\\n}
 }{}
 \NewEnviron{holthmenv}{\[\begin{array}[t]{l}\BODY\end{array}\]}
 \newcommand{\TODO}[1]{{\bf TODO:} #1}
@@ -30,8 +31,28 @@ Ramana~Kumar\inst{2}}
 Data61, CSIRO and UNSW}
 \maketitle
 \begin{abstract}
-We introduce a new framework for verifying electronic vote counting results that are based on the Single Transferable Vote scheme (STV). Our approach frames electronic vote counting as a certified computation where each execution of the counting algorithm is accompanied by a certificate that witnesses the correctness of the output. These certificates are then checked for correctness independently of the means employed to produce them. In particular, we advocate to verify the verifier rather than the software used to produce the result. We use the theorem prover HOL to formalise the counting protocol of an STV scheme to obtain full static verification of the checker. By means of built-in mechanisms that connect HOL with the verified CakeML compiler, we then extract an executable that is computationally equivalent to the verified verifier. The executable machine code is guaranteed to behave correctly with respect to the formalised specification of the protocol. Moreover, it can check certificates of real-size elections efficiently. Our encoding is modular, so repeating the same process for another different STV scheme would require a minimal amount of additional work.
-\end{abstract}
+We introduce a new framework for verifying electronic vote counting
+results that are based on the Single Transferable Vote scheme (STV).
+Our approach frames electronic vote counting as certified
+computation where each execution of the counting algorithm is
+accompanied by a certificate that witnesses the correctness of the
+output. These certificates are then checked for correctness
+independently of how they are produced. 
+We advocate to verify the verifier rather than the software used to
+produce the result. We use the theorem prover HOL to formalise the
+STV vote counting scheme, and obtain a fully verified
+certificate checker.
+By connecting 
+HOL with the verified CakeML compiler, we then extract an
+executable that is 
+guaranteed to behave
+correctly with respect to the formal specification of the
+protocol down to machine level.
+We demonstrate that our verifier can check certificates of real-size elections
+efficiently. Our encoding is modular, so repeating the same process
+for another different STV scheme would require a minimal amount of
+additional work.  \end{abstract}
+
 \section{Introduction}\label{sec:intro}
 
 The main contribution of this paper is a new framework for
@@ -117,7 +138,7 @@ paper-based setting.  There are two kinds of stages that we call
 as a tuple, corresponding to a snapshot of the stage
 of the count in a paper-based setting.  The formalisation of the
 voting protocol then takes the form of \emph{rules} that specify how
-to advance from one judgement to the next, thereby advancing the
+to advance from one judgement to the next, thereby progressing the
 count. The applicability of particular rules are described
 by side conditions that are in turn formalised by HOL predicates.  A
 correct certificate is then simply a sequence of judgements where
@@ -125,7 +146,7 @@ each judgement is justified through its predecessor by means of a
 correct rule application.  The task of the verifier is then simply
 to process a list of judgements and ascertain that this is indeed
 the case.  In particular, our specification of rules is purely
-logical.
+descriptive.
 
 
 Second, in tandem with the logical specification of each rule, we
@@ -171,20 +192,33 @@ Australia.
 
 
 \section{The Protocol and its HOL Formalisation}
+<<<<<<< HEAD
+=======
+Single Transferable Vote is a preferential voting scheme that is
+used in multi-seat constituencies. Voters rank (possibly
+a subset of) candidates by assigning numerical preferences to
+candidates as in
+%
+>>>>>>> e5ff6588783ec1eb2f98e225877724558a6aa882
 \begin{wrapfigure}{r}[0cm]{0.4\textwidth}
   \begin{center}
     %\raisebox{0pt}[-1cm]
-    \raisebox{0pt}[\dimexpr\height-2.5\baselineskip\relax]
+    \raisebox{0pt}[\dimexpr\height-3.0\baselineskip\relax]
     {\includegraphics[width=0.37\textwidth]{ballot.png}}
-    \vspace*{-8ex}
+    \vspace*{-16ex}
     %\raisebox{0pt}[\dimexpr\height-8.5\baselineskip\relax]{xx}
     %\includegraphics[width=4cm]{ballot.png}
   \end{center}
 \end{wrapfigure}
+<<<<<<< HEAD
 Single Transferable Vote is a preferential voting scheme that is
 used in multi-seat constituencies. Voters rank (possibly
 a subset of) candidates by assigning numerical preferences to
 candidates as in the ballot on the right, where no two candidates may be given the
+=======
+%
+the ballot on the right, where no two candidates may be given the
+>>>>>>> e5ff6588783ec1eb2f98e225877724558a6aa882
 same preference. This allows us to represent ballots as duplicate
 free lists of candidates where the list order reflects the
 preference order.
@@ -237,12 +271,15 @@ $1$.
 There are various versions of STV. They mainly differ in how  and
 when ballots are transferred and candidates are elected, the
 calculation of the transfer value, and the various tie breaking
-methods used to determine which candidate is to be excluded.
+methods used to determine which candidate is to be excluded, and the
+quota being used. 
 Here, we deal with a generic version of STV that
 incorporates all three mechanisms outlined above, and is very
 similar to the method used to elect members of the Australian
 Senate, and incidentally also to the scheme used elect the representatives of the
-student's union of the first and second author. Design decisions in
+student's union of the first and second author. Throughout, we do
+not assume a particular definition of the quota, but take this as a
+parameter. Design decisions in
 the precise formulation of the scheme are resolved as follows:
 
 \begin{description}
