@@ -447,7 +447,7 @@ candidates by this point, and $h$ is the list of continuing
 \end{definition}
 
 \noindent
-%Definition~\ref{jud:hol} below gives our straight forward HOLencoding of judgements. 
+%Definition~\ref{jud:hol} below gives our straight forward HOLencoding of judgements.
 We use lists (instead of sets, or multisets)
 mainly for convenience of formalisation in HOL, but this is not used
 in an essential way either in the definition, or in the
@@ -698,17 +698,17 @@ Our final theorem about the verifier executable is presented at the end of this 
 The input to the verifier is a textual certificate file, in a format similar to Figure~\ref{fig;figure}.
 We specify this file format indirectly, by defining an executable specification of a certificate parser.
 Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line.
-Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, shown below, that operates on lines from a file and calls \HOLtm{Check_Parsed_Certificate} from before to do the actual verification:
+Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, below, that parses lines from the file then calls \HOLtm{Check_Parsed_Certificate} to do the verification:
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}
 
 \paragraph{Translation into CakeML and I/O Wrapper}
-Using prior work on proof-producing synthesis~\cite{JFP14} we can automatically synthesise an implementation of the function \HOLtm{Check_Parsed_Certificate} in the programming language CakeML.
+Using prior work on proof-producing synthesis~\cite{JFP14} we can automatically synthesise an implementation of the function \HOLtm{Check_Certificate} in the programming language CakeML.
 The synthesis tool for CakeML produces a theorem relating the semantics of the synthesised program back to the logical function.
-However, this implementation is a \emph{pure} function that expects the lines of a file as input.
+However, the result is a \emph{pure} function that expects the lines of a file as input.
 To actually open the file and read lines from it, we write an impure wrapper (making use of the CakeML Basis Library) around the pure function, and verify the wrapper using Characteristic Formulae for CakeML, as described by Gu\'eneau et al.~\cite{DBLP:conf/esop/GueneauMKN17}.
-The result is a complete CakeML program whose I/O semantics is verified to implement the certificate-checking logical function.
+The result is a complete CakeML program whose I/O semantics is verified to implement \HOLtm{Check_Certificate} on lines from standard input.
 
 \paragraph{Compilation in Logic}
 Finally, we would like an executable verifier in machine code (rather than CakeML code).
@@ -717,9 +717,12 @@ This is a time-consuming process: compilation within logic can be a thousand tim
 But the payoff is a final theorem which only mentions the final generated machine-code implementation: all dependence on the CakeML language and implementation is discharged by proof.
 
 \paragraph{Final Theorem}
+The final theorem, which we explain further below, is about the generated machine code, represented by the constant \HOLtm{check_count_compiled}.
 \begin{holthmenv}
   \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
 \end{holthmenv}
+We assume (\HOLtm{x64_installed}) that this code is loaded into memory in an x86-64 machine represented by \HOLtm{mc} and \HOLtm{ms}, and that the command line (\HOLtm{cl}) and file system (\HOLtm{fs}) are well-formed.
+The conclusion of the theorem concerns the semantics (\HOLtm{machine_sem}) of executing the machine: it will terminate successfully (or fail if there is not enough memory) with a trace of I/O events (\HOLtm{io_events}) such that if we replay those events on the initial file system, we obtain a resulting file system \HOLtm{fs'} for which the string \HOLtm{"Certificate OK\n"} is printed on standard output if and only if \HOLtm{Check_Certificate} succeeds on the lines of standard input.
 
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
@@ -781,7 +784,7 @@ $18$&$180.5$&$325$\\
 
 
 
-We have implemented the protocol in an unverified certifying Haskell program as well. The unverified program was then tested on ballots of the same ACT Legislative Assembly elections mentioned above. Then we checked the certificates produced by this program for each of the districts. The result shows that the certificates of the districts for the year 2012 are valid. Also the certificate of Molonglo electorate 2008 is verified as correct. However, the two electorates of Brindabella and Ginninderra 2008, despite declaring the final winners correctly, are invalid as an error occurs in an intermediate transition. In both cases the ckecker invalidates the transition from  line 5 to line 6.  
+We have implemented the protocol in an unverified certifying Haskell program as well. The unverified program was then tested on ballots of the same ACT Legislative Assembly elections mentioned above. Then we checked the certificates produced by this program for each of the districts. The result shows that the certificates of the districts for the year 2012 are valid. Also the certificate of Molonglo electorate 2008 is verified as correct. However, the two electorates of Brindabella and Ginninderra 2008, despite declaring the final winners correctly, are invalid as an error occurs in an intermediate transition. In both cases the ckecker invalidates the transition from  line 5 to line 6.
 
 
 %Figure~\ref{ref;figure5} illustrates the result of execution of this program on the ACT legislative Assembly elections for the same years as above. In two of them, even though the final winners are announced correctly, one of the steps taken from line 6 to line 5 in the certificate is invalid. Therefore, the checker rejects the whole output as invalid.
@@ -807,7 +810,7 @@ We have implemented the protocol in an unverified certifying Haskell program as 
 %\label{ref;figure5}
 %\end{figure}
 
-The error message output by the checker informs us that (a) the computation carried out by the unverified Haskell program is invalid, and (b) where to look for possibly debugging the program. Based on the mentioned error message on the above paragraph, we only need to inspect the transition from line 5 to 6. After checking those lines of the concrete certificate, we understand that the protocol's expectation is for the elimination rule to apply. Therefore, the mistake must be happening in the implementation of elimination rule. On the other hand, the same program successfully computes election results of other districts. This implies that the existing error must be very subtle. Exactly because of such delicacies in the STV protocol and hence their implementation, one may hesitate to lay full trust in the meticulousness of any expert programmer. 
+The error message output by the checker informs us that (a) the computation carried out by the unverified Haskell program is invalid, and (b) where to look for possibly debugging the program. Based on the mentioned error message on the above paragraph, we only need to inspect the transition from line 5 to 6. After checking those lines of the concrete certificate, we understand that the protocol's expectation is for the elimination rule to apply. Therefore, the mistake must be happening in the implementation of elimination rule. On the other hand, the same program successfully computes election results of other districts. This implies that the existing error must be very subtle. Exactly because of such delicacies in the STV protocol and hence their implementation, one may hesitate to lay full trust in the meticulousness of any expert programmer.
 \section{Related Work}
  There is some work combining methods of theorem proving with certification for verification intentions. However they are not carried out for vote counting. On the other hand, in context of vote counting, merely few certifying algorithms exist which are not accompanied by any verified checker.
 

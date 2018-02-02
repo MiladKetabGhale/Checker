@@ -29,7 +29,7 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   term_name = "=",
                   pp_elements = [HardSpace 1, TOK "=", BreakSpace(1,2)]}
 
-val _ = overload_on("stdFS",``fsFFIProps$STD_streams``);
+val _ = overload_on("wfCL",``CommandLineProof$wfcl``);
 val _ = overload_on("x64_regs",``backendProof$heap_regs (stack_to_lab$config_reg_names (backend$config_stack_conf x64_config$x64_backend_config))``);
 
 val _ = overload_on("the",``THE``);
@@ -65,5 +65,15 @@ val _ = overload_on("zip",``ZIP``);
 val _ = overload_on("pairwise",``LIST_REL``);
 val _ = overload_on("split",``SPLITP``);
 val _ = overload_on("LaTeXNIL",``[]``);
+
+val _ = overload_on("get_stdin",``λfs. mlstring$implode (get_stdin fs)``);
+
+local open term_pp_types in
+fun strlitprinter (tyg, tmg) backend printer ppfns gravs depth tm =
+  printer {gravs = (Top,Top,Top), depth = depth - 1, binderp = false} (rand tm)
+val x = mk_var("x", stringSyntax.string_ty)
+val strlit_t = prim_mk_const{Name = "strlit", Thy = "mlstring"}
+val _ = temp_add_user_printer("strlitprinter", mk_comb(strlit_t, x), strlitprinter)
+end
 
 end
