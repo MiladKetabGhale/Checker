@@ -565,8 +565,7 @@ Conversely, correctness of the computational definition \HOLtm{Valid_PileTally_d
 Therefore, we obtain a perfect match between the specification and computational condition for tallies and piles to be distinctively allocated to candidates.
 
 For elimination of the candidate with the smallest tally (number of
-first preferences), the protocol states that:
-the protocol states that
+first preferences), item 7 of the protocol states that:
 \begin{small}
 \begin{center}
 \begin{minipage}{10cm}
@@ -741,7 +740,7 @@ But the payoff is a final theorem which only mentions the final generated machin
 
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
-Legislative Assembly elections in ACT for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalization of ANU\_Union STV in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
+Legislative Assembly elections in ACT for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
 \begin{figure}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
