@@ -127,7 +127,8 @@ synthesis of the verifier that is itself fully verified down to the
 machine-code level.
 
 
-This proceeds in four steps.
+This proceeds in four steps\footnote{Source codes of the formalisation can be found at\\ {\tt\url{https://github.com/MiladKetabGhale/Checker}.}}
+.
 First, we formalise  the vote counting protocol as a sequence of
 steps inside the HOL theorem prover where every step
 corresponds to an action taken by a counting officer in a
@@ -187,42 +188,27 @@ use of CakeML.
 In the remainder of the paper, we describe our framework in detail
 and demonstrate that it can handle real-world size elections by
 evaluating it on historical data of elections conducted in
-Australia.
-
-
-
+Australia. 
 \section{The Protocol and its HOL Formalisation}
-<<<<<<< HEAD
-=======
+
 Single Transferable Vote is a preferential voting scheme that is
 used in multi-seat constituencies. Voters rank (possibly
 a subset of) candidates by assigning numerical preferences to
 candidates as in
-%
->>>>>>> e5ff6588783ec1eb2f98e225877724558a6aa882
+the ballot on the right, where no two candidates may be given the 
+same preference. This allows us to represent ballots as duplicate
+free lists of candidates where the list order reflects the
+preference order.
 \begin{wrapfigure}{r}[0cm]{0.4\textwidth}
   \begin{center}
     %\raisebox{0pt}[-1cm]
     \raisebox{0pt}[\dimexpr\height-3.0\baselineskip\relax]
     {\includegraphics[width=0.37\textwidth]{ballot.png}}
-    \vspace*{-16ex}
+    \vspace*{-12ex}
     %\raisebox{0pt}[\dimexpr\height-8.5\baselineskip\relax]{xx}
     %\includegraphics[width=4cm]{ballot.png}
   \end{center}
 \end{wrapfigure}
-<<<<<<< HEAD
-Single Transferable Vote is a preferential voting scheme that is
-used in multi-seat constituencies. Voters rank (possibly
-a subset of) candidates by assigning numerical preferences to
-candidates as in the ballot on the right, where no two candidates may be given the
-=======
-%
-the ballot on the right, where no two candidates may be given the
->>>>>>> e5ff6588783ec1eb2f98e225877724558a6aa882
-same preference. This allows us to represent ballots as duplicate
-free lists of candidates where the list order reflects the
-preference order.
-
 
 
 Each election defines a \emph{quota}, i.e. a minimal set of votes
