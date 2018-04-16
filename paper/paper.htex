@@ -496,7 +496,7 @@ correctness of the transitions between successive judgements.
 Each rule consists of three main components:
 \begin{itemize}
   \item a specification of how premiss and conclusion relate
-  \item a side condition that specifies when a rule is applicable
+  \item side conditions that specifies when a rule is applicable
   \item a number of implicit assertions that guarantee the integrity
 of the data.
 \end{itemize}
@@ -534,17 +534,10 @@ elimination rule.
 \paragraph{Integrity Constraints.} The integrity constraints for the
 elimination rule are identical to those of other rules.
 For example, the name of each candidate appears only once in the
-initial list of competing candidates. Also, all candidates need to
-have precisely one tally and one unique associated pile (of votes
-counted in their favour).
-For instance, the predicate
-\HOLtm{Valid_Init_CandList} restricts legal initial lists of
-candidates to those which are non-empty and have no duplicate.
-\begin{holthmenv}
-  \HOLthm[def,width=80]{CheckerSpec.Valid_Init_CandList_def}
-\end{holthmenv}
-Moreover, at every stage of the count, every candidate has exactly
-one tally and one pile. Therefore, if a judgement in a certificate
+initial list of competing candidates. 
+Also, at every stage of the count, every candidate has exactly
+one tally and one pile (of votes
+counted in their favour). Therefore, if a judgement in a certificate
 maliciously allocates more than one tally to a single candidate, the
 bug is detected and the certificate rejected as invalid.  We express
 this condition as follows.
@@ -552,7 +545,7 @@ this condition as follows.
   \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
 \noindent
-Both predicates are paired with computational twins, and soundness
+The above predicate is paired with computational twins, and soundness
 and completeness connect both.  Here,
 given lists $t$ and $l$, the function \HOLtm{Valid_PileTally_dec1} decides if every first element of each pair in $t$ is a member of $l$.
 \begin{holthmenv}
@@ -562,64 +555,21 @@ Additionally, the function \HOLtm{Valid_PileTally_dec2} determines if each eleme
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec2_def}
 \end{holthmenv}
-We prove that the formal specification \HOLtm{Valid_PileTally} enforces correctness of the function \HOLtm{Valid_PileTally_dec1}.
+We prove that the formal specification \HOLtm{Valid_PileTally}  corresponds with the functions \HOLtm{Valid_PileTally_dec1} and \HOLtm{Valid_PileTally_dec2}. Therefore we ensure that tallies and piles are distinctively allocated to candidates.
 \begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC1}
+\HOLthm[width=80]{CheckerProof.Valid_PileTally_Spec_iff_Valid_PileTally_DEC}
 \end{holthmenv}
-\noindent
-Also the specification \HOLtm{Valid_PileTally} implies correctness of \HOLtm{Valid_PileTally_dec2} witnessed by the theorem below.
-\begin{holthmenv}
-  \HOLthm[width=80]{CheckerProof.PileTally_to_PileTally_DEC2}
-\end{holthmenv}
-Conversely, correctness of the computational definition \HOLtm{Valid_PileTally_dec1} and \HOLtm{Valid_PileTally_dec2} entails their respective specifications.
-Therefore, we obtain a perfect match between the specification and computational condition for tallies and piles to be distinctively allocated to candidates.
 
-For elimination of the candidate with the smallest tally (number of
-first preferences), item 7 of the protocol states that:
-\begin{small}
-\begin{center}
-\begin{minipage}{10cm}
-\emph{choose the candidate with the least amount of votes and exclude
-them from the list of continuing candidates}.
-\end{minipage}
-\end{center}
-\end{small}
 
-\noindent
-We formulate the elimination rule with an additional parameter --
-the candidate $c$ to be eliminated.
-
-\paragraph{Side Conditions.} For correctness of the elimination
-rule,
-we stipulate that
+\noindent\emph{Side Conditions.} The item 7 of the protocol on page 5, specifies when and how a candidate shall be eliminated from the election. It stipulates that
 \begin{itemize}
-  \item the candidate $c$ to be eliminated is indeed a continuing
-  candidate
-  \item the tally of the candidate to be eliminated is minimal.
-  \item all votes are counted, and
-  \item there are no pending transfers.
-\end{itemize}
-
-\noindent
-The fact that the candidate to be removed is indeed the weakest is established
-by another assertion which is part of the side condition.
-
-
-\paragraph{Relation between Premiss and Conclusion.} If candidate
-$c$ is to be eliminated, and their votes are to be transferred to
-the next preference, the data captured by premiss and conclusion
-needs to change in the following way:
-\begin{itemize}
-  \item the set of continuing candidates in the \emph{conclusion} is
-  the same as in the premiss, with the exception that $c$ is no
-  longer continuing
-  \item the ballots counted in favour of $c$ (i.e. those on $c$'s
-  pile) are re-injected into the count, i.e. placed onto the stack
-  of ballots that are to be counted (again).
-\end{itemize}
-
-\noindent
-The predicate \textsf{equal\_except} formally asserts when two lists are equal except for one exact element.
+  \item[a.]  there are empty seats 
+ \item[b.] there are no votes to count at this stage and there are no pending transfer
+\item[c.] determine the candidate $c$ who has the minimal amount of tally
+\item[d.] eliminate the candidate $c$
+ \item[e.] votes of the eliminated candidate $c$ are transferred according to the next preference with the same value.
+ \end{itemize}
+To illustrate how explicit clauses of the protocol are formalised, we explain the way that we have specified item (d) inside HOL. We introduce the predicate \textsf{equal\_except} which formally asserts when two lists are equal except for one exact element.
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
@@ -643,21 +593,29 @@ Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} 
 Having defined the implicit integrity constraints, and the
 explicit side conditions in the definition of \emph{elimination}, we
 can present the formalisation of this rule in HOL as a predicate.
+
+
+The \textsf{ELIM\_CAND} rule specifies what it means to legitimately eliminate a given candidate $c$. It is defined on three kinds of input; a
+candidate, a triple composed of three fixed parameters which are the
+quota, vacancies, and the initial list of candidates, and two
+judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule).  The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. 
+
 \begin{holthmenv}
   \HOLthm[def,width=85]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
 
 
-\noindent
-The \textsf{ELIM\_CAND} rule is defined on three kind of input; a
-candidate, a triple composed of three fixed parameters which are the
-quota, vacancies, and the initial list of candidates, and two
-judgements (the premiss and the conclusion of the rule). Each of the conjuncts corresponds to a condition specified in the item 7 of the protocol, as we already demonstrated for a few cases. \textsf{ELIM\_CAND\_dec} is the computational realisation of the \textsf{ELIM\_CAND}.
+
+Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. Similar to the case of \textsf{equal\_except}, for each of the conjuncts, we define a computational counterpart and prove the equivalence of the the conjunct with its computational realisation. Conjunction of these computational definitions is \textsf{ELIM\_CAND\_dec}, which is the computational equivalent of the predicate \textsf{ELIM\_CAND}.
 \begin{holthmenv}
   \HOLthm[def,width=88]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
-By drawing on the theorems establishing correspondence of conjuncts, we obtain equivalence of the computational \textsf{ELIM\_CAND\_dec} with its specification \textsf{ELIM\_CAND}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules.
+By drawing upon the correspondence established between conjuncts of \textsf{ELIM\_CAND}, and conjuncts of \textsf{ELIM\_CAND\_dec}, we prove that
+\begin{holthmenv}
+  \HOLthm[def,width=85]{CheckerProof.ELIM_CAND_thm}
+\end{holthmenv}
 
+The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules. 
 
 \subsection{The Certificate Verifier}
 
