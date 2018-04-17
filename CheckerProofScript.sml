@@ -1,6 +1,6 @@
 open preamble CheckerSpecTheory CheckerTheory
 open ratTheory
-
+   
 val _ = new_theory "CheckerProof";
 
 val list_MEM_dec_thm = Q.store_thm("list_MEM_dec_thm",
@@ -21,7 +21,7 @@ val EWIN_thm = Q.store_thm("EWIN_thm",
   \\ metis_tac[]);
 
 val HWIN_thm = Q.store_thm("HWIN_thm",
-  `HWIN_dec = HWIN`,
+  `HWIN_dec = HWIN`, 
   simp[FUN_EQ_THM]
   \\ qx_gen_tac`params`
   \\ PairCases_on`params`
@@ -86,7 +86,11 @@ val PileTally_DEC2_IMP_PileTally = Q.store_thm ("PileTally_DEC2_IMP_PileTally",
            >> FULL_SIMP_TAC list_ss [MEM])
               >- FULL_SIMP_TAC list_ss [Valid_PileTally_dec2_def]
               >- rfs [Valid_PileTally_dec2_def]));
-
+   
+val Valid_PileTally_Spec_iff_Valid_PileTally_DEC = Q.store_thm ("Valid_PileTally_Spec_iff_Valid_PileTally_DEC",
+ `!l t. Valid_PileTally t l <=> (Valid_PileTally_dec1 t l) /\ (Valid_PileTally_dec2 t l)`,
+   metis_tac[Valid_PileTally_def,PileTally_DEC1_to_PileTally,PileTally_to_PileTally_DEC1,PileTally_to_PileTally_DEC2,PileTally_DEC2_IMP_PileTally]);
+    
 val REMOVE_ONE_CAND_APPEND = Q.store_thm ("REMOVE_ONE_CAND_APPEND",
  `! l1 l2 (c: cand). (~ MEM c l1) ==> (equal_except_dec c (l1 ++l2) = l1 ++ (equal_except_dec c l2))`,
 
@@ -1248,12 +1252,31 @@ val ELIM_CAND_thm = Q.store_thm("ELIM_CAND_thm",
 val initial_judgement_thm = Q.store_thm("initial_judgement_thm",
   `Initial_Judgement_dec = initial_judgement`,
   rw[FUN_EQ_THM,Initial_Judgement_IMP_TheLogical,Logical_to_Functional_Initial_Judgement,EQ_IMP_THM]);
-
+   
+(*
+val Valid_Step_thm = Q.store_thm ("Valid_Step_thm",
+  `Valid_Step = Valid_Step_Spec`, 
+    rw[FUN_EQ_THM,Valid_Step_def,Valid_Step_Spec_def,TRANSFER_thm,COUNT_thm,
+       ELECT_thm,ELIM_CAND_thm,HWIN_thm,EWIN_thm,EQ_IMP_THM]  
+      >- rw[]   
+      >- rw[] 
+      >- rw[]
+      >- rw[]
+      >- rw[]
+      >- (REPEAT (DISJ2_TAC) >> fs [EXISTS_MEM] >> qexists_tac`c` >> rfs[])
+      >- rw[]
+      >- rw[]         
+      >- rw[]
+      >- rw[]
+      >- rw[]
+      >- (REPEAT (DISJ2_TAC) >> fs[EXISTS_MEM] >> qexists_tac`c` >> rfs[]));
+*)
+ 
 val valid_judgements_thm = Q.store_thm("valid_judgements_thm",
-  `valid_judgements_dec = valid_judgements`,
-  rw[FUN_EQ_THM,valid_judgements_dec_LRC,valid_judgements_def,EQ_IMP_THM] \\  rw[]
-  >- (
-   fs[APPEND_EQ_APPEND] \\ rw[] \\ fs[LRC_APPEND,LRC_def]
+  `valid_judgements_dec = valid_judgements`,    
+  rw[FUN_EQ_THM,valid_judgements_dec_LRC,valid_judgements_def,EQ_IMP_THM] \\ rw[]       
+  >- (  
+   fs[APPEND_EQ_APPEND] \\ rw[] \\ fs[LRC_APPEND,LRC_def] 
    \\ TRY(last_x_assum(assume_tac o Q.AP_TERM`LENGTH`) \\ fs[] \\ NO_TAC)
    \\ TRY (
      qpat_x_assum`Valid_Step _ j0 j1`mp_tac
@@ -1263,14 +1286,14 @@ val valid_judgements_thm = Q.store_thm("valid_judgements_thm",
    \\ simp_tac std_ss [LENGTH,LENGTH_EQ_NUM_compute]
    \\ rw[APPEND_EQ_SING] \\ fs[] \\ rw[] \\ fs[LRC_def] \\ rw[]
    \\ qpat_x_assum`Valid_Step _ j0 _` mp_tac
-   \\ simp[Valid_Step_def,HWIN_thm,EWIN_thm,COUNT_thm,TRANSFER_thm,ELECT_thm,ELIM_CAND_thm,EXISTS_MEM])
-  >- (
-    qmatch_assum_rename_tac`ls ≠ []`
+   \\ simp[Valid_Step_def,HWIN_thm,EWIN_thm,COUNT_thm,TRANSFER_thm,ELECT_thm,ELIM_CAND_thm,EXISTS_MEM]) 
+  >- (    
+    qmatch_assum_rename_tac`ls ≠ []`  
     \\ Q.ISPEC_THEN`ls`FULL_STRUCT_CASES_TAC SNOC_CASES \\ fs[] \\ rw[]
     \\ qexists_tac`HD(l++[Final w])`
     \\ Induct_on`l` \\ rw[LRC_def]
     \\ last_x_assum mp_tac
-    \\ impl_tac
+    \\ impl_tac 
     >- (
       rw[] \\ fs[]
       \\ first_x_assum(qspec_then`h::J0`mp_tac)
@@ -1284,80 +1307,16 @@ val valid_judgements_thm = Q.store_thm("valid_judgements_thm",
     \\ rw[Valid_Step_def,HWIN_thm,EWIN_thm,COUNT_thm,TRANSFER_thm,ELECT_thm,ELIM_CAND_thm,EXISTS_MEM]
     \\ metis_tac[] )
 );
+  
+val Valid_intermediate_judgements_thm = Q.store_thm ("Valid_intermediate_judegments_thm",
+ `Valid_intermediate_judgements = valid_judgements`,  
+   rw[FUN_EQ_THM,valid_judgements_def,Valid_intermediate_judgements_def,Valid_Step_Spec_def]);
+         
+val Check_Parsed_Certificate_matches_with_TheSpec = Q.store_thm ("Check_Parsed_Certificate_matches_with_TheSpec",
+ `! params J. Check_Parsed_Certificate params J = Certificate_Checker_Spec params J`,
 
-(*
-val Elim_dec = Define `
-         (Elim_dec st qu l (j1,j2) c = Elim_cand_dec st qu l c (j1,j2))`;
-
-
-
-val Checker_Aux_dec = Define `
-          (Checker_Aux_dec st qu l ([] : judgement list) = F)
-       /\ (Checker_Aux_dec st qu l (j0::js) =
-              if (empty_list js)
-                          then  (Final_Judgement_dec j0)
-              else if (empty_list (TL js))
-                        then (Hwin qu st (j0,HD js) \/ Ewin qu st (j0,HD js))
-                   else  ((Count_Aux_dec st qu l (j0,HD js))
-                      \/ (Transfer_dec st qu l (j0,HD js))
-                      \/ (Elect_dec st qu l (j0,HD js))
-                      \/ (EXISTS (Elim_dec st qu l (j0,HD js)) l))
-                      /\ (Checker_Aux_dec st qu l js))`;
-
-
-*)
-
-(*
-val Logical_to_computational_checker= Q.store_thm("Logical_to_computatonal_checker",
- `! st qu l J. valid_judgement st qu l J ==> CHECKER_AUX_dec st qu l J`,
-
-  Induct_on `J`
-    >- rw [checker_aux2_def]
-    >- ((REPEAT STRIP_TAC >>
-        `(J = []) \/ (J <> [])` by metis_tac [list_nchotomy])
-           >- (rfs[Checker_Aux2_dec,checker_aux2_def]
-            >> FULL_SIMP_TAC list_ss [LAST_DEF]
-             >> metis_tac [final_judgement,Final_Judgement_dec])
-           >- ((`? j' J'. (J = j'::J')` by metis_tac[list_nchotomy]
-                 >> RW_TAC bool_ss []
-                  >> rw[Checker_Aux2_dec])
-            >- ((rfs[checker_aux2_def]
-             >> first_assum (qspecl_then [`[]`,`J'`,`h`,`j'`] strip_assume_tac)
-              >> `h::j'::J' = [] ++ [h;j'] ++ J'` by EVAL_TAC
-               >> `  (hwin qu st h j')
-                 \/ (ewin qu st h j')
-                 \/ (Count_Aux st qu l h j')
-                 \/ (transfer st qu l h j')
-                 \/ (elect st qu l h j')
-                 \/ (? c. MEM c l /\ elim_cand st qu l c h j')` by metis_tac [])
-                   >- metis_tac [hwin_to_Hwin]
-                   >- metis_tac [ewin_to_Ewin_thm]
-                   >- metis_tac [Count_Aux_IMP_Count_Aux_dec]
-                   >- metis_tac [Logical_transfer_to_Functional_Transfer]
-                   >- metis_tac [Logical_to_Functional_elect]
-                   >- (ASSUME_TAC (INST_TYPE [alpha |-> ``:Cand``] MEM_SPLIT)
-                     >> first_x_assum (qspecl_then [`c`,`l`] strip_assume_tac)
-                       >> `? l1 l2. l = l1 ++ c:: l2` by metis_tac []
-                        >> RW_TAC bool_ss [Elim_dec] >> REPEAT DISJ2_TAC
-                          >> rw [EXISTS_DEF]
-                           >> DISJ2_TAC >> DISJ1_TAC
-                            >> metis_tac [Elim_dec,Logical_elim_to_Functional_Elim]))
-
-
-             >- (rfs[checker_aux2_def]
-              >> first_assum (qspecl_then [`st`,`qu`,`l`] strip_assume_tac)
-               >> `! J0 J1 j0 j1. (j'::J' = J0 ++ [j0;j1] ++ J1) ==>  (hwin qu st j0 j1)
-                                                     \/ (ewin qu st j0 j1)
-                                                     \/ (Count_Aux st qu l j0 j1)
-                                                     \/ (transfer st qu l j0 j1)
-                                                     \/ (elect st qu l j0 j1)
-                                                     \/ (? c. MEM c l /\ elim_cand st qu l c j0 j1)`
-                  by  (REPEAT STRIP_TAC
-                  >> first_assum (qspecl_then [`h::J0`,`J1`,`j0`,`j1`] strip_assume_tac)
-                   >> `h::j'::J' = h::J0 ++ [j0;j1] ++J1` by FULL_SIMP_TAC list_ss[]
-                     >> metis_tac [])
-                       >> metis_tac []))));
-
-*)
-
+  Cases_on `J`
+    >- rw[Check_Parsed_Certificate_def,Certificate_Checker_Spec_def]    
+    >- metis_tac [Check_Parsed_Certificate_def,Certificate_Checker_Spec_def,Valid_intermediate_judgements_thm,valid_judgements_thm,initial_judgement_thm]); 
+  
 val _ = export_theory();
