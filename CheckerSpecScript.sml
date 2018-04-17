@@ -1,5 +1,5 @@
 open preamble
-  
+   
 val _ = new_theory "CheckerSpec";
   
 (* Helper functions that have nothing to do with vote counting *)
@@ -266,6 +266,30 @@ val valid_judgements_def =  Define `
            \/ (ELECT params j0 j1)
            \/ (?c. MEM c (SND(SND params)) /\ ELIM_CAND c params j0 j1)))`;
 
+
+val Valid_Step_Spec_def = Define `
+ Valid_Step_Spec params j0 j1 = 
+          ((HWIN params j0 j1)
+           \/ (EWIN params j0 j1)
+           \/ (COUNT params j0 j1)
+           \/ (TRANSFER params j0 j1)
+           \/ (ELECT params j0 j1)
+           \/ (?c. MEM c (SND(SND params)) /\ ELIM_CAND c params j0 j1))`;
+
+val Valid_intermediate_judgements_def = Define `
+ Valid_intermediate_judgements params J = 
+  ((J <> []) /\ (?w. LAST J = Final w)
+  /\ (! J0 J1 j0 j1.
+       (J = J0 ++ [j0;j1] ++ J1) ==> Valid_Step_Spec params j0 j1))`;
+
+val Certificate_Checker_Spec_def = Define `
+  (Certificate_Checker_Spec params [] ⇔ F) /\
+  (Certificate_Checker_Spec params (first_judgement::rest_judgements) ⇔
+     initial_judgement (SND(SND params)) first_judgement /\
+     Valid_intermediate_judgements params (first_judgement::rest_judgements))`;
+
+ 
+
 (* N.B. A more idiomatic approach might be:
 
 val (valid_step_rules,valid_step_ind,valid_step_cases) = Hol_reln`
@@ -284,8 +308,8 @@ val valid_steps_def = Define`
 (* Valid certificate *)
 
 val valid_certificate_def = Define`
-  valid_certificate ((qu,st,l):params) J ⇔
-    initial_judgement l (HD J) ∧
-    valid_judgements (qu,st,l) J`;
+  valid_certificate params J ⇔
+    initial_judgement (SND (SND params)) (HD J) ∧
+    valid_judgements params J`;
 
 val _ = export_theory();
