@@ -641,29 +641,33 @@ verification of the verifier is considerably
 simpler than that of a fully-fledged implementation, and certificate
 checking is also generally faster than re-computing.
 
-The verification of certificates comprises the following steps.
-We need to validate whether the first
-judgement of the certificate is a valid initial state of the count,
-and whether transitions from one judgement to the next is according to
-one of the rules that define the count.
-We can therefore check whether a transition from one judgement to
-the next is correct by simply considering the disjunction of all
-rules, and similarly obtain a computational version from the
-individual decision procedures associated with the counting rules.
-\begin{holthmenv}
-  \HOLthm[def,width=80]{CheckerSpec.valid_judgements_def}
-\end{holthmenv}
-\noindent
-A valid initial judgement is one
+The verification of certificates comprises two steps.
+ First we need to validate whether the first
+judgement of the certificate is a valid initial state of the count. A valid initial judgement is one
 where candidate's tally is zero, their
 piles are empty, and both the transfer queue and the list of elected candidates
 are both empty as well.
 \begin{holthmenv}
   \HOLthm[width=80,def]{CheckerSpec.initial_judgement_def}
 \end{holthmenv}
-Putting this together with the specification of a valid sequence of judgements, we obtain the specification for a valid certificate:
+\noindent
+Second, we check whether transitions from one judgement to the next is according to
+one of the rules that define the count.
 \begin{holthmenv}
-  \HOLthm[def,width=80]{CheckerSpec.valid_certificate_def}
+  \HOLthm[def,width=80]{CheckerSpec.Valid_Step_Spec_def}
+\end{holthmenv}
+\noindent
+We can therefore check whether a transition from one judgement to
+the next is correct by simply considering the disjunction of all
+rules.
+\begin{holthmenv}
+  \HOLthm[def,width=80]{CheckerSpec.Valid_intermediate_judgements_def}
+\end{holthmenv}
+\noindent
+
+Putting the specification of a valid initial judgement with valid sequence of judgements together, we obtain the specification for a valid certificate:
+\begin{holthmenv}
+  \HOLthm[def,width=80]{CheckerSpec.Valid_Certificate_def}
 \end{holthmenv}
 For checking a formal certificate we therefore first  verify that
 certificate starts at a permissible initial stage. We then
@@ -671,14 +675,19 @@ iteratively
 check that transitions have happened correctly, and that the
 terminating state is a final one where winners are declared.
 
-The above specification of the checker, corresponds to the following computational formal certificate checker.
+
+The above specification of a valid vertificate, corresponds to the following computational formal certificate checker.
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Check_Parsed_Certificate_def}
 \end{holthmenv}
 The correctness of this definition rests on the equivalences we have already established between the specifications and their computational counterparts, namely, \HOLthm[tt]{CheckerProof.initial_judgement_thm} and \HOLthm[tt]{CheckerProof.valid_judgements_thm}.
 Consequently a formal certificate is validated if and only if it is valid according to
-the HOL specification of \HOLtm{valid_certificate}.
-Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation.
+the HOL specification of \HOLtm{Valid_Certificate}.
+{\begin{holthmenv}
+  \HOLthm[def,width=80]{CheckerProof.Check_Parsed_Certificate_iff_Valid_Certificate}
+\end{holthmenv}
+\noindent
+Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation. 
 \section{Translation into CakeML and Code Extraction}
 
 The verified certificate-checking function,
@@ -693,23 +702,30 @@ and obtain a verified executable for
 checking certificates.  Our final theorem about the verifier
 executable is presented at the end of this section.
 
-%\paragraph{Parsing}
-\noindent\emph{Parsing}
+
+\paragraph{Parsing}
+%\noindent\emph{Parsing}
 The input to the verifier is a textual certificate file, in a format similar to Figure~\ref{fig;figure}.
 We specify this file format indirectly, by defining an executable specification of a certificate parser.
-Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line.
-Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, below, that parses lines from the file then calls \HOLtm{Check_Parsed_Certificate} to do the verification:
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}
+Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line. 
+Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, above, that parses lines from the file then calls \HOLtm{Check_Parsed_Certificate} to do the verification.
 
 %\paragraph{Translation into CakeML and I/O Wrapper}
 \noindent\emph{Translation into CakeML and I/O Wrapper}
 Using prior work on proof-producing synthesis~\cite{JFP14} we can automatically synthesise an implementation of the function \HOLtm{Check_Certificate} in the programming language CakeML.
 The synthesis tool for CakeML produces a theorem relating the semantics of the synthesised program back to the logical function.
 However, the result is a \emph{pure} function that expects the lines of a file as input.
-To actually open the file and read lines from it, we write an impure wrapper (making use of the CakeML Basis Library) around the pure function, and verify the wrapper using Characteristic Formulae for CakeML, as described by Gu\'eneau et al.~\cite{DBLP:conf/esop/GueneauMKN17}.
-The result is a complete CakeML program whose I/O semantics is verified to implement \HOLtm{Check_Certificate} on lines from standard input.
+To actually open the file and read lines from it, we write the impure wrapper \HOLtm{check_count} (making use of the CakeML Basis Library) around the pure function, and verify the wrapper using Characteristic Formulae for CakeML, as described by Gu\'eneau et al.~\cite{DBLP:conf/esop/GueneauMKN17}.
+The result is a complete CakeML program whose I/O semantics is verified, witnessed by the theorem \HOLtm{check_count_compiled} below, to implement \HOLtm{Check_Certificate} on lines from standard input.
+
+
+To elaborate further on the above step, the impure wrapper \HOLtm{check_count} calls two impure functions \HOLtm{parse_line} and \HOLtm{loop}. The former, calls I/O functions to read one line at a time from the concrete certificate given as lines on the standard input  and parse it. It comprises  two phases; one for the header of the certificate file consisting of the quota, seats number, and initial list of candidates, and the other is for parsing judgement lines. If the parsing fails due to malformedness of a line, the parser messages the appropriate error on the standard output and the line number. However, if it succeeds, the parsed line is fed to the \HOLtm{loop} function to check if transitions occurred from two consecutive parsed judgement lines is a valid step. The parsing and checking of judgement lines continues until either all steps are verified as correct, or an incorrect step is encountered. The following theorem asserts that the \HOLtm{loop} function returns the correct output \HOLtm{NONE} if and only if the initial line of judgements in the certificate file is indeed valid and all steps taken to move from one judgement line to its successor are correct. 
+\begin{holthmenv}
+  \HOLthm[def,width=90]{check_countProg.loop_thm}
+\end{holthmenv}
 
 %\paragraph{Compilation in Logic}
 \noindent\emph{Compilation in Logic}
