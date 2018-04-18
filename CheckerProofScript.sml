@@ -1312,11 +1312,11 @@ val Valid_intermediate_judgements_thm = Q.store_thm ("Valid_intermediate_judegme
  `Valid_intermediate_judgements = valid_judgements`,  
    rw[FUN_EQ_THM,valid_judgements_def,Valid_intermediate_judgements_def,Valid_Step_Spec_def]);
          
-val Check_Parsed_Certificate_matches_with_TheSpec = Q.store_thm ("Check_Parsed_Certificate_matches_with_TheSpec",
- `! params J. Check_Parsed_Certificate params J = Certificate_Checker_Spec params J`,
+val Check_Parsed_Certificate_iff_Valid_Certificate = Q.store_thm ("Check_Parsed_Certificate_iff_Valid_Certificate",
+ `! params J. Check_Parsed_Certificate params J = Valid_Certificate params J`,
 
   Cases_on `J`
-    >- rw[Check_Parsed_Certificate_def,Certificate_Checker_Spec_def]    
-    >- metis_tac [Check_Parsed_Certificate_def,Certificate_Checker_Spec_def,Valid_intermediate_judgements_thm,valid_judgements_thm,initial_judgement_thm]); 
+    >- rw[Check_Parsed_Certificate_def,Valid_Certificate_def]    
+    >- metis_tac [Check_Parsed_Certificate_def,Valid_Certificate_def,Valid_intermediate_judgements_thm,valid_judgements_thm,initial_judgement_thm]); 
   
 val _ = export_theory();
