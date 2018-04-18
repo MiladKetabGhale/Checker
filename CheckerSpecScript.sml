@@ -282,9 +282,9 @@ val Valid_intermediate_judgements_def = Define `
   /\ (! J0 J1 j0 j1.
        (J = J0 ++ [j0;j1] ++ J1) ==> Valid_Step_Spec params j0 j1))`;
 
-val Certificate_Checker_Spec_def = Define `
-  (Certificate_Checker_Spec params [] ⇔ F) /\
-  (Certificate_Checker_Spec params (first_judgement::rest_judgements) ⇔
+val Valid_Certificate_def = Define `
+  (Valid_Certificate params [] ⇔ F) /\
+  (Valid_Certificate params (first_judgement::rest_judgements) ⇔
      initial_judgement (SND(SND params)) first_judgement /\
      Valid_intermediate_judgements params (first_judgement::rest_judgements))`;
 
@@ -305,11 +305,12 @@ val valid_steps_def = Define`
     ∃st w. LRC (valid_step params) J (NonFinal st) (Final w)`;
 *)
 
-(* Valid certificate *)
+(* Valid certificate
 
 val valid_certificate_def = Define`
   valid_certificate params J ⇔
     initial_judgement (SND (SND params)) (HD J) ∧
     valid_judgements params J`;
+*)
 
 val _ = export_theory();
