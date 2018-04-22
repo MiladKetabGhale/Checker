@@ -98,13 +98,8 @@ announced result is correct on the basis of the published ballots
 \cite{Kremer:2010:EVE}) has long been recognised as being
 central,
 both for guaranteeing  correctness, and building trust,
-in electronic elections. For vote-counting (on which we focus in
-this paper), verifiability means that every stakeholder, or indeed
-any
-member of the general public, has the means to check that the
-computation
-of election winners is correct, independently of how the result has
-been produced.
+in electronic elections. This notion has three subproperties; verifiability of casting votes as intended by voters, recording votes as intended, and counting votes as recorded.  The aim of this paper is only to address the last property, namely \emph{verifiability of the tallying process}. 
+ 
 
 The approach presented here combines the concept of certifying
 algorithms \cite{DBLP:journals/csr/McConnellMNS11} with formal specification and
@@ -166,7 +161,7 @@ implies that the election protocol has been carried out in
 accordance to the specification.
 
 
-In the fourth, and last step, we synthesise an implementation of  the verifier and produce a proof this implementation's correctness.  This is
+In the fourth, and last step, we synthesise an implementation of  the verifier and produce a proof of this implementation's correctness.  This is
 achieved by using proof-producing synthesis~\cite{JFP14} of CakeML code from the HOL definitions, then using the verified CakeML compiler~\cite{DBLP:conf/icfp/TanMKFON16} to produce the machine code.
 To perform computation on an actual certificate, we define the formal
 syntax for certificates, and a parser in HOL, that we combine with the
@@ -371,23 +366,32 @@ The fourth line is the election result, and the remainder of the
 certificate consists of the intermediate steps that lead to this
 outcome.
 \begin{small} \begin{figure}[b]
-\begin{tabular}{c@{\hspace{2cm}}c} \AxiomC{\tiny 133\%50} \noLine
+\begin{tabular}{c@{\hspace{2cm}}c} 
+\AxiomC{\tiny 8/3} \noLine
+
 \UnaryInfC{\tiny 2} \noLine \UnaryInfC{\tiny $[A,B,C]$} \noLine
+
 \UnaryInfC{\scriptsize [A,C]} \RightLabel{\tiny hwin}
-\UnaryInfC{\tiny [$b_4$,([B,C],0.11)]]; A[3\%1] B[111\%100] C[133\%100]; A[] B[]
-C[$b_{5}$,([C],11\%),([C,B],11\%100),([C],11\%100)]; []; [A]; [C]}
-\RightLabel{\tiny elim} \UnaryInfC{\tiny []; A[3\%1] B[111\%100]
-C[122\%100], A[] B[$b_4$,([B,C],11\%100)]
-C[$b_5$,([C],11\%100),([C,B],113\%1000)]; []; [A]; [B,C]}
+
+\UnaryInfC{\tiny [$b_4$,([A,B,C],1/9)]]; A[3/1] B[10/9] C[11/9]; A[] B[]
+C[$b_{5}$,([C],1/9),([C,B],1/9),([C],11/100)]; []; [A]; [C]}
+
+\RightLabel{\tiny elim} \UnaryInfC{\tiny []; A[3/1] B[10/9]
+C[11/9], A[] B[$b_4$,([A,B,C],1/9)]
+C[$b_5$,([A,C],1/9),([A,C,B],1/9)]; []; [A]; [B,C]}
+
 \RightLabel{\tiny count} \UnaryInfC{\tiny
-[([A,C],11\%100),([A,B,C],11\%100),([A,C,B],11\%100)]; A[3\%1]
-B[1\%1] C[1\%1]; A[] B[$b_4$] C[$b_5$]; []; [A]; [B,C]}
-\RightLabel{\tiny transfer} \UnaryInfC{\tiny []; A[3\%1] B[1\%1]
-C[1\%1]; A[([A,C],11\%100),([A,B,C],11\%100),([A,C,B],11\%100)]
+[([A,C],1/9),([A,B,C],1/9),([A,C,B],1/9)]; A[3/1]
+B[1/1] C[1/1]; A[] B[$b_4$] C[$b_5$]; []; [A]; [B,C]}
+
+\RightLabel{\tiny transfer} \UnaryInfC{\tiny []; A[3/1] B[1/1]
+C[1/1]; A[([A,C],1/9),([A,B,C],1/9),([A,C,B],1/9)]
 B[$b_4$] C[$b_5$]; [A]; [A]; [B,C]} \RightLabel{\tiny elect}
-\UnaryInfC{\tiny []; A[3\%1] B[1\%1] C[1\%1]; A[$b_1$,$b_2$,$b_3$]
+
+\UnaryInfC{\tiny []; A[3/1] B[1/1] C[1/1]; A[$b_1$,$b_2$,$b_3$]
 B[$b_4$] C[$b_5$]; []; []; [A,B,C]} \RightLabel{\tiny count}
-\UnaryInfC{\tiny ba; A[0\%1] B[0\%1] C[0\%51]; A[] B[] C[]; []; [];
+
+\UnaryInfC{\tiny ba; A[0/1] B[0/1] C[0/1]; A[] B[] C[]; []; [];
 [A,B,C]} \DisplayProof \end{tabular} \caption{Example
 Certificate} \label{fig;figure} \end{figure} \end{small}
 
@@ -416,9 +420,9 @@ C receives $b_5$. Tallies are updated so that tally of A becomes
 $3$, and B and C each reach $1$.
 \item[elect.] Candidate A exceeds the quota, and is elected. The
 transfer value of all ballots counted in $A$'s favour  changes to
-$11/100$ according to formula (\ref{eq:tv}). The updated pile of A
+$1/9$ according to formula (\ref{eq:tv}). The updated pile of A
 reflects this change in transfer values, and now contains
-$([A,C],11/100)$, $([A,B,C],11/100)$, and $([A,C,B],11/100)$. The data
+$([A,C],1/9)$, $([A,B,C],1/9)$, and $([A,C,B],1/9)$. The data
 associated with $B$ and $C$ doesn't change.
 \item[transfer.] As there are vacancies and no one else has reached
 or exceeded the quota, the surplus of A is dealt with. The list of
@@ -427,9 +431,9 @@ transfer values updated in the previous step).
 \item[count.] As there are uncounted ballots (again), tallies are
 updated. As $A$ is no longer a continuing candidate, the votes are
 counted in favour of the highest-ranked continuing candidate.
-That is, C receives  two new votes (each of value $11/100$) which
-are $([C],11/100)$ and $([C,B],113/1000)$. Candidate B receives one vote,
-which is $([B,C],11/1000)$.
+That is, C receives  two new votes (each of value $1/9$) which
+are $([A,C],1/9)$ and $([A,C,B],1/9)$. Candidate B receives one vote,
+which is $([A,B,C],1/9)$.
 \item[elim.] No continuing candidate has reached the quota, one
 vacancy is still unfilled, and all ballots are (again) counted.
 Hence the candidate with the lowest tally is eliminated (in this
@@ -509,7 +513,7 @@ must have only one tally and one pile at every non-final judgement.
 
 Crucially, the specification of the counting rules is purely
 \emph{descriptive}. To effectively check certificates, we augment
-each (specifiaction of a) rule with an actual decision procedure
+each (specification of a) rule with an actual decision procedure
 that, given two judgements, returns either true or false, depending
 on whether the rule is applicable or not. The decision procedure and
 the formal specification are connected by (formal) proofs of
@@ -722,7 +726,7 @@ To actually open the file and read lines from it, we write the impure wrapper \H
 The result is a complete CakeML program whose I/O semantics is verified, witnessed by the theorem \HOLtm{check_count_compiled} below, to implement \HOLtm{Check_Certificate} on lines from standard input.
 
 
-To elaborate further on the above step, the impure wrapper \HOLtm{check_count} calls two impure functions \HOLtm{parse_line} and \HOLtm{loop}. The former, calls I/O functions to read one line at a time from the concrete certificate given as lines on the standard input  and parse it. It comprises  two phases; one for the header of the certificate file consisting of the quota, seats number, and initial list of candidates, and the other is for parsing judgement lines. If the parsing fails due to malformedness of a line, the parser messages the appropriate error on the standard output and the line number. However, if it succeeds, the parsed line is fed to the \HOLtm{loop} function to check if transitions occurred from two consecutive parsed judgement lines is a valid step. The parsing and checking of judgement lines continues until either all steps are verified as correct, or an incorrect step is encountered. The following theorem asserts that the \HOLtm{loop} function returns the correct output \HOLtm{NONE} if and only if the initial line of judgements in the certificate file is indeed valid and all steps taken to move from one judgement line to its successor are correct. 
+To elaborate further on the above step, the impure wrapper \HOLtm{check_count} calls two impure functions \HOLtm{parse_line} and \HOLtm{loop}. The former, calls I/O functions to read one line at a time from the concrete certificate given as lines on the standard input  and parse it. It comprises  two phases; one for the header of the certificate file consisting of the quota, seats number, and initial list of candidates, and the other is for parsing judgement lines. If the parsing fails due to malformedness of a line, the parser messages the appropriate error on the standard output with the line number included. However, if it succeeds, the parsed line is fed to the \HOLtm{loop} function to check if the transition occurred from two consecutive parsed judgement lines is a valid step. The parsing and checking of judgement lines continues until either all steps are verified as correct, or an incorrect step is encountered. The following theorem asserts that the \HOLtm{loop} function returns the correct output \HOLtm{NONE} if and only if the initial line of judgements in the certificate file is indeed valid and all steps taken to move from one judgement line to its successor are correct. 
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.loop_thm}
 \end{holthmenv}
@@ -773,13 +777,11 @@ We also evaluated the verifier on certificates obtained through
 randomly generated ballots. We vary two parameters: the number of
 ballots and the size of each ballot. Figure~\ref{ref;figure3} shows
 the results on certificates where the number of candidates is fixed
-at 20, vacancies are 5, and the length of each ballot is 12. We
-observe quadratic runtime behaviour in the number of ballots. Also
+at 20, vacancies are 5, and the length of each ballot is 12. Also
 we keep the number of ballots, vacancies, and length of each ballot
 fixed at 100000, 1, and 10 respectively, in order to see the
 effect of increase in the length of each ballot
-(Figure~\ref{ref;figure4}). The complexity of the program appears to
-be linear in this dimension.
+(Figure~\ref{ref;figure4}). 
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
@@ -824,7 +826,7 @@ districts for the year 2012 are valid. Also the certificate of
 Molonglo electorate 2008 is verified as correct. However, the two
 electorates of Brindabella and Ginninderra 2008, despite declaring
 the final winners correctly, were \emph{invalid} as an error occurs in an
-intermediate transition. 
+intermediate transition on line 6 in both certificates. 
 %In both cases the ckecker invalidates the
 %transition from  line 5 to line 6.
 
@@ -851,14 +853,10 @@ intermediate transition.
 %\caption{Unverified Haskell program with ACT elections}
 %\label{ref;figure5}
 %\end{figure}
-
-The error message informs us that (a) the computation carried out by
-the unverified Haskell program on the certificate of Brindabella
-2008 is invalid, and (b) where to look for possibly debugging the
-program. Based on the aforementioned error message, we only need to
+Based on the aforementioned error message, we only need to
 inspect a very small part of the certificate. Upon closer
 inspection, we have uncovered a subtle error in the implementation
-of the elimination rule 
+of the elimination rule. 
 On the other hand, the same program successfully (and correctly) computes election
 results of other districts which substantiates the subtlety of the
 error.
@@ -867,13 +865,8 @@ protocol and hence their implementation, we advocate that vote
 counting be carried out in a certified way, with a minimal trust
 base such as demonstrated in this paper.
 \section{Related Work}
-While there is prior work that combines theorem proving with
-certified computation, we are not aware of any approach where this
-is carried out in the context of electronic voting. Orthogonally,
-while there are cerfifying algorithms for vote
-counting~\cite{DBLP:conf/ausai/PattinsonS15,DBLP:conf/itp/PattinsonT17,DBLP:conf/voteid/GhaleGP17}, none of
-them  are
-accompanied by any verified checker.
+Universal verifiability requires an election protocol to provide any member of the public with means to verify that the end result of the election held is correct despite (possible) presence of security vulnerabilities, dishonesty in vote registration, manipulation of registered votes during casting, or mistakes in computing the tallies. To satisfy this notion, the protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that meet their desired verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. In some cases, even though an implementation exists, there is no proof as why the informal verifiability algorithm correctly is realised by the impplementation~\cite{DBLP:conf/esorics/CortierGGI14}. This happens because the algorithm is presented on paper, rather than in a formal syntax, and then encoded in environment of some programming laguage, such as Python,  without any formal demonstration of connections between them. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. The conditions mainly require correspondence between elements of the list of ballots cast and the list of recorded ones (by some zero-knowledge proofs) and that the pulicly announced result match with the tally test output. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. As a result, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.   
+
 
 
 
@@ -905,19 +898,16 @@ With the help of the VCC
 tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, pre- and
 postconditions are generated that are syntactically generalized
 syntactically and discharged in the Isabelle 
-theorem prover to be discharged. Even
-though this method introduces a uniform platform for dealing with
-certifying algorithms, the user has to trust the VCC tool, and there
+theorem prover to be discharged. The user has to trust the VCC tool, and there
 is duplication of effort in that one has to generalise the
 conditions imposed by the VCC and then implement them manually in
-Isabella to prove. To ameliorate this disadvantage, Noschinski et
+Isabelle to prove. To ameliorate this disadvantage, Noschinski et
 al~\cite{DBLP:conf/nfm/NoschinskiRM14} replace the intermediate
 step where VCC is invoked by the
 AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which
 provably correctly translates (part of) the C language into Isabelle in
 a semantic preserving manner. Although the latter method is much
-superior in the degree of the verification achieved, one can not
-guarantee that the machine code behaves in the same way as its
+superior in the degree of the verification achieved, one can not promise that the machine code behaves in the same way as its
 top-level C implementation.
 
 \section{Discussion and Conclusion}
