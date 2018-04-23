@@ -133,8 +133,8 @@ val ELIM_CAND_def = Define `
      /\ equal_except c nh h
      /\ (nba = get_cand_pile c p)
      /\ MEM (c,[]) np
-     /\ (!d'. ((d' <> c) ==> (!l. (MEM (d',l) p ==> MEM (d',l) np)
-                               /\ (MEM (d',l) np ==> MEM (d',l) p))))
+     /\ (!d'. ((d' <> c) ==>
+         (!l. (MEM (d',l) p ==> MEM (d',l) np) /\ (MEM (d',l) np ==> MEM (d',l) p))))
      /\ (j2 = NonFinal (nba, t, np, [], e, nh))`;
 
 (* TRANSFER rule *)
