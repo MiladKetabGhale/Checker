@@ -189,21 +189,22 @@ Australia.
 Single Transferable Vote is a preferential voting scheme that is
 used in multi-seat constituencies. Voters rank (possibly
 a subset of) candidates by assigning numerical preferences to
-candidates as in
-the ballot on the right, where no two candidates may be given the 
+candidates 
+%as in the ballot on the right, 
+where no two candidates may be given the 
 same preference. This allows us to represent ballots as duplicate
 free lists of candidates where the list order reflects the
 preference order.
-\begin{wrapfigure}{r}[0cm]{0.4\textwidth}
-  \begin{center}
-    %\raisebox{0pt}[-1cm]
-    \raisebox{0pt}[\dimexpr\height-3.0\baselineskip\relax]
-    {\includegraphics[width=0.37\textwidth]{ballot.png}}
-    \vspace*{-12ex}
-    %\raisebox{0pt}[\dimexpr\height-8.5\baselineskip\relax]{xx}
-    %\includegraphics[width=4cm]{ballot.png}
-  \end{center}
-\end{wrapfigure}
+%\begin{wrapfigure}{r}[0cm]{0.4\textwidth}
+%  \begin{center}
+    %%\raisebox{0pt}[-1cm]
+%    \raisebox{0pt}[\dimexpr\height-3.0\baselineskip\relax]
+%    {\includegraphics[width=0.37\textwidth]{ballot.png}}
+%    \vspace*{-12ex}
+    %%\raisebox{0pt}[\dimexpr\height-8.5\baselineskip\relax]{xx}
+    %%\includegraphics[width=4cm]{ballot.png}
+%  \end{center}
+%\end{wrapfigure}
 
 
 Each election defines a \emph{quota}, i.e. a minimal set of votes
@@ -520,7 +521,6 @@ the formal specification are connected by (formal) proofs of
 soundess and completeness, as shown in the figure below.
 
 \includegraphics[scale=0.35]{spec-dec-cropped.pdf}
-
 \noindent
 Here, \emph{soundness} refers to the fact that the decision
 procedure only stipulates that a rule has been correctly applied if
@@ -545,26 +545,32 @@ counted in their favour). Therefore, if a judgement in a certificate
 maliciously allocates more than one tally to a single candidate, the
 bug is detected and the certificate rejected as invalid.  We express
 this condition as follows.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
+\end{small}
 \noindent
 The above predicate is paired with computational twins, and soundness
 and completeness connect both.  Here,
 given lists $t$ and $l$, the function \HOLtm{Valid_PileTally_dec1} decides if every first element of each pair in $t$ is a member of $l$.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec1_def}
 \end{holthmenv}
+\end{small}
 Additionally, the function \HOLtm{Valid_PileTally_dec2} determines if each element of $l$ appears as the first component of a pair in $t$.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec2_def}
 \end{holthmenv}
+\end{small}
 We prove that the formal specification \HOLtm{Valid_PileTally}  corresponds with the functions \HOLtm{Valid_PileTally_dec1} and \HOLtm{Valid_PileTally_dec2}. Therefore we ensure that tallies and piles are distinctively allocated to candidates.
+\begin{small}
 \begin{holthmenv}
 \HOLthm[width=80]{CheckerProof.Valid_PileTally_Spec_iff_Valid_PileTally_DEC}
 \end{holthmenv}
-
-
+\end{small}
 \noindent\emph{Side Conditions.} The item 7 of the protocol on page 5, specifies when and how a candidate shall be eliminated from the election. It stipulates that
 \begin{itemize}
   \item[a.]  there are empty seats 
@@ -574,25 +580,32 @@ We prove that the formal specification \HOLtm{Valid_PileTally}  corresponds with
  \item[e.] votes of the eliminated candidate $c$ are transferred according to the next preference with the same value.
  \end{itemize}
 To illustrate how explicit clauses of the protocol are formalised, we explain the way that we have specified item (d) inside HOL. We introduce the predicate \textsf{equal\_except} which formally asserts when two lists are equal except for one exact element.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
+\end{small}
 The computational twin of this definition decides whether
 two list match with the exception of one element.  This is the
 function \textsf{equal\_except\_dec}.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.equal_except_dec_def}
 \end{holthmenv}
+\end{small}
 We formally establish that this function implements
 the specification given by the \textsf{equal\_except} predicate.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.EQE_REMOVE_ONE_CAND}
 \end{holthmenv}
+\end{small}
 Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} is unique.
+\begin{small}
 \begin{holthmenv}
   \HOLthm{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
-
+\end{small}
 \noindent
 Having defined the implicit integrity constraints, and the
 explicit side conditions in the definition of \emph{elimination}, we
@@ -603,23 +616,18 @@ The \textsf{ELIM\_CAND} rule specifies what it means to legitimately eliminate a
 candidate, a triple composed of three fixed parameters which are the
 quota, vacancies, and the initial list of candidates, and two
 judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule).  The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. 
-
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=85]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
-
-
-
+\end{small}
 Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. Similar to the case of \textsf{equal\_except}, for each of the conjuncts, we define a computational counterpart and prove the equivalence of the the conjunct with its computational realisation. Conjunction of these computational definitions is \textsf{ELIM\_CAND\_dec}, which is the computational equivalent of the predicate \textsf{ELIM\_CAND}.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=88]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
-By drawing upon the correspondence established between conjuncts of \textsf{ELIM\_CAND}, and conjuncts of \textsf{ELIM\_CAND\_dec}, we prove that
-\begin{holthmenv}
-  \HOLthm[def,width=85]{CheckerProof.ELIM_CAND_thm}
-\end{holthmenv}
-
-The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules. 
+\end{small}
+By drawing upon the correspondence established between conjuncts of the elimination specification and computational counterpart, we prove that  \HOLthm{CheckerProof.ELIM_CAND_thm}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules. 
 
 \subsection{The Certificate Verifier}
 
@@ -630,18 +638,13 @@ perfect sense for a \emph{deterministic} program, voting protocols
 generally employ tie-breaking techniques that lead to
 non-determinism. In the case of STV, this for example applies when
 two candidates are tied for exclusion where it is permissible to
-eliminate \emph{either} of the candidates.
-
-From the perspective of certified computation, this is a non-issue,
+eliminate \emph{either} of the candidates. From the perspective of certified computation, this is a non-issue,
 as the certificate simply records which choice has been made (and
 why this choice is permissible). Compared to simply re-computing,
 the verification of a certificate provides another significant
 advantage: in case of diverging results, we gain information
 on precisely what step of the (incorrect) computation is to blame
-for the wrong result.
-
-Computationally, the additional advantage is simplicity and speed:  the
-verification of the verifier is considerably
+for the wrong result. Computationally, the additional advantage is simplicity and speed:  the verification of the verifier is considerably
 simpler than that of a fully-fledged implementation, and certificate
 checking is also generally faster than re-computing.
 
@@ -651,45 +654,53 @@ judgement of the certificate is a valid initial state of the count. A valid init
 where candidate's tally is zero, their
 piles are empty, and both the transfer queue and the list of elected candidates
 are both empty as well.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[width=80,def]{CheckerSpec.initial_judgement_def}
 \end{holthmenv}
+\end{small}
 \noindent
 Second, we check whether transitions from one judgement to the next is according to
 one of the rules that define the count.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_Step_Spec_def}
 \end{holthmenv}
+\end{small}
 \noindent
 We can therefore check whether a transition from one judgement to
 the next is correct by simply considering the disjunction of all
 rules.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_intermediate_judgements_def}
 \end{holthmenv}
+\end{small}
 \noindent
-
 Putting the specification of a valid initial judgement with valid sequence of judgements together, we obtain the specification for a valid certificate:
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_Certificate_def}
 \end{holthmenv}
+\end{small}
 For checking a formal certificate we therefore first  verify that
 certificate starts at a permissible initial stage. We then
 iteratively 
 check that transitions have happened correctly, and that the
-terminating state is a final one where winners are declared.
-
-
-The above specification of a valid vertificate, corresponds to the following computational formal certificate checker.
+terminating state is a final one where winners are declared. The above specification of a valid vertificate, corresponds to the following computational formal certificate checker.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Check_Parsed_Certificate_def}
 \end{holthmenv}
+\end{small}
 The correctness of this definition rests on the equivalences we have already established between the specifications and their computational counterparts, namely, \HOLthm[tt]{CheckerProof.initial_judgement_thm} and \HOLthm[tt]{CheckerProof.valid_judgements_thm}.
 Consequently a formal certificate is validated if and only if it is valid according to
 the HOL specification of \HOLtm{Valid_Certificate}.
-{\begin{holthmenv}
+\begin{small}
+\begin{holthmenv}
   \HOLthm[def,width=80]{CheckerProof.Check_Parsed_Certificate_iff_Valid_Certificate}
 \end{holthmenv}
+\end{small}
 \noindent
 Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation. 
 \section{Translation into CakeML and Code Extraction}
@@ -711,9 +722,11 @@ executable is presented at the end of this section.
 %\noindent\emph{Parsing}
 The input to the verifier is a textual certificate file, in a format similar to Figure~\ref{fig;figure}.
 We specify this file format indirectly, by defining an executable specification of a certificate parser.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}
+\end{small}
 Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line. 
 Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, above, that parses lines from the file then calls \HOLtm{Check_Parsed_Certificate} to do the verification.
 
@@ -750,6 +763,7 @@ The conclusion of the theorem concerns the semantics (\HOLtm{machine_sem}) of ex
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
 Legislative Assembly elections in the Australian Capital Territory for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
+\begin{small}
 \begin{figure}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
@@ -771,7 +785,7 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \caption{ACT Legislative Assembly 2008 and 2012}
 \label{ref;figure2}
 \end{figure}
-
+\end{small}
 \noindent
 We also evaluated the verifier on certificates obtained through
 randomly generated ballots. We vary two parameters: the number of
@@ -782,6 +796,7 @@ we keep the number of ballots, vacancies, and length of each ballot
 fixed at 100000, 1, and 10 respectively, in order to see the
 effect of increase in the length of each ballot
 (Figure~\ref{ref;figure4}). 
+\begin{small}
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
@@ -813,9 +828,7 @@ $18$&$180.5$&$325$\\
 \label{ref;figure4}
 \end{minipage}
 \end{figure}
-
-
-
+\end{small}
 \noindent
 We have also implemented the protocol in an unverified certifying
 Haskell program. The unverified program was then tested on
@@ -865,7 +878,8 @@ protocol and hence their implementation, we advocate that vote
 counting be carried out in a certified way, with a minimal trust
 base such as demonstrated in this paper.
 \section{Related Work}
-Universal verifiability requires an election protocol to provide any member of the public with means to verify that the end result of the election held is correct despite (possible) presence of security vulnerabilities, dishonesty in vote registration, manipulation of registered votes during casting, or mistakes in computing the tallies. To satisfy this notion, the protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that meet their desired verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. In some cases, even though an implementation exists, there is no proof as why the informal verifiability algorithm correctly is realised by the impplementation~\cite{DBLP:conf/esorics/CortierGGI14}. This happens because the algorithm is presented on paper, rather than in a formal syntax, and then encoded in environment of some programming laguage, such as Python,  without any formal demonstration of connections between them. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. The conditions mainly require correspondence between elements of the list of ballots cast and the list of recorded ones (by some zero-knowledge proofs) and that the pulicly announced result match with the tally test output. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. As a result, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.   
+%Universal verifiability requires an election protocol to provide any member of the public with means to verify that the end result of the election held is correct despite (possible) presence of security vulnerabilities, dishonesty in vote registration, manipulation of registered votes during casting, or mistakes in computing the tallies. 
+To satisfy Universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that meet their desired verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. In some cases, even though an implementation exists, there is no proof as why the informal verifiability algorithm correctly is realised by the impplementation~\cite{DBLP:conf/esorics/CortierGGI14}. This happens because the algorithm is presented on paper, rather than in a formal syntax, and then encoded in environment of some programming laguage, such as Python,  without any formal demonstration of connections between them. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. The conditions mainly require correspondence between elements of the list of ballots cast and the list of recorded ones (by some zero-knowledge proofs) and that the pulicly announced result match with the tally test output. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. As a result, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.   
 
 
 
@@ -906,23 +920,12 @@ al~\cite{DBLP:conf/nfm/NoschinskiRM14} replace the intermediate
 step where VCC is invoked by the
 AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which
 provably correctly translates (part of) the C language into Isabelle in
-a semantic preserving manner. Although the latter method is much
-superior in the degree of the verification achieved, one can not promise that the machine code behaves in the same way as its
-top-level C implementation.
+a semantic preserving manner. Nonetheless one has to trust that the machine code behaviour correspondes to its top-level C encoding.
 
 \section{Discussion and Conclusion}
-Correct, publicly verifiable, transparent
-election count is a key constituent of establishing trustworthiness
-in election outcomes. We have combined
-tools of theorem proving with certification techniques to accomplish this task in
-a cost-effective way. Our implementation strives for the best clarity in encoding, precision
-in formulation, and modularity in implementation so that it can be taken as a
-framework for verifying STV election results down to machine level.
+%Correct, publicly verifiable, transparent election count is a key constituent of establishing trustworthiness in election outcomes. We have combined tools of theorem proving with certification techniques to accomplish this task in a cost-effective way. Our implementation strives for the best clarity in encoding, precision in formulation, and modularity in implementation so that it can be taken as a framework for verifying STV election results down to machine level.
 
-
-
-The framework introduced is implemented in the HOL theorem prover
-and CakeML verified compiler. Separation of program from proofs
+The framework introduced, aims at addressing verification of cast-as-recorded subproperty of the universal verifability. Verifying other parts of a protocol falls outside the focus of the current work. However, e-voting systems which accommodate STV schemes can perfectly employ our metohd together with their cryptography tools to fully satisfy expectations of  universally verifying tallying process. Our framework is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs
 offered in HOL environment makes our formalisation clear so that
 external scrutineers may simply examine the specification of the
 frame work to understand what it does, rather than necessarily
