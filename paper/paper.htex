@@ -491,11 +491,11 @@ of the equality type class which we use later on in specification
 and reasoning about counting rules. Additionally, this formulation
 reduces the gap between an actual certificate and its abstract
 syntactic representation which we refer to as a \emph{formal
-certificate} that is simply a list of judgements.
+certificate}. 
 
 
 \noindent
-As a certificate consists of a sequence of judgements, each of
+As a (formal) certificate consists of a sequence of judgements, each of
 which represents a state of the count, we need to verify the
 correctness of the transitions between successive judgements.
 Each rule consists of three main components:
@@ -624,12 +624,15 @@ can present the formalisation of this rule in HOL as a predicate.
 The \textsf{ELIM\_CAND} rule specifies what it means to legitimately eliminate a given candidate $c$. It is defined on three kinds of input; a
 candidate, a triple composed of three fixed parameters which are the
 quota, vacancies, and the initial list of candidates, and two
-judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule).  The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. 
+judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule). 
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=85]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
 \end{small}
+ The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. 
+
+
  Similar to the case of \textsf{equal\_except}, for each of the conjuncts, we define a computational counterpart and prove the equivalence of the the conjunct with its computational realisation. Conjunction of these computational definitions is \textsf{ELIM\_CAND\_dec}, which is the computational equivalent of the predicate \textsf{ELIM\_CAND}.
 \begin{small}
 \begin{holthmenv}
@@ -748,11 +751,12 @@ To actually open the file and read lines from it, we write the impure wrapper \H
 The result is a complete CakeML program whose I/O semantics is verified, witnessed by the theorem \HOLtm{check_count_compiled} below, to implement \HOLtm{Check_Certificate} on lines from standard input.
 
 
-To elaborate further on the above step, the impure wrapper \HOLtm{check_count} calls two impure functions \HOLtm{parse_line} and \HOLtm{loop}. The former, calls I/O functions to read one line at a time from the concrete certificate given as lines on the standard input  and parse it. It comprises  two phases; one for the header of the certificate file consisting of the quota, seats number, and initial list of candidates, and the other is for parsing judgement lines. If the parsing fails due to malformedness of a line, the parser messages the appropriate error on the standard output with the line number included. However, if it succeeds, the parsed line is fed to the \HOLtm{loop} function to check if the transition occurred from two consecutive parsed judgement lines is a valid step. The parsing and checking of judgement lines continues until either all steps are verified as correct, or an incorrect step is encountered. The following theorem asserts that the \HOLtm{loop} function returns the correct output \HOLtm{NONE} if and only if the initial line of judgements in the certificate file is indeed valid and all steps taken to move from one judgement line to its successor are correct. 
+To elaborate further on the above step, the impure wrapper \HOLtm{check_count} calls two impure functions \HOLtm{parse_line} and \HOLtm{loop}. The former, calls I/O functions to read one line at a time from the concrete certificate given as lines on the standard input  and parse it. It comprises  two phases; one for the header of the certificate file consisting of the quota, seats number, and initial list of candidates, and the other is for parsing judgement lines. If the parsing fails due to malformedness of a line, the parser messages the appropriate error on the standard output with the line number included. However, if it succeeds, the parsed line is fed to the \HOLtm{loop} function to check if the transition from two consecutive parsed judgement lines is a valid step. The parsing and checking of judgement lines continues until either all steps are verified as correct, or an incorrect step is encountered. The following theorem asserts that the \HOLtm{loop} function returns the correct output \HOLtm{NONE} if and only if the initial line of judgements in the certificate file is indeed valid and all steps taken to move from one judgement line to its successor are correct. 
+\begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.loop_thm}
 \end{holthmenv}
-
+\end{small}
 %\paragraph{Compilation in Logic}
 \noindent\emph{Compilation in Logic}
 Finally, we would like an executable verifier in machine code (rather than CakeML code).
@@ -763,12 +767,13 @@ But the payoff is a final theorem which only mentions the final generated machin
 %\paragraph{Final Theorem}
 \noindent\emph{Final Theorem}
 The final theorem, which we explain further below, is about the generated machine code, represented by the constant \HOLtm{check_count_compiled}.
+\begin{small}
 \begin{holthmenv}
   \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
 \end{holthmenv}
+\end{small}
 We assume (\HOLtm{x64_installed}) that this code is loaded into memory in an x86-64 machine represented by \HOLtm{mc} and \HOLtm{ms}, and that the command line (\HOLtm{cl}) and file system (\HOLtm{fs}) are well-formed.
 The conclusion of the theorem concerns the semantics (\HOLtm{machine_sem}) of executing the machine: it will terminate successfully (or fail if there is not enough memory) with a trace of I/O events (\HOLtm{io_events}) such that if we replay those events on the initial file system, we obtain a resulting file system \HOLtm{fs'} for which the string \HOLtm{"Certificate OK\n"} is printed on standard output if and only if \HOLtm{Check_Certificate} succeeds on the lines of standard input.
-
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
 Legislative Assembly elections in the Australian Capital Territory for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
@@ -892,7 +897,10 @@ counting be carried out in a certified way, with a minimal trust
 base such as demonstrated in this paper.
 \section{Related Work}
 %Universal verifiability requires an election protocol to provide any member of the public with means to verify that the end result of the election held is correct despite (possible) presence of security vulnerabilities, dishonesty in vote registration, manipulation of registered votes during casting, or mistakes in computing the tallies. 
-To satisfy Universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that address verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verfication, and subsequently trust. gap in their work. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.   
+To satisfy Universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. 
+
+
+The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that address verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verfication, and subsequently trust. gap in their work. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.   
 
 
 
