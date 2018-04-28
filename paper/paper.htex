@@ -366,6 +366,7 @@ candidates being voted on.
 The fourth line is the election result, and the remainder of the
 certificate consists of the intermediate steps that lead to this
 outcome.
+%\vspace*{-0.1cm}
 \begin{small} \begin{figure}[b]
 \begin{tabular}{c@{\hspace{2cm}}c} 
 \AxiomC{\tiny 8/3} \noLine
@@ -410,38 +411,37 @@ candidate, the transfer queue, and finally the sets of continuing
 and elected candidates. We briefly illustrate the protocol using the
 certificate in Figure \ref{fig;figure} as an example, going though
 the protocol step-by-step.
+%\begin{itemize}
 
-
-\begin{description}
-\item[count.] First preferences for each candidates are computed,
+\noindent\textbf{count.} First preferences for each candidates are computed,
 and ballots counted in favour of particular candidates are placed
 onto that candidate's pile. Here, $A$ is the first preference on
 $b_1$, $b_2$, and $b_3$ (leading to a tally of 3), and $B$ receives $b_4$, and
 C receives $b_5$. Tallies are updated so that tally of A becomes
-$3$, and B and C each reach $1$.
-\item[elect.] Candidate A exceeds the quota, and is elected. The
+$3$, and B and C each reach $1$.\\
+\noindent\textbf{elect.} Candidate A exceeds the quota, and is elected. The
 transfer value of all ballots counted in $A$'s favour  changes to
 $1/9$ according to formula (\ref{eq:tv}). The updated pile of A
 reflects this change in transfer values, and now contains
 $([A,C],1/9)$, $([A,B,C],1/9)$, and $([A,C,B],1/9)$. The data
-associated with $B$ and $C$ doesn't change.
-\item[transfer.] As there are vacancies and no one else has reached
+associated with $B$ and $C$ doesn't change.\\
+\noindent\textbf{transfer.} As there are vacancies and no one else has reached
 or exceeded the quota, the surplus of A is dealt with. The list of
 uncounted ballots is updated to contain the votes for $A$ (with
-transfer values updated in the previous step).
-\item[count.] As there are uncounted ballots (again), tallies are
+transfer values updated in the previous step).\\
+\noindent\textbf{count.} As there are uncounted ballots (again), tallies are
 updated. As $A$ is no longer a continuing candidate, the votes are
 counted in favour of the highest-ranked continuing candidate.
 That is, C receives  two new votes (each of value $1/9$) which
 are $([A,C],1/9)$ and $([A,C,B],1/9)$. Candidate B receives one vote,
-which is $([A,B,C],1/9)$.
-\item[elim.] No continuing candidate has reached the quota, one
+which is $([A,B,C],1/9)$.\\
+\noindent\textbf{elim.} No continuing candidate has reached the quota, one
 vacancy is still unfilled, and all ballots are (again) counted.
 Hence the candidate with the lowest tally is eliminated (in this
 case, $B$) and their votes (with unchanged transfer values) are
-again injected into the count.
-\item[hwin.] The only continuing candidate, that is C, is elected and as we have filled all the vacancies, a final stage has been obtained.
-\end{description}
+again injected into the count.\\
+\noindent\textbf{hwin.} The only continuing candidate, that is C, is elected and as we have filled all the vacancies, a final stage has been obtained.
+%\end{itemize}
 
 \noindent
 To validate certificates of this form, we first parse the textual
@@ -572,6 +572,7 @@ We prove that the formal specification \HOLtm{Valid_PileTally}  corresponds with
 \end{holthmenv}
 \end{small}
 \noindent\emph{Side Conditions.} The item 7 of the protocol on page 5, specifies when and how a candidate shall be eliminated from the election. It stipulates that
+%\vspace*{-0.4cm}
 \begin{itemize}
   \item[a.]  there are empty seats 
  \item[b.] there are no votes to count at this stage and there are no pending transfer
@@ -579,7 +580,9 @@ We prove that the formal specification \HOLtm{Valid_PileTally}  corresponds with
 \item[d.] eliminate the candidate $c$
  \item[e.] votes of the eliminated candidate $c$ are transferred according to the next preference with the same value.
  \end{itemize}
+ %\vspace*{-0.3cm}
 To illustrate how explicit clauses of the protocol are formalised, we explain the way that we have specified item (d) inside HOL. We introduce the predicate \textsf{equal\_except} which formally asserts when two lists are equal except for one exact element.
+%\vspace*{-0.2cm}
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.equal_except_def}
@@ -588,24 +591,30 @@ To illustrate how explicit clauses of the protocol are formalised, we explain th
 The computational twin of this definition decides whether
 two list match with the exception of one element.  This is the
 function \textsf{equal\_except\_dec}.
+%\vspace*{-0.1cm}
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.equal_except_dec_def}
 \end{holthmenv}
 \end{small}
+%\vspace*{-0.1cm}
 We formally establish that this function implements
 the specification given by the \textsf{equal\_except} predicate.
+%\vspace*{-0.1cm}
 \begin{small}
 \begin{holthmenv}
   \HOLthm[width=80]{CheckerProof.EQE_REMOVE_ONE_CAND}
 \end{holthmenv}
 \end{small}
+%\vspace*{-0.1cm}
 Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} is unique.
+%\vspace*{-0.1cm}
 \begin{small}
 \begin{holthmenv}
   \HOLthm{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
 \end{small}
+%\vspace*{-0.1cm}
 \noindent
 Having defined the implicit integrity constraints, and the
 explicit side conditions in the definition of \emph{elimination}, we
@@ -615,13 +624,13 @@ can present the formalisation of this rule in HOL as a predicate.
 The \textsf{ELIM\_CAND} rule specifies what it means to legitimately eliminate a given candidate $c$. It is defined on three kinds of input; a
 candidate, a triple composed of three fixed parameters which are the
 quota, vacancies, and the initial list of candidates, and two
-judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule).  The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. 
+judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule).  The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. 
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=85]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
 \end{small}
-Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. Similar to the case of \textsf{equal\_except}, for each of the conjuncts, we define a computational counterpart and prove the equivalence of the the conjunct with its computational realisation. Conjunction of these computational definitions is \textsf{ELIM\_CAND\_dec}, which is the computational equivalent of the predicate \textsf{ELIM\_CAND}.
+ Similar to the case of \textsf{equal\_except}, for each of the conjuncts, we define a computational counterpart and prove the equivalence of the the conjunct with its computational realisation. Conjunction of these computational definitions is \textsf{ELIM\_CAND\_dec}, which is the computational equivalent of the predicate \textsf{ELIM\_CAND}.
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=88]{Checker.ELIM_CAND_dec_def}
@@ -763,6 +772,7 @@ The conclusion of the theorem concerns the semantics (\HOLtm{machine_sem}) of ex
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
 Legislative Assembly elections in the Australian Capital Territory for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
+\vspace*{-0.3cm}
 \begin{small}
 \begin{figure}
 \centering
@@ -786,6 +796,7 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \label{ref;figure2}
 \end{figure}
 \end{small}
+\vspace*{-0.5cm}
 \noindent
 We also evaluated the verifier on certificates obtained through
 randomly generated ballots. We vary two parameters: the number of
@@ -796,6 +807,7 @@ we keep the number of ballots, vacancies, and length of each ballot
 fixed at 100000, 1, and 10 respectively, in order to see the
 effect of increase in the length of each ballot
 (Figure~\ref{ref;figure4}). 
+\vspace*{-0.2cm}
 \begin{small}
 \begin{figure}
 \centering
@@ -829,6 +841,7 @@ $18$&$180.5$&$325$\\
 \end{minipage}
 \end{figure}
 \end{small}
+\vspace*{-0.5cm}
 \noindent
 We have also implemented the protocol in an unverified certifying
 Haskell program. The unverified program was then tested on
@@ -879,7 +892,7 @@ counting be carried out in a certified way, with a minimal trust
 base such as demonstrated in this paper.
 \section{Related Work}
 %Universal verifiability requires an election protocol to provide any member of the public with means to verify that the end result of the election held is correct despite (possible) presence of security vulnerabilities, dishonesty in vote registration, manipulation of registered votes during casting, or mistakes in computing the tallies. 
-To satisfy Universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that meet their desired verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. In some cases, even though an implementation exists, there is no proof as why the informal verifiability algorithm correctly is realised by the impplementation~\cite{DBLP:conf/esorics/CortierGGI14}. This happens because the algorithm is presented on paper, rather than in a formal syntax, and then encoded in environment of some programming laguage, such as Python,  without any formal demonstration of connections between them. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. The conditions mainly require correspondence between elements of the list of ballots cast and the list of recorded ones (by some zero-knowledge proofs) and that the pulicly announced result match with the tally test output. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. As a result, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.   
+To satisfy Universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that address verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verfication, and subsequently trust. gap in their work. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.   
 
 
 
