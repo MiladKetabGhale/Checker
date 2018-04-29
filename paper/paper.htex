@@ -98,7 +98,7 @@ announced result is correct on the basis of the published ballots
 \cite{Kremer:2010:EVE}) has long been recognised as being
 central,
 both for guaranteeing  correctness, and building trust,
-in electronic elections. This notion has three subproperties; verifiability of casting votes as intended by voters, recording votes as intended, and counting votes as recorded.  The aim of this paper is only to address the last property, namely \emph{verifiability of the tallying process}. 
+in electronic elections. This notion has three subproperties; verifiability of casting votes as intended by voters, recording votes as intended, and counting votes as recorded~\cite{DBLP:journals/iacr/CortierGKMT16}. The aim of this paper is only to address the last property, namely \emph{verifiability of the tallying process}. 
  
 
 The approach presented here combines the concept of certifying
@@ -742,8 +742,8 @@ We specify this file format indirectly, by defining an executable specification 
 Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line. 
 Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, above, that parses lines from the file then calls \HOLtm{Check_Parsed_Certificate} to do the verification.
 
-%\paragraph{Translation into CakeML and I/O Wrapper}
-\noindent\emph{Translation into CakeML and I/O Wrapper}
+\paragraph{Translation into CakeML and I/O Wrapper}
+%\noindent\emph{Translation into CakeML and I/O Wrapper}
 Using prior work on proof-producing synthesis~\cite{JFP14} we can automatically synthesise an implementation of the function \HOLtm{Check_Certificate} in the programming language CakeML.
 The synthesis tool for CakeML produces a theorem relating the semantics of the synthesised program back to the logical function.
 However, the result is a \emph{pure} function that expects the lines of a file as input.
@@ -896,7 +896,7 @@ protocol and hence their implementation, we advocate that vote
 counting be carried out in a certified way, with a minimal trust
 base such as demonstrated in this paper.
 \section{Related Work}
-To satisfy universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. There is some work combining methods of theorem proving with certification
+To satisfy universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. Moreover, there is some work combining methods of theorem proving with certification
 for verification intentions. However they are not carried out for vote counting.
 On the other hand, in context of vote counting, merely few certifying algorithms
 exist which are not accompanied by any verified checker.
@@ -928,8 +928,7 @@ establish a framework for validation of certifying algorithms in the
 C programming language. 
 With the help of the VCC
 tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, pre- and
-postconditions are generated that are syntactically generalized
-syntactically and discharged in the Isabelle 
+postconditions are generated that are syntactically generalized in the Isabelle 
 theorem prover to be discharged. The user has to trust the VCC tool, and there
 is duplication of effort in that one has to generalise the
 conditions imposed by the VCC and then implement them manually in
@@ -942,15 +941,15 @@ a semantic preserving manner. Nonetheless one has to trust that the machine code
 
 
 
-The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that address verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verfication, and subsequently trust. gap in their work. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler which translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verifiation of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Morevoer, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environment remains a question.  
+The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step, they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that address verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14,DBLP:conf/wote/JuelsCJ10,DBLP:conf/esorics/KremerRS10}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verfication, and subsequently trust, gap in their work. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler that translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verification of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Moreover, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environments remains a question.  
 \vspace*{-0.1cm}
 \section{Discussion and Conclusion}
-The framework introduced, aims at addressing verification of cast-as-recorded subproperty of the universal verifability. Verifying other parts of a protocol falls outside the focus of the current work. However, e-voting systems which accommodate STV schemes can perfectly employ our metohd together with their cryptography tools to fully satisfy expectations of  universally verifying tallying process. Our framework is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs
+The framework introduced, aims at addressing verification of cast-as-recorded subproperty of the universal verifability. Verifying other parts of a protocol falls outside the focus of the current work. However, e-voting systems which accommodate STV schemes can perfectly employ our metohd together with their cryptographic techniques to fully satisfy expectations of  universally verifying tallying process. Our framework is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs
 offered in HOL environment makes our formalisation clear so that
 external scrutineers may simply examine the specification of the
-frame work to understand what it does, rather than necessarily
+framework to understand what it does, rather than necessarily
 bothering with proofs and computational components. Also rich
-rewriting tactics and libraries of HOL allows us to express the
+rewriting tactics and libraries of HOL allow us to express the
 protocol and discharge related proofs with a minimum amount of lines
 of encoding. Moreover, the verified connection of HOL with CakeML
 enables verification performed inside the theorem prover to be
