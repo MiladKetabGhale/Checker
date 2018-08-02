@@ -40,12 +40,12 @@ computation where each execution of the counting algorithm is
 accompanied by a certificate that witnesses the correctness of the
 output. These certificates are then checked for correctness
 independently of how they are produced. 
-We advocate to verify the verifier rather than the software used to
-produce the result. We use the theorem prover HOL to formalise the
+We advocate verification of the verifier rather than the software used to
+produce the result. We use the theorem prover HOL4 to formalise the
 STV vote counting scheme, and obtain a fully verified
 certificate checker.
 By connecting 
-HOL with the verified CakeML compiler, we then extract an
+HOL4 to the verified CakeML compiler, we then extract an
 executable that is 
 guaranteed to behave
 correctly with respect to the formal specification of the
@@ -71,16 +71,14 @@ paper based elections.
 
 For example, the vote counting software that is used in Australia's
 most populous
-state, the state of New South Wales,
+state, New South Wales,
 was found to contain errors that had an impact in at least one seat that
 was wrongly filled with high probability.
-This was not only reported in specialist publications
-\cite{Conway:2017:ANS} but
-also in the national press \cite{Brooks:2017:NCE}.
+This was reported in specialist publications~\cite{Conway:2017:ANS} as well as the national press~\cite{Brooks:2017:NCE}.
 
 When counting ballots by hand,  the counting is monitored by
 scrutineers, usually members of the general public or stakeholders
-such as party representatives and members of the general public.
+such as party representatives.
 %
 In contrast,  computer software that is used to count ballots
 merely produces a final result. Moreover, in many cases, the source
@@ -96,8 +94,7 @@ currently in use fail to meet both expectations.
 
 In the literature on electronic voting, the notion of \emph{universal
 verifiability} of vote counting (any voter can check that the
-announced result is correct on the basis of the published ballots
-\cite{Kremer:2010:EVE}) has long been recognised as being
+announced result is correct on the basis of the published ballots~\cite{Kremer:2010:EVE}) has long been recognised as being
 central,
 both for guaranteeing  correctness, and building trust,
 in electronic elections. This notion has three subproperties; verifiability of casting votes as intended by voters, recording votes as intended, and counting votes as recorded~\cite{DBLP:journals/iacr/CortierGKMT16}. The aim of this paper is only to address the last property, namely \emph{verifiability of the tallying process}. 
@@ -112,7 +109,7 @@ of the computed result.  This certificate can then be scrutinised by
 a verifier, independently of the tools, hardware or software that
 were used to create the certificate.
 
-Our focus in this paper is on the \emph{verifier}. We briefly
+Our focus in this paper is on the \emph{certificate verifier}. We briefly
 discuss a
 concise formal specification of \emph{single transferable vote} (STV), a
 complex, preferential voting system used e.g. in Ireland, Malta, New
@@ -124,8 +121,8 @@ synthesis of the verifier that is itself fully verified down to the
 machine-code level.
 
 
-This proceeds in four steps\footnote{Source codes of the formalisation can be found at\\ {\tt\url{https://github.com/MiladKetabGhale/Checker}.}}\label{sourceCode}
-.
+This proceeds in four steps.\footnote{Source code of the formalisation can be found at\\ {\tt\url{https://github.com/MiladKetabGhale/Checker}.}}\label{sourceCode}
+%
 First, we formalise  the vote counting protocol as a sequence of
 steps inside the HOL theorem prover where every step
 corresponds to an action taken by a counting officer in a
@@ -237,7 +234,7 @@ generally differ. This is the purpose of a third mechanism:
 
 \begin{enumerate}
 \setcounter{enumi}{2}
-\item Fractional Transfer. \emph{All} suprlus votes are transfered
+\item Fractional Transfer. \emph{All} surplus votes are transfered
 to the next preference, but at a \emph{reduced} weight that is
 proportional to the size of the surplus.
 \end{enumerate}
@@ -261,7 +258,7 @@ Here, we deal with a generic version of STV that
 incorporates all three mechanisms outlined above, and is very
 similar to the method used to elect members of the Australian
 Senate, and incidentally also to the scheme used elect the representatives of the
-student's union of the first and second author. Throughout, we do
+student union at the Australian National University. Throughout, we do
 not assume a particular definition of the quota, but take this as a
 parameter. Design decisions in
 the precise formulation of the scheme are resolved as follows:
@@ -523,6 +520,7 @@ the formal specification are connected by (formal) proofs of
 soundess and completeness, as shown in the figure below.
 
 \includegraphics[scale=0.35]{spec-dec-cropped.pdf}
+
 \noindent
 Here, \emph{soundness} refers to the fact that the decision
 procedure only stipulates that a rule has been correctly applied if
