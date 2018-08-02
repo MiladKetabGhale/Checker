@@ -30,7 +30,7 @@ Ramana~Kumar\inst{2}\and
 Michael Norrish\inst{3}}
 \institute{Australian National University\and
 Data61, CSIRO and UNSW\and
-Data61, CSIRO, ANU}
+Data61, CSIRO, and ANU}
 \maketitle
 \begin{abstract}
 We introduce a new framework for verifying electronic vote counting
@@ -124,7 +124,7 @@ synthesis of the verifier that is itself fully verified down to the
 machine-code level.
 
 
-This proceeds in four steps\footnote{Source codes of the formalisation can be found at\\ {\tt\url{https://github.com/MiladKetabGhale/Checker}.}}
+This proceeds in four steps\footnote{Source codes of the formalisation can be found at\\ {\tt\url{https://github.com/MiladKetabGhale/Checker}.}}\label{sourceCode}
 .
 First, we formalise  the vote counting protocol as a sequence of
 steps inside the HOL theorem prover where every step
@@ -178,7 +178,7 @@ demand that a program produces a certificate that we can then
 independently verify. This has several advantages. For one, it is
 much less labour intensive to verify the verifier, compared with
 verifying the counting program. Second, having verifiable certificates at hand
-meets the goal of universal verifiability~\cite{DBLP:conf/esorics/KremerRS10}.
+meets the goal of count-as-recorded subproperty~\cite{DBLP:journals/iacr/CortierGKMT16}.
 Third, we achieve correctness over a minimal trust base through the
 use of CakeML.
 
@@ -363,7 +363,7 @@ $b_4=([B,A],1)$, $b_5=([C,B,A],1)$.  Each ballot is a pair, where
 the first component is a preference-ordered list of candidates, and
 the second is the transfer value (initially set to $1$). The
 certificate consists of a \emph{header} that specifies the quota as
-a fraction, the number of seats to be filled, and the list of
+a fraction (computed according to the Droop formula~\cite{10.2307/2339223}), the number of seats to be filled, and the list of
 candidates being voted on.
 The fourth line is the election result, and the remainder of the
 certificate consists of the intermediate steps that lead to this
@@ -378,7 +378,7 @@ outcome.
 \UnaryInfC{\scriptsize [A,C]} \RightLabel{\tiny hwin}
 
 \UnaryInfC{\tiny [$b_4$,([A,B,C],1/9)]]; A[3/1] B[10/9] C[11/9]; A[] B[]
-C[$b_{5}$,([C],1/9),([C,B],1/9),([C],11/100)]; []; [A]; [C]}
+C[$b_{5}$,([C],1/9),([C,B],1/9),([C],1/9)]; []; [A]; [C]}
 
 \RightLabel{\tiny elim} \UnaryInfC{\tiny []; A[3/1] B[10/9]
 C[11/9], A[] B[$b_4$,([A,B,C],1/9)]
@@ -851,7 +851,7 @@ $18$&$180.5$&$325$\\
 \vspace*{-0.5cm}
 \noindent
 We have also implemented the protocol in an unverified certifying
-Haskell program. The unverified program was then tested on
+Haskell program\footnote{Source code can be found in the Github repository given in the second page}. The unverified program was then tested on
 ballots of the same ACT Legislative Assembly elections.
 We have then verified the certificates produced by this program for
 each of the districts. The result shows that the certificates of the
@@ -903,7 +903,7 @@ base such as demonstrated in this paper.
 Universal verifiability is a security requirement introduced for measuring verifiability of  an election result by any member of the public~\cite{DBLP:journals/iacr/CortierGKMT16}.  The literature on election protocol design agrees on the textual formulation of the concept, despite the fact that they vary in the technical implementation of the property~\cite{DBLP:journals/iacr/CortierGKMT16}. Moreover, it is accepted that satisfaction of the property rests on verifying three subproperties, namely cast-as-intended, recorded-as-intended, and count-as-recorded~\cite{DBLP:journals/iacr/CortierGKMT16}, and  also demonstration of the eligibility verifiability~as an explicitly or implicitly stated prerequisite~\cite{DBLP:conf/sp/KustersTV11}. 
 
 
-Our framework only aims at addressing verification of the count-as-recorded subproperty. We do not attempt to introduce an election protocol for answering expectations of the  universal verifiability. Therefore, verification of other two subproperties and the eligibility criterion falls outside the focus of the current work. However, our tool can be perfectly employed by any election protocol which accommodates STV scheme and uses Mix Net~\cite{DBLP:journals/ieeesp/Chaum04} for anonymising and decrypting ballots. For example, some protocols require the authorities to produce a witness for tallying and then verify it is a proof of correctness for the announced tallying result~\cite{DBLP:conf/post/CortierEKMW15}. Such systems can adapt certification and the checker for (a) offering an independently checkable witness of tallying, and (b) provably correctly verify the certificate.     
+Our framework only aims at addressing verification of the count-as-recorded subproperty. We do not attempt to introduce an election protocol for answering expectations of the  universal verifiability. Therefore, verification of other two subproperties and the eligibility criterion falls outside the focus of the current work. However, our tool can be perfectly employed by any election protocol which accommodates STV scheme and uses Mix Net~\cite{DBLP:journals/ieeesp/Chaum04} for anonymising and decrypting ballots. For example, some protocols require the authorities to produce a witness for tallying and then verify it is a proof of correctness for the announced tallying result~\cite{DBLP:conf/post/CortierEKMW15}. Such systems can adapt certification and the checker for (a) offering an independently checkable witness of tallying, and (b) provably correctly verify the certificate.  Finally, the certificates which the checker operates on include the exact ballots published by election authorities after the tallying is complete, and are therefore publicly available. Hence, the certificate would not compromise privacy concerns such as vote buying or voter coercion any more than publication of the ballots would. 
 
     
 The framework employs CakeML to achieve an end-to-end verification of certificates. Therefore we prove that executable checker is verified to behave according to its specification in  HOL, which operates in a different environment. To obtain this level of verification, we rely on the verified proof-synthesis tool of CakeML, the mechanism for producing deeply embedded equivalent assertions of HOL functions into CakeML environment, the Characteristic Formula of CakeML to assert that the pure (deeply embedded functions) behave consistently with the impure I/O calls, and the verified compiler that generates executable that provably respects all of the above proofs.
@@ -946,37 +946,33 @@ CakeML and executable extraction process mainly remain unaffected.
 
 
 \section{Related Work}
-To satisfy universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. Moreover, there is some work combining methods of theorem proving with certification
-for verification intentions. However they are not carried out for vote counting.
+
+Given that the count-as-recorded property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. Moreover, there is  few work combining methods of theorem proving with certification
+for verification intentions. However they are not carried out for vote counting~\cite{DBLP:journals/jar/AlkassarBMR14,DBLP:conf/itp/GreenawayAK12}.
 On the other hand, in context of vote counting, merely few certifying algorithms
-exist which are not accompanied by any verified checker.
+exist which are not accompanied by any verified checker~\cite{DBLP:conf/voteid/GhaleGP17,DBLP:conf/itp/PattinsonT17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/acsw/VerityP17}.
 
 
 The existing certificate-producing implemetations of vote counting
 mainly formalise a voting protocol inside the Coq theorem prover
 and then prove some desired properties about the formalised
-specification, and then extract the development into Haskell or
-OCaml programs.
+specification, and then extract the development into Haskell~\cite{DBLP:conf/voteid/GhaleGP17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/acsw/VerityP17} or
+OCaml~\cite{DBLP:conf/itp/PattinsonT17} programs.
 Since the semantics of the target
 and source of the extraction method differ, and there is no proof
 that the translation occurs in a semantic-preserving way,
 verification of the specification does not provably extend to
 the extracted program. Moreover, these work are either not
-accompanied by a checker\cite{DBLP:conf/voteid/GhaleGP17}, or their
+accompanied by a checker~\cite{DBLP:conf/voteid/GhaleGP17}, or their
 checker is an unverified Haskell/OCaml
-program\cite{DBLP:conf/itp/PattinsonT17}. One therefore has to trust
-both 
-the extraction mechanism and the compiler used to produce the
-executable.
+program~\cite{DBLP:conf/itp/PattinsonT17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/acsw/VerityP17}. One therefore has to trust both  the extraction mechanism and the compiler used to produce the executable.
 
 
 In the context of certified computation, 
-Alkassar et
-al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified
+Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified
 computation and theorem proving with methods of code verification to
 establish a framework for validation of certifying algorithms in the
-C programming language. 
-With the help of the VCC
+C programming language.  With the help of the VCC
 tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, pre- and
 postconditions are generated that are syntactically generalized in the Isabelle 
 theorem prover to be discharged. The user has to trust the VCC tool, and there
@@ -991,10 +987,10 @@ a semantic preserving manner. Nonetheless one has to trust that the machine code
 
 
 
-The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step, they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that address verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14,DBLP:conf/wote/JuelsCJ10,DBLP:conf/esorics/KremerRS10}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verfication, and subsequently trust, gap in their work. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler that translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verification of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Moreover, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environments remains a question.  
+There are some election protocols which require a witness for the tallying result and verify it for correctness, however they are essentially theoretical attempts in designing such protocols/systems~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verification, and subsequently trust, gap in their work.  Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler that translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verification of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Moreover, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environments remains a question.  
 
 %\vspace*{-0.1cm}
-\section{Conclusion and Future Work}
+\section{Conclusion}
 Correct, publicly verifiable, transparent election count is a key
 constituent of establishing trustworthiness in the final outcome. The tool developed here has clarity in encoding,
 precision in formulation, and modularity in implementation so that it can be
