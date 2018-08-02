@@ -26,9 +26,11 @@
 \author{
 Milad~K.~Ghale\inst{1}\and
 Dirk~Pattinson\inst{1}\and
-Ramana~Kumar\inst{2}}
+Ramana~Kumar\inst{2}\and
+Michael Norrish\inst{3}}
 \institute{Australian National University\and
-Data61, CSIRO and UNSW}
+Data61, CSIRO and UNSW\and
+Data61, CSIRO, ANU}
 \maketitle
 \begin{abstract}
 We introduce a new framework for verifying electronic vote counting
@@ -895,6 +897,54 @@ We argue that precisely because of such delicacies in the STV
 protocol and hence their implementation, we advocate that vote
 counting be carried out in a certified way, with a minimal trust
 base such as demonstrated in this paper.
+
+
+\section{Discussion}
+Universal verifiability is a security requirement introduced for measuring verifiability of  an election result by any member of the public~\cite{DBLP:journals/iacr/CortierGKMT16}.  The literature on election protocol design agrees on the textual formulation of the concept, despite the fact that they vary in the technical implementation of the property~\cite{DBLP:journals/iacr/CortierGKMT16}. Moreover, it is accepted that satisfaction of the property rests on verifying three subproperties, namely cast-as-intended, recorded-as-intended, and count-as-recorded~\cite{DBLP:journals/iacr/CortierGKMT16}, and  also demonstration of the eligibility verifiability~as an explicitly or implicitly stated prerequisite~\cite{DBLP:conf/sp/KustersTV11}. 
+
+
+Our framework only aims at addressing verification of the count-as-recorded subproperty. We do not attempt to introduce an election protocol for answering expectations of the  universal verifiability. Therefore, verification of other two subproperties and the eligibility criterion falls outside the focus of the current work. However, our tool can be perfectly employed by any election protocol which accommodates STV scheme and uses Mix Net~\cite{DBLP:journals/ieeesp/Chaum04} for anonymising and decrypting ballots. For example, some protocols require the authorities to produce a witness for tallying and then verify it is a proof of correctness for the announced tallying result~\cite{DBLP:conf/post/CortierEKMW15}. Such systems can adapt certification and the checker for (a) offering an independently checkable witness of tallying, and (b) provably correctly verify the certificate.     
+
+    
+The framework employs CakeML to achieve an end-to-end verification of certificates. Therefore we prove that executable checker is verified to behave according to its specification in  HOL, which operates in a different environment. To obtain this level of verification, we rely on the verified proof-synthesis tool of CakeML, the mechanism for producing deeply embedded equivalent assertions of HOL functions into CakeML environment, the Characteristic Formula of CakeML to assert that the pure (deeply embedded functions) behave consistently with the impure I/O calls, and the verified compiler that generates executable that provably respects all of the above proofs.
+ 
+
+ 
+Furthermore, separation of program from proofs
+offered in HOL environment makes our formalisation clear so that
+external scrutineers may simply examine the specification of the
+framework to understand what it does, rather than necessarily
+bothering with proofs and computational components. Also rich
+rewriting tactics and libraries of HOL allow us to express the
+protocol and discharge related proofs with a minimum amount of lines
+of encoding.  We have demonstrated the practical
+feasibility of our approach by means of case studies. For example,
+the certificates of the Molonglo
+district, the biggest Legislative Assembly electorate in Australia,
+are checked in just five minutes.
+
+
+
+
+Our framework is modular in two different ways.
+On the one hand,
+the formalisation realises the counting scheme as a set of standalone logical
+rules. On the other hand, each of the rules comprises independent
+assertions.
+Since every STV election consists of
+counting, elimination, transfer, electing and declaration of
+winners, we only need to change some of these rules locally to
+capture different variants.
+For example, the STV version used in the Senate
+elections of Australia requires transfer of excessive votes of an
+elected candidate before any other rule can apply. This difference
+can be formalised in our system simply by modifying a single
+component of the \textsf{TRANSFER} rule. So for establishing
+verification results, we simply have to discharge a few
+correspondences in HOL. Furthermore, the steps of translation into
+CakeML and executable extraction process mainly remain unaffected.
+
+
 \section{Related Work}
 To satisfy universal verifiability, a protocol has to meet expectations of three subproperties cast-as-intended, recorded-as-intended, and counted-as-recorded. Since only the last property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. Moreover, there is some work combining methods of theorem proving with certification
 for verification intentions. However they are not carried out for vote counting.
@@ -942,48 +992,14 @@ a semantic preserving manner. Nonetheless one has to trust that the machine code
 
 
 The community of e-voting verification agrees on encryption of votes cast before proceeding to tallying them. Then as a tallying verification step, they check if the encrypted votes cast appear correctly, with some zero-knowledge proofs if any, in the bulletin board~\cite{DBLP:journals/iacr/CortierGKMT16}. Many of them are essentially theoretical attempts in formulating protocols/systems that address verifiability conditons~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. They also rely on pen-and-paper proofs to demonstrate validity of their framework~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16,DBLP:conf/esorics/CortierGGI14,DBLP:conf/wote/JuelsCJ10,DBLP:conf/esorics/KremerRS10}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verfication, and subsequently trust, gap in their work. Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler that translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verification of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Moreover, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environments remains a question.  
-\vspace*{-0.1cm}
-\section{Discussion and Conclusion}
-The framework introduced, aims at addressing verification of cast-as-recorded subproperty of the universal verifability. Verifying other parts of a protocol falls outside the focus of the current work. However, e-voting systems which accommodate STV schemes can perfectly employ our metohd together with their cryptographic techniques to fully satisfy expectations of  universally verifying tallying process. Our framework is implemented in the HOL theorem prover and CakeML verified compiler. Separation of program from proofs
-offered in HOL environment makes our formalisation clear so that
-external scrutineers may simply examine the specification of the
-framework to understand what it does, rather than necessarily
-bothering with proofs and computational components. Also rich
-rewriting tactics and libraries of HOL allow us to express the
-protocol and discharge related proofs with a minimum amount of lines
-of encoding. Moreover, the verified connection of HOL with CakeML
-enables verification performed inside the theorem prover to be
-pushed down to machine level. We have demonstrated the practical
-feasibility of our approach by means of case studies. For example,
-the certificates of the Molonglo
-district, the biggest Legislative Assembly electorate in Australia,
-are checked in just five minutes.
 
-
-
-Our framework is modular in two different ways.
-On the one hand,
-the formalisation realises the counting scheme as a set of standalone logical
-rules. On the other hand, each of the rules comprises independent
-assertions.
-Since every STV election consists of
-counting, elimination, transfer, electing and declaration of
-winners, we only need to change some of these rules locally to
-capture different variants.
-For example, the STV version used in the Senate
-elections of Australia requires transfer of excessive votes of an
-elected candidate before any other rule can apply. This difference
-can be formalised in our system simply by modifying a single
-component of the \textsf{TRANSFER} rule. So for establishing
-verification results, we simply have to discharge a few
-correspondences in HOL. Furthermore, the steps of translation into
-CakeML and executable extraction process mainly remain unaffected.
-
-
+%\vspace*{-0.1cm}
+\section{Conclusion and Future Work}
 Correct, publicly verifiable, transparent election count is a key
 constituent of establishing trustworthiness in the final outcome. The tool developed here has clarity in encoding,
 precision in formulation, and modularity in implementation so that it can be
 taken as a framework for verifying STV election results down to machine level.
+
 \bibliographystyle{splncs03}
 \bibliography{paper,delta2,ev}
 \end{document}
