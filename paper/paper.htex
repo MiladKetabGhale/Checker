@@ -933,28 +933,32 @@ base such as demonstrated in this paper.
 Universal verifiability is a security requirement introduced for measuring verifiability of  an election result by any member of the public~\cite{DBLP:journals/iacr/CortierGKMT16}.  The literature on election protocol design agrees on the textual formulation of the concept, despite the fact that they vary in the technical implementation of the property~\cite{DBLP:journals/iacr/CortierGKMT16}. Moreover, it is accepted that satisfaction of the property rests on verifying three subproperties, namely cast-as-intended, recorded-as-intended, and count-as-recorded~\cite{DBLP:journals/iacr/CortierGKMT16}, and  also demonstration of the eligibility verifiability~as an explicitly or implicitly stated prerequisite~\cite{DBLP:conf/sp/KustersTV11}. 
 
 
-Our framework only aims at addressing verification of the count-as-recorded subproperty. We do not attempt to introduce an election protocol for answering expectations of the  universal verifiability. Therefore, verification of other two subproperties and the eligibility criterion falls outside the focus of the current work. However, our tool can be perfectly employed by any election protocol which accommodates STV scheme and uses Mix Net~\cite{DBLP:journals/ieeesp/Chaum04} for anonymising and decrypting ballots. For example, some protocols require the authorities to produce a witness for tallying and then verify it is a proof of correctness for the announced tallying result~\cite{DBLP:conf/post/CortierEKMW15}. Such systems can adapt certification and the checker for (a) offering an independently checkable witness of tallying, and (b) provably correctly verify the certificate.  Finally, the certificates which the checker operates on include the exact ballots published by election authorities after the tallying is complete, and are therefore publicly available. Hence, the certificate would not compromise privacy concerns such as vote buying or voter coercion any more than publication of the ballots would. 
+Our framework only aims at addressing verification of the count-as-recorded subproperty. 
+We do not attempt to introduce an election protocol for answering expectations of the  universal verifiability. 
+Therefore, verification of other two subproperties and the eligibility criterion falls outside the focus of the current work. 
+However, our tool can be perfectly employed by any election protocol which accommodates STV scheme and uses Mix Net~\cite{DBLP:journals/ieeesp/Chaum04} for anonymising and decrypting ballots. 
+For example, some protocols require authorities to produce a witness for tallying, and then verify it is a proof of correctness for the announced tallying result~\cite{DBLP:conf/post/CortierEKMW15}. 
+Such systems can adapt certification and the checker for (a) offering an independently checkable witness of tallying, and (b) provably correctly verifying the certificate.  
+Finally, the certificates which the checker operates on include the exact ballots published by election authorities after the tallying is complete, and are therefore publicly available. 
+Hence, the certificate would not compromise privacy concerns such as vote buying or voter coercion any more than the existing practice of ballot publication. 
 
     
-The framework employs CakeML to achieve an end-to-end verification of certificates. Therefore we prove that executable checker is verified to behave according to its specification in  HOL, which operates in a different environment. To obtain this level of verification, we rely on the verified proof-synthesis tool of CakeML, the mechanism for producing deeply embedded equivalent assertions of HOL functions into CakeML environment, the Characteristic Formula of CakeML to assert that the pure (deeply embedded functions) behave consistently with the impure I/O calls, and the verified compiler that generates executable that provably respects all of the above proofs.
+The framework employs CakeML to achieve an end-to-end verification of certificates. 
+Therefore we prove that executable checker is verified to behave according to its specification in  HOL, which operates in a different environment. 
+To obtain this level of verification, we rely on the verified proof-synthesis tool of CakeML, the mechanism for producing deeply embedded equivalent assertions of HOL functions into CakeML environment, the Characteristic Formulae of CakeML to assert that the pure (deeply embedded functions) behave consistently with the impure I/O calls, and the verified compiler that generates executables that provably respect all of the above proofs.
  
+Furthermore, the separation of the program from proofs
+offered in the CakeML+HOL environment makes our formalisation easier to understand.
+In particular, we believe that
+external scrutineers should be able to examine the specification of the
+framework to understand what it does, rather than having to also get to grips with CakeML proofs and computational components. 
+HOL4's rich rewriting tactics and libraries also allow us to express the protocol and discharge related proofs with a minimum amount of lines of encoding.  
 
- 
-Furthermore, separation of program from proofs
-offered in HOL environment makes our formalisation clear so that
-external scrutineers may simply examine the specification of the
-framework to understand what it does, rather than necessarily
-bothering with proofs and computational components. Also rich
-rewriting tactics and libraries of HOL allow us to express the
-protocol and discharge related proofs with a minimum amount of lines
-of encoding.  We have demonstrated the practical
+We have demonstrated the practical
 feasibility of our approach by means of case studies. For example,
 the certificates of the Molonglo
 district, the biggest Legislative Assembly electorate in Australia,
 are checked in just five minutes.
-
-
-
 
 Our framework is modular in two different ways.
 On the one hand,
