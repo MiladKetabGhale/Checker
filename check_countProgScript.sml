@@ -153,15 +153,15 @@ val loop = process_topdecs`
   fun loop params i j1 j0 =
     if valid_step params j0 j1 then
       case TextIO.inputLine TextIO.stdIn of
-        NONE =>
+        None =>
           if initial_judgement_dec (snd (snd params)) j0 then
             TextIO.print "Certificate OK\n"
           else
             TextIO.output TextIO.stdErr "Malformed initial judgement\n"
-      | SOME line =>
+      | Some line =>
       case parse_judgement line of
-        NONE => TextIO.output TextIO.stdErr (malformed_line_msg i)
-      | SOME j => loop params (i+1) j0 j
+        None => TextIO.output TextIO.stdErr (malformed_line_msg i)
+      | Some j => loop params (i+1) j0 j
     else TextIO.output TextIO.stdErr (invalid_step_msg i)`;
 
 val _ = append_prog loop;
@@ -218,7 +218,7 @@ val loop_spec = Q.store_thm("loop_spec",
     \\ fs[]
     \\ imp_res_tac stdin_get_file_content
     \\ `IS_SOME (get_file_content fs 0)` by metis_tac[IS_SOME_EXISTS]
-    \\ xlet_auto >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
+    \\ xlet_auto >- ( xsimpl \\ simp[FD_def] \\ metis_tac[stdin_v_thm,stdIn_def] )
     \\ xmatch
     \\ rfs[linesFD_nil_lineFD_NONE,OPTION_TYPE_def]
     \\ reverse conj_tac >- (EVAL_TAC \\ rw[])
@@ -268,7 +268,7 @@ val loop_spec = Q.store_thm("loop_spec",
   \\ fs[]
   \\ imp_res_tac stdin_get_file_content
   \\ `IS_SOME (get_file_content fs 0)` by metis_tac[IS_SOME_EXISTS]
-  \\ xlet_auto >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
+  \\ xlet_auto >- ( xsimpl \\ simp[FD_def] \\ metis_tac[stdin_v_thm,stdIn_def] )
   \\ xmatch
   \\ Cases_on`lineFD fs 0` \\ fs[OPTION_TYPE_def]
   >- ( fs[GSYM linesFD_nil_lineFD_NONE] )
@@ -325,11 +325,11 @@ val r = translate malformed_msg_def;
 val parse_line = process_topdecs`
   fun parse_line parse name k =
     case TextIO.inputLine TextIO.stdIn of
-      NONE => TextIO.output TextIO.stdErr (missing_msg name)
-    | SOME line =>
+      None => TextIO.output TextIO.stdErr (missing_msg name)
+    | Some line =>
     case parse line of
-      NONE => TextIO.output TextIO.stdErr (malformed_msg name)
-    | SOME x => k x`;
+      None => TextIO.output TextIO.stdErr (malformed_msg name)
+    | Some x => k x`;
 
 val _ = append_prog parse_line;
 
@@ -366,7 +366,7 @@ val parse_line_spec = Q.store_thm("parse_line_spec",
   \\ fs[]
   \\ imp_res_tac stdin_get_file_content
   \\ `IS_SOME (get_file_content fs 0)` by metis_tac[IS_SOME_EXISTS]
-  \\ xlet_auto >- ( xsimpl \\ metis_tac[stdin_v_thm,stdIn_def] )
+  \\ xlet_auto >- ( xsimpl \\ simp[FD_def] \\ metis_tac[stdin_v_thm,stdIn_def] )
   \\ xmatch
   \\ Cases_on`lineFD fs 0` \\ fs[OPTION_TYPE_def]
   >- (
