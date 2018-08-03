@@ -19,7 +19,7 @@
 \newcommand{\HOLthm}[2][]{\texttt{#2}}
 \newcommand{\n}{\\n}
 }{}
-\NewEnviron{holthmenv}{\[\begin{array}[t]{l}\BODY\end{array}\]}
+\NewEnviron{holthmenv}{\[\begin{array}[t]{l}\BODY\end{array}\]\ignorespacesafterend}
 \newcommand{\TODO}[1]{{\bf TODO:} #1}
 \begin{document}
 \title{Verified Certificate Checking for Counting Votes}
@@ -550,6 +550,7 @@ this condition as follows.
   \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
 \end{holthmenv}
 \end{small}
+
 \noindent
 The above predicate is paired with computational twins, and soundness
 and completeness connect both.  Here,
@@ -559,19 +560,23 @@ given lists $t$ and $l$, the function \HOLtm{Valid_PileTally_dec1} decides if ev
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec1_def}
 \end{holthmenv}
 \end{small}
+
+\noindent 
 Additionally, the function \HOLtm{Valid_PileTally_dec2} determines if each element of $l$ appears as the first component of a pair in $t$.
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Valid_PileTally_dec2_def}
 \end{holthmenv}
 \end{small}
-We prove that the formal specification \HOLtm{Valid_PileTally}  corresponds with the functions \HOLtm{Valid_PileTally_dec1} and \HOLtm{Valid_PileTally_dec2}. Therefore we ensure that tallies and piles are distinctively allocated to candidates.
+
+\noindent We prove that the formal specification \HOLtm{Valid_PileTally}  corresponds with the functions \HOLtm{Valid_PileTally_dec1} and \HOLtm{Valid_PileTally_dec2}. Therefore we ensure that tallies and piles are distinctively allocated to candidates.
 \begin{small}
 \begin{holthmenv}
 \HOLthm[width=80]{CheckerProof.Valid_PileTally_Spec_iff_Valid_PileTally_DEC}
 \end{holthmenv}
 \end{small}
-\noindent\emph{Side Conditions.} The item 7 of the protocol on page 5, specifies when and how a candidate shall be eliminated from the election. It stipulates that
+
+\noindent\emph{Side Conditions.} Item 7 of the protocol on page 5 specifies when and how a candidate shall be eliminated from the election. It stipulates that
 %\vspace*{-0.4cm}
 \begin{itemize}
   \item[a.]  there are empty seats 
@@ -588,6 +593,8 @@ To illustrate how explicit clauses of the protocol are formalised, we explain th
   \HOLthm[def,width=80]{CheckerSpec.equal_except_def}
 \end{holthmenv}
 \end{small}
+
+\noindent 
 The computational twin of this definition decides whether
 two list match with the exception of one element.  This is the
 function \textsf{equal\_except\_dec}.
@@ -597,7 +604,8 @@ function \textsf{equal\_except\_dec}.
   \HOLthm[def,width=80]{Checker.equal_except_dec_def}
 \end{holthmenv}
 \end{small}
-%\vspace*{-0.1cm}
+
+\noindent 
 We formally establish that this function implements
 the specification given by the \textsf{equal\_except} predicate.
 %\vspace*{-0.1cm}
@@ -606,7 +614,8 @@ the specification given by the \textsf{equal\_except} predicate.
   \HOLthm[width=80]{CheckerProof.EQE_REMOVE_ONE_CAND}
 \end{holthmenv}
 \end{small}
-%\vspace*{-0.1cm}
+
+\noindent 
 Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} is unique.
 %\vspace*{-0.1cm}
 \begin{small}
@@ -614,14 +623,14 @@ Moreover, modulo extensional equality, the function \textsf{equal\_except\_dec} 
   \HOLthm{CheckerProof.EQE_IMP_REMOVE_ONE_CAND}
 \end{holthmenv}
 \end{small}
-%\vspace*{-0.1cm}
+
 \noindent
 Having defined the implicit integrity constraints, and the
 explicit side conditions in the definition of \emph{elimination}, we
 can present the formalisation of this rule in HOL as a predicate.
 
 
-The \textsf{ELIM\_CAND} rule specifies what it means to legitimately eliminate a given candidate $c$. It is defined on three kinds of input; a
+The \textsf{ELIM\_CAND} rule specifies what it means to legitimately eliminate a given candidate $c$. It is defined on three kinds of input: a
 candidate, a triple composed of three fixed parameters which are the
 quota, vacancies, and the initial list of candidates, and two
 judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule). 
@@ -630,15 +639,20 @@ judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule).
   \HOLthm[def,width=85]{CheckerSpec.ELIM_CAND_def}
 \end{holthmenv}
 \end{small}
- The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. 
+
+\noindent 
+The first and the fourth component of $j_{1}$ which correspond to the list of uncounted ballots and the backlog are both empty. This realises the condition (a) stated above. It is also required that $h$ the list of continuing candidates in the premise $j_{1}$, and $nh$ the updated list of continuing candidates in $j_{2}$ satisfy the predicate \textsf{equal\_except} so that condition (d) is met. Each of the conjuncts in the definition of \textsf{ELIM\_CAND} encapsulates part of the item 7 in the protocol. 
 
 
  Similar to the case of \textsf{equal\_except}, for each of the conjuncts, we define a computational counterpart and prove the equivalence of the the conjunct with its computational realisation. Conjunction of these computational definitions is \textsf{ELIM\_CAND\_dec}, which is the computational equivalent of the predicate \textsf{ELIM\_CAND}.
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=88]{Checker.ELIM_CAND_dec_def}
 \end{holthmenv}
 \end{small}
+
+\noindent
 By drawing upon the correspondence established between conjuncts of the elimination specification and computational counterpart, we prove that  \HOLthm{CheckerProof.ELIM_CAND_thm}. The same procedure is followed to achieve formal specification,  computational definitions, and their correspondence for the rest of counting rules. 
 
 \subsection{The Certificate Verifier}
@@ -666,53 +680,65 @@ judgement of the certificate is a valid initial state of the count. A valid init
 where candidate's tally is zero, their
 piles are empty, and both the transfer queue and the list of elected candidates
 are both empty as well.
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[width=80,def]{CheckerSpec.initial_judgement_def}
 \end{holthmenv}
 \end{small}
+
 \noindent
 Second, we check whether transitions from one judgement to the next is according to
 one of the rules that define the count.
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_Step_Spec_def}
 \end{holthmenv}
 \end{small}
+
 \noindent
 We can therefore check whether a transition from one judgement to
 the next is correct by simply considering the disjunction of all
 rules.
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_intermediate_judgements_def}
 \end{holthmenv}
 \end{small}
+
 \noindent
 Putting the specification of a valid initial judgement with valid sequence of judgements together, we obtain the specification for a valid certificate:
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_Certificate_def}
 \end{holthmenv}
 \end{small}
-For checking a formal certificate we therefore first  verify that
+
+\noindent For checking a formal certificate we therefore first  verify that
 certificate starts at a permissible initial stage. We then
 iteratively 
 check that transitions have happened correctly, and that the
 terminating state is a final one where winners are declared. The above specification of a valid vertificate, corresponds to the following computational formal certificate checker.
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{Checker.Check_Parsed_Certificate_def}
 \end{holthmenv}
 \end{small}
-The correctness of this definition rests on the equivalences we have already established between the specifications and their computational counterparts, namely, \HOLthm[tt]{CheckerProof.initial_judgement_thm} and \HOLthm[tt]{CheckerProof.valid_judgements_thm}.
+
+\noindent The correctness of this definition rests on the equivalences we have already established between the specifications and their computational counterparts, namely, \HOLtm{Initial_Judgement_dec} and \HOLtm{initial_judgement}, and \HOLtm{valid_judgements_dec} and \HOLtm{valid_judgements}. 
 Consequently a formal certificate is validated if and only if it is valid according to
 the HOL specification of \HOLtm{Valid_Certificate}.
+
 \begin{small}
 \begin{holthmenv}
-  \HOLthm[def,width=80]{CheckerProof.Check_Parsed_Certificate_iff_Valid_Certificate}
+\HOLthm[def,width=80]{CheckerProof.Check_Parsed_Certificate_iff_Valid_Certificate}
 \end{holthmenv}
 \end{small}
+
 \noindent
 Since the HOL specification realises the protocol, a formal certificate is validated if and only if it meets the protocol's expectation. 
 \section{Translation into CakeML and Code Extraction}
@@ -720,7 +746,7 @@ Since the HOL specification realises the protocol, a formal certificate is valid
 The verified certificate-checking function,
 \HOLtm{Check_Parsed_Certificate}, described above, is a good
 starting point for a verifier, but still has two shortcomings: it is a
-function in logic rather than an executable program, and a
+function in logic rather than an executable program, and as a
 consequence, 
 its inputs must be provided as elements of the respective data
 types, whereas certificates are purely textual.
@@ -734,11 +760,13 @@ executable is presented at the end of this section.
 %\noindent\emph{Parsing}
 The input to the verifier is a textual certificate file, in a format similar to Figure~\ref{fig;figure}.
 We specify this file format indirectly, by defining an executable specification of a certificate parser.
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.Check_Certificate_def}
 \end{holthmenv}
 \end{small}
+
 Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line. 
 Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, above, that parses lines from the file then calls \HOLtm{Check_Parsed_Certificate} to do the verification.
 
@@ -752,19 +780,21 @@ The result is a complete CakeML program whose I/O semantics is verified, witness
 
 
 To elaborate further on the above step, the impure wrapper \HOLtm{check_count} calls two impure functions \HOLtm{parse_line} and \HOLtm{loop}. The former, calls I/O functions to read one line at a time from the concrete certificate given as lines on the standard input  and parse it. It comprises  two phases; one for the header of the certificate file consisting of the quota, seats number, and initial list of candidates, and the other is for parsing judgement lines. If the parsing fails due to malformedness of a line, the parser messages the appropriate error on the standard output with the line number included. However, if it succeeds, the parsed line is fed to the \HOLtm{loop} function to check if the transition from two consecutive parsed judgement lines is a valid step. The parsing and checking of judgement lines continues until either all steps are verified as correct, or an incorrect step is encountered. The following theorem asserts that the \HOLtm{loop} function returns the correct output \HOLtm{NONE} if and only if the initial line of judgements in the certificate file is indeed valid and all steps taken to move from one judgement line to its successor are correct. 
+
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=90]{check_countProg.loop_thm}
 \end{holthmenv}
 \end{small}
 %\paragraph{Compilation in Logic}
+
 \noindent\emph{Compilation in Logic}
 Finally, we would like an executable verifier in machine code (rather than CakeML code).
 To produce this, we use the verifed CakeML compiler~\cite{DBLP:conf/icfp/TanMKFON16}, which can be executed within the theorem prover itself.
 This is a time-consuming process: compilation within logic can be a thousand times slower (e.g., half an hour) than running the compiler outside the logic (a second or two).
 But the payoff is a final theorem which only mentions the final generated machine-code implementation: all dependence on the CakeML language and implementation is discharged by proof.
 
-%\paragraph{Final Theorem}
+\smallskip %\paragraph{Final Theorem}
 \noindent\emph{Final Theorem}
 The final theorem, which we explain further below, is about the generated machine code, represented by the constant \HOLtm{check_count_compiled}.
 \begin{small}
@@ -772,14 +802,16 @@ The final theorem, which we explain further below, is about the generated machin
   \HOLthm[width=80]{check_countProof.check_count_compiled_thm}
 \end{holthmenv}
 \end{small}
-We assume (\HOLtm{x64_installed}) that this code is loaded into memory in an x86-64 machine represented by \HOLtm{mc} and \HOLtm{ms}, and that the command line (\HOLtm{cl}) and file system (\HOLtm{fs}) are well-formed.
+
+\noindent We assume (\HOLtm{x64_installed}) that this code is loaded into memory in an x86-64 machine represented by \HOLtm{mc} and \HOLtm{ms}, and that the command line (\HOLtm{cl}) and file system (\HOLtm{fs}) are well-formed.
 The conclusion of the theorem concerns the semantics (\HOLtm{machine_sem}) of executing the machine: it will terminate successfully (or fail if there is not enough memory) with a trace of I/O events (\HOLtm{io_events}) such that if we replay those events on the initial file system, we obtain a resulting file system \HOLtm{fs'} for which the string \HOLtm{"Certificate OK\n"} is printed on standard output if and only if \HOLtm{Check_Certificate} succeeds on the lines of standard input.
 \section{Experimental Results}
 We have tested our approach against some of the past Australian
-Legislative Assembly elections in the Australian Capital Territory for years 2008 and 2012 (Figure~\ref{ref;figure2})\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}. The certificates have been produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
-\vspace*{-0.3cm}
-\begin{small}
+Legislative Assembly elections in the Australian Capital Territory for years 2008 and 2012 (Figure~\ref{ref;figure2}).\footnote{Tests were conducted on one core of an Intel Core i7-7500U CPU~\@ 2.70GHz$\times$4 Ubuntu~16.4 LTS}
+The certificates were produced by the Haskell program extracted from our previous formalisation of the same protocol in Coq~\cite{DBLP:conf/voteid/GhaleGP17}.
+
 \begin{figure}
+\begin{small}
 \centering
 %\begin{tabu} to 0.86\textwidth {X[c] X[c] X[c] X[c] X[c] X[c]}
 \begin{tabular}{|l |c |c |c |c |c|c|}
@@ -799,10 +831,9 @@ Molonglo&$91534$&$7$&$27$&$286$&158.7&2012\\
 \end{tabular}
 \caption{ACT Legislative Assembly 2008 and 2012}
 \label{ref;figure2}
-\end{figure}
 \end{small}
-\vspace*{-0.5cm}
-\noindent
+\end{figure}
+
 We also evaluated the verifier on certificates obtained through
 randomly generated ballots. We vary two parameters: the number of
 ballots and the size of each ballot. Figure~\ref{ref;figure3} shows
@@ -849,7 +880,8 @@ $18$&$180.5$&$325$\\
 \vspace*{-0.5cm}
 \noindent
 We have also implemented the protocol in an unverified certifying
-Haskell program\footnote{Source code can be found in the Github repository given in the second page}. The unverified program was then tested on
+Haskell program.\footnote{Source code can be found in the Github repository given in the second page}
+The unverified program was then tested on
 ballots of the same ACT Legislative Assembly elections.
 We have then verified the certificates produced by this program for
 each of the districts. The result shows that the certificates of the
@@ -886,7 +918,7 @@ intermediate transition on line 6 in both certificates.
 %\end{figure}
 Based on the aforementioned error message, we only need to
 inspect a very small part of the certificate. Upon closer
-inspection, we have uncovered a subtle error in the implementation
+inspection, we uncovered a subtle error in the implementation
 of the elimination rule. 
 On the other hand, the same program successfully (and correctly) computes election
 results of other districts which substantiates the subtlety of the
@@ -934,24 +966,24 @@ counting, elimination, transfer, electing and declaration of
 winners, we only need to change some of these rules locally to
 capture different variants.
 For example, the STV version used in the Senate
-elections of Australia requires transfer of excessive votes of an
+elections of Australia requires transfer of excess votes of an
 elected candidate before any other rule can apply. This difference
 can be formalised in our system simply by modifying a single
 component of the \textsf{TRANSFER} rule. So for establishing
 verification results, we simply have to discharge a few
 correspondences in HOL. Furthermore, the steps of translation into
-CakeML and executable extraction process mainly remain unaffected.
+CakeML and the process of extracting a verified executable remains mostly unaffected.
 
 
 \section{Related Work}
 
-Given that the count-as-recorded property concerns us, we  simply overview a few existing work from the perspective of their tally verification methods. Moreover, there is  few work combining methods of theorem proving with certification
+Given our concern with the count-as-recorded property, we provide an overview of existing work from the perspective of their tally verification methods. Moreover, there is  few work combining methods of theorem proving with certification
 for verification intentions. However they are not carried out for vote counting~\cite{DBLP:journals/jar/AlkassarBMR14,DBLP:conf/itp/GreenawayAK12}.
 On the other hand, in context of vote counting, merely few certifying algorithms
 exist which are not accompanied by any verified checker~\cite{DBLP:conf/voteid/GhaleGP17,DBLP:conf/itp/PattinsonT17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/acsw/VerityP17}.
 
 
-The existing certificate-producing implemetations of vote counting
+The existing certificate-producing implementations of vote counting
 mainly formalise a voting protocol inside the Coq theorem prover
 and then prove some desired properties about the formalised
 specification, and then extract the development into Haskell~\cite{DBLP:conf/voteid/GhaleGP17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/acsw/VerityP17} or
