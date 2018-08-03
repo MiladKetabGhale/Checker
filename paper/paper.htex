@@ -662,8 +662,8 @@ re-compute (possibly using a verified
 program)~\cite{DBLP:conf/stoc/BlumK89}. While this makes
 perfect sense for a \emph{deterministic} program, voting protocols
 generally employ tie-breaking techniques that lead to
-non-determinism. In the case of STV, this for example applies when
-two candidates are tied for exclusion where it is permissible to
+non-determinism. In the case of STV, for example, this applies when
+two candidates are tied for exclusion. In this situation it is permissible to
 eliminate \emph{either} of the candidates. From the perspective of certified computation, this is a non-issue,
 as the certificate simply records which choice has been made (and
 why this choice is permissible). Compared to simply re-computing,
@@ -921,7 +921,7 @@ inspect a very small part of the certificate. Upon closer
 inspection, we uncovered a subtle error in the implementation
 of the elimination rule. 
 On the other hand, the same program successfully (and correctly) computes election
-results of other districts which substantiates the subtlety of the
+results for other districts, substantiating the subtlety of the
 error.
 We argue that precisely because of such delicacies in the STV
 protocol and hence their implementation, we advocate that vote
@@ -999,27 +999,39 @@ program~\cite{DBLP:conf/itp/PattinsonT17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/
 
 
 In the context of certified computation, 
-Alkassar et al~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified
+Alkassar et al.~\cite{DBLP:journals/jar/AlkassarBMR14} combine certified
 computation and theorem proving with methods of code verification to
 establish a framework for validation of certifying algorithms in the
 C programming language.  With the help of the VCC
 tool~\cite{DBLP:conf/icse/DahlweidMSTS09}, pre- and
 postconditions are generated that are syntactically generalized in the Isabelle 
-theorem prover to be discharged. The user has to trust the VCC tool, and there
+theorem prover and then discharged. The user has to trust the VCC tool, and there
 is duplication of effort in that one has to generalise the
 conditions imposed by the VCC and then implement them manually in
 Isabelle to prove. To ameliorate this disadvantage, Noschinski et
-al~\cite{DBLP:conf/nfm/NoschinskiRM14} replace the intermediate
+al.~\cite{DBLP:conf/nfm/NoschinskiRM14} replace the intermediate
 step where VCC is invoked by the
 AutoCorres~\cite{DBLP:conf/itp/GreenawayAK12} verifier which
 provably correctly translates (part of) the C language into Isabelle in
-a semantic preserving manner. Nonetheless one has to trust that the machine code behaviour correspondes to its top-level C encoding.
+a semantics-preserving manner. Nonetheless one has to trust that the machine code behaviour corresponds to its top-level C encoding.
 
 
+% TODO: why are these three pieces of work all described in the same paragraph?
+Some election protocols~(\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}) do require a witness for the tallying result, which should then be verified for correctness. 
+Other work (e.g.,~\cite{DBLP:conf/esorics/CortierGGI14}) implements algorithms in programming environments such as Python. 
+However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. 
+% Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verification, and subsequently trust, gap in their work.  
+% TODO: perhaps there could be a new paragraph here
+Finally, Cortier et al.~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions for elections that allow voting for one candidate. 
+This is done inside the dependently-typed programming language $F^{\star}$. 
+The $F^{\star}$ environment is implemented by a compiler that translates into RDCIL, a dialect of .NET bytecode. 
+The verification also depends on the external SMT solver Z3.
+The size of these tools' implementations makes for a very large trusted code base. 
+% The compiler lacks verification of correct translation with respect to either semantic or syntax into the target domain. 
+% Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. 
+% Moreover, they call the external SAT solver Z3 to perform some computations. 
+% The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environments remains a question.  
 
-There are some election protocols which require a witness for the tallying result and verify it for correctness, however they are essentially theoretical attempts in designing such protocols/systems~\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}. Some work~\cite{DBLP:conf/esorics/CortierGGI14} implement their algorithm in programming environments such as Python. However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verification, and subsequently trust, gap in their work.  Cortier et al~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions inside the dependently programming language $F^{\star}$. Their protocol concerns elections which allow voting for one candidate only. But more importantly, the environment $F^{\star}$ which they rely on, is implemented by a compiler that translates the syntax into RDCIL, a dialect of .NET bytecode. The compiler lacks verification of correct translation with respect to either semantic or syntax into the target domain. Therefore, one cannot guarantee the machine code would behave as the formalised counting protocol. Moreover, they call the external SAT solver Z3 to perform some computations. The mechanisms of these calls and whether they respect the semantic equivalences of computations obtained in different environments remains a question.  
-
-%\vspace*{-0.1cm}
 \section{Conclusion}
 Correct, publicly verifiable, transparent election count is a key
 constituent of establishing trustworthiness in the final outcome. The tool developed here has clarity in encoding,
