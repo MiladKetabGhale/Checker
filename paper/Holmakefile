@@ -1,4 +1,4 @@
-paper.pdf : paper.tex holtexbasic.sty llncs.cls splncs03.bst aliascnt.sty remreset.sty
+paper.pdf : paper.tex holtexbasic.sty llncs.cls splncs03.bst aliascnt.sty remreset.sty paper.bib delta2.bib ev.bib
 	latexmk -pdf paper
 
 HOLHEAP = ../compilation/proofs/heap
