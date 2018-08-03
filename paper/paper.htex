@@ -948,7 +948,7 @@ Therefore we prove that executable checker is verified to behave according to it
 To obtain this level of verification, we rely on the verified proof-synthesis tool of CakeML, the mechanism for producing deeply embedded equivalent assertions of HOL functions into CakeML environment, the Characteristic Formulae of CakeML to assert that the pure (deeply embedded functions) behave consistently with the impure I/O calls, and the verified compiler that generates executables that provably respect all of the above proofs.
  
 Furthermore, the separation of the program from proofs
-offered in the CakeML+HOL environment makes our formalisation easier to understand.
+offered in the combined CakeML and HOL environment makes our formalisation easier to understand.
 In particular, we believe that
 external scrutineers should be able to examine the specification of the
 framework to understand what it does, rather than having to also get to grips with CakeML proofs and computational components. 
