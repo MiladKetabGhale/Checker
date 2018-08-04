@@ -23,9 +23,10 @@ val wfFS_def = Define `
   wfFS fs <=> fsFFIProps$wfFS fs ∧ fsFFIProps$STD_streams fs ∧ TextIOProof$stdo 1 "stdout" fs (mlstring$strlit "")`;
 
 val x64_installed_def = Define `
-  x64_installed (c,d,conf) ffi mc ms <=>
+  x64_installed (c,d,cf) ffi mc ms <=>
+    ∃cbspace data_sp.
     x64_configProof$is_x64_machine_config mc ∧
-    backendProof$installed c d (lab_to_target$config_ffi_names conf) ffi
+    backendProof$installed c cbspace d data_sp (lab_to_target$config_ffi_names cf) ffi
       (backendProof$heap_regs (stack_to_lab$config_reg_names (backend$config_stack_conf x64_config$x64_backend_config))) mc ms`
 (* -- *)
 
@@ -55,7 +56,7 @@ val check_count_compiled_thm = Q.store_thm("check_count_compiled_thm",
   \\ simp[GSYM CONJ_ASSOC]
   \\ disch_then assume_tac
   \\ simp[x64_installed_def,check_count_compiled_def]
-  \\ disch_then assume_tac
+  \\ disch_then (CHOOSE_THEN (CHOOSE_THEN assume_tac))
   \\ qmatch_asmsub_rename_tac`basis_ffi cl`
   \\ assume_tac (UNDISCH compile_correct_applied)
   \\ asm_exists_tac
