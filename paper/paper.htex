@@ -543,9 +543,11 @@ initial list of competing candidates.
 Also, at every stage of the count, every candidate has exactly
 one tally and one pile (of votes
 counted in their favour). Therefore, if a judgement in a certificate
-maliciously allocates more than one tally to a single candidate, the
-bug is detected and the certificate rejected as invalid.  We express
-this condition as follows.
+maliciously allocates no tally, or more than one tally for a single candidate,
+this
+error is detected and the certificate is rejected as invalid.  We
+express the fact that tallies need to be recorded for every
+candidate as follows:
 \begin{small}
 \begin{holthmenv}
   \HOLthm[def,width=80]{CheckerSpec.Valid_PileTally_def}
@@ -577,17 +579,19 @@ Additionally, the function \HOLtm{Valid_PileTally_dec2} determines if each eleme
 \end{holthmenv}
 \end{small}
 
-\noindent\emph{Side Conditions.} Item 7 of the protocol on page 5 specifies when and how a candidate shall be eliminated from the election. It stipulates that
+\noindent\emph{Side Conditions.} Item 7 of the protocol on Page 5 specifies when and how a candidate shall be eliminated from the election. It stipulates that
 %\vspace*{-0.4cm}
 \begin{itemize}
-  \item[a.]  there are empty seats 
- \item[b.] there are no votes to count at this stage and there are no pending transfer
-\item[c.] determine the candidate $c$ who has the minimal amount of tally
+  \item[a.]  there still seats to fill
+ \item[b.] there are no votes to count at this stage and there are
+ no pending transfers
+\item[c.] the candidate $c$ has the least tally 
 \item[d.] eliminate the candidate $c$
- \item[e.] votes of the eliminated candidate $c$ are transferred according to the next preference with the same value.
+ \item[e.] votes of the eliminated candidate $c$ are transferred
+ according to the next preference with the same transfer value.
  \end{itemize}
  %\vspace*{-0.3cm}
-To illustrate how explicit clauses of the protocol are formalised, we explain the way that we have specified item (d) inside HOL. We introduce the predicate \textsf{equal\_except} which formally asserts when two lists are equal except for one exact element.
+To illustrate how clauses of the protocol are formalised explicitly, we explain the way that we have specified item (d) inside HOL. We introduce the predicate \textsf{equal\_except} which formally asserts when two lists are equal except for one exact element.
 %\vspace*{-0.2cm}
 \begin{small}
 \begin{holthmenv}
@@ -631,7 +635,8 @@ explicit side conditions in the definition of \emph{elimination}, we
 can present the formalisation of this rule in HOL as a predicate.
 
 
-The \textsf{ELIM\_CAND} rule specifies what it means to legitimately eliminate a given candidate $c$. It is defined on three kinds of input: a
+The \textsf{ELIM\_CAND} rule specifies what it means to legitimately
+eliminate a given candidate $c$. It relates three data items: a
 candidate, a triple composed of three fixed parameters which are the
 quota, vacancies, and the initial list of candidates, and two
 judgements $j_{1}$ and $j_{2}$ (the premiss and the conclusion of the rule). 
@@ -757,7 +762,7 @@ checking certificates.  Our final theorem about the verifier
 executable is presented at the end of this section.
 
 
-\paragraph{Parsing}
+\paragraph{Parsing.}
 %\noindent\emph{Parsing}
 The input to the verifier is a textual certificate file, in a format similar to Figure~\ref{fig;figure}.
 We specify this file format indirectly, by defining an executable specification of a certificate parser.
@@ -768,10 +773,11 @@ We specify this file format indirectly, by defining an executable specification 
 \end{holthmenv}
 \end{small}
 
+\noindent
 Specifically, we define functions that take a string representing a line in the file and return either \HOLtm{NONE} or \HOLtm{SOME (x:unit)}, where \HOLtm{x} is the parsed information from the line. 
 Given these parsing functions --- \HOLtm{parse_quota}, \HOLtm{parse_seats}, etc. --- we write the verifier as a function, above, that parses lines from the file then calls \HOLtm{Check_Parsed_Certificate} to do the verification.
 
-\paragraph{Translation into CakeML and I/O Wrapper}
+\paragraph{Translation into CakeML and I/O Wrapper.}
 %\noindent\emph{Translation into CakeML and I/O Wrapper}
 Using prior work on proof-producing synthesis~\cite{JFP14} we can automatically synthesise an implementation of the function \HOLtm{Check_Certificate} in the programming language CakeML.
 The synthesis tool for CakeML produces a theorem relating the semantics of the synthesised program back to the logical function.
@@ -788,6 +794,7 @@ To elaborate further on the above step, the impure wrapper \HOLtm{check_count} c
 \end{holthmenv}
 \end{small}
 %\paragraph{Compilation in Logic}
+
 
 \noindent\emph{Compilation in Logic}
 Finally, we would like an executable verifier in machine code (rather than CakeML code).
@@ -937,9 +944,12 @@ Universal verifiability is a security requirement introduced for measuring verif
 Our framework only aims at addressing verification of the count-as-recorded subproperty. 
 We do not attempt to introduce an election protocol for answering expectations of the  universal verifiability. 
 Therefore, verification of other two subproperties and the eligibility criterion falls outside the focus of the current work. 
-However, our tool can be perfectly employed by any election protocol which accommodates STV scheme and uses Mix Net~\cite{DBLP:journals/ieeesp/Chaum04} for anonymising and decrypting ballots. 
+However, our tool can be perfectly employed by any election protocol
+which accommodates STV scheme and uses Mixnets~\cite{DBLP:journals/ieeesp/Chaum04} for anonymising and decrypting ballots. 
 For example, some protocols require authorities to produce a witness for tallying, and then verify it is a proof of correctness for the announced tallying result~\cite{DBLP:conf/post/CortierEKMW15}. 
-Such systems can adapt certification and the checker for (a) offering an independently checkable witness of tallying, and (b) provably correctly verifying the certificate.  
+Such systems can adapt certification and the checker for (a)
+offering an independently checkable witness of tallying, and (b)
+verifying the certificate in a provably correct way.  
 Finally, the certificates which the checker operates on include the exact ballots published by election authorities after the tallying is complete, and are therefore publicly available. 
 Hence, the certificate would not compromise privacy concerns such as vote buying or voter coercion any more than the existing practice of ballot publication. 
 
@@ -982,7 +992,11 @@ CakeML and the process of extracting a verified executable remains mostly unaffe
 
 \section{Related Work}
 
-Given our concern with the count-as-recorded property, we provide an overview of existing work from the perspective of their tally verification methods. Moreover, there is  few work combining methods of theorem proving with certification
+Given that our main concern with is the count-as-recorded property,
+we provide an overview of existing work from the perspective of
+their tally verification methods. We also compare with related work
+that combines theorem proving and certified computation.
+
 for verification intentions. However they are not carried out for vote counting~\cite{DBLP:journals/jar/AlkassarBMR14,DBLP:conf/itp/GreenawayAK12}.
 On the other hand, in context of vote counting, merely few certifying algorithms
 exist which are not accompanied by any verified checker~\cite{DBLP:conf/voteid/GhaleGP17,DBLP:conf/itp/PattinsonT17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/acsw/VerityP17}.
@@ -1024,8 +1038,10 @@ a semantics-preserving manner. Nonetheless one has to trust that the machine cod
 % TODO: why are these three pieces of work all described in the same paragraph?
 Some election protocols~(\cite{DBLP:conf/ccs/KustersTV10,DBLP:journals/iacr/CortierGKMT16}) do require a witness for the tallying result, which should then be verified for correctness. 
 Other work (e.g.,~\cite{DBLP:conf/esorics/CortierGGI14}) implements algorithms in programming environments such as Python. 
-However the algorithm, correctness proof of the algorithm, and the implementation occur in different unverified environments. 
-% Lack of any formal demonstration as why the three steps are provably correctly connected to one another, leaves a verification, and subsequently trust, gap in their work.  
+However the algorithm, the correctness proof of the algorithm, and the implementation occur in different unverified environments. 
+% Lack of any formal demonstration as why the three steps are
+% provably correctly connected to one another, leaves a
+% verification, and subsequently a trust, gap in their work.  
 % TODO: perhaps there could be a new paragraph here
 Finally, Cortier et al.~\cite{DBLP:conf/post/CortierEKMW15} present simple formally stated pre- and post-conditions for elections that allow voting for one candidate. 
 This is done inside the dependently-typed programming language $F^{\star}$. 
