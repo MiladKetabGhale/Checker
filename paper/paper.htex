@@ -145,15 +145,15 @@ descriptive.
 
 
 Second, in tandem with the logical specification of each rule, we
-define a Boolean-valued function that checks whether or not the rule has
+define a boolean-valued function that checks whether or not the rule has
 been applied correctly.  This then directly gives rise to the
 verifier that, at every step, just checks whether any of the rules
-is applicable, using the corresponding Boolean-valued function.
+is applicable, using the corresponding boolean-valued function.
 
 Third, we establish correspondence between the logical
 definitions and their computational counterparts. This boils
 down to formally establishing that the logical specification holds
-if and only if the Boolean-valued function returns true, which in
+if and only if the boolean-valued function returns true, which in
 turn implies the correctness of the certificate verifier.
 This allows us to conclude that a valid certificate indeed
 implies that the election protocol has been carried out in
@@ -175,7 +175,8 @@ demand that a program produces a certificate that we can then
 independently verify. This has several advantages. For one, it is
 much less labour intensive to verify the verifier, compared with
 verifying the counting program. Second, having verifiable certificates at hand
-meets the goal of count-as-recorded subproperty~\cite{DBLP:journals/iacr/CortierGKMT16}.
+establishes 
+the count-as-recorded property~\cite{DBLP:journals/iacr/CortierGKMT16}.
 Third, we achieve correctness over a minimal trust base through the
 use of CakeML.
 
@@ -209,7 +210,7 @@ preference order.
 Each election defines a \emph{quota}, i.e. a minimal set of votes
 that a candidate must receive in order to be elected. The count
 starts by counting all voters' \emph{first preferences}, and
-candidates who reach the quota are elected, but more often than not,
+candidates who reach the quota are elected, but in general
 there will still be seats to fill.  This is effected by two
 mechanisms:
 \begin{enumerate}
@@ -242,7 +243,7 @@ proportional to the size of the surplus.
 \noindent
 For example, if a candidate exceeds the quota by 20\%, all first
 preference votes for that candidate are re-assigned a weight of
-$0.2$ and re-injected into the count, and regarded as
+$0.2$ and injected back into the count, and regarded as
 first-preference votes for the subsequently listed candidate. In
 other words, the number of first preference votes for a candidate is
 the sum of the \emph{weights} of ballots where that candidate is
@@ -360,7 +361,7 @@ $b_4=([B,A],1)$, $b_5=([C,B,A],1)$.  Each ballot is a pair, where
 the first component is a preference-ordered list of candidates, and
 the second is the transfer value (initially set to $1$). The
 certificate consists of a \emph{header} that specifies the quota as
-a fraction (computed according to the Droop formula~\cite{10.2307/2339223}), the number of seats to be filled, and the list of
+a fraction (computed according to the Droop quota~\cite{10.2307/2339223}), the number of seats to be filled, and the list of
 candidates being voted on.
 The fourth line is the election result, and the remainder of the
 certificate consists of the intermediate steps that lead to this
@@ -397,7 +398,7 @@ B[$b_4$] C[$b_5$]; []; []; [A,B,C]} \RightLabel{\tiny count}
 Certificate} \label{fig;figure} \end{figure} \end{small}
 
 The certificate records every step of the count, where a step
-corresponds to a rule application, where the rules themselves are
+corresponds to a rule application, and the rules themselves are
 modelled on valid actions that of counting officers to progress the
 count. The inspection of a certificate therefore corresponds to
 witnessing all the individual steps that take place in a
