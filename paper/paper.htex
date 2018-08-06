@@ -997,11 +997,6 @@ we provide an overview of existing work from the perspective of
 their tally verification methods. We also compare with related work
 that combines theorem proving and certified computation.
 
-for verification intentions. However they are not carried out for vote counting~\cite{DBLP:journals/jar/AlkassarBMR14,DBLP:conf/itp/GreenawayAK12}.
-On the other hand, in context of vote counting, merely few certifying algorithms
-exist which are not accompanied by any verified checker~\cite{DBLP:conf/voteid/GhaleGP17,DBLP:conf/itp/PattinsonT17,DBLP:conf/ausai/PattinsonS15,DBLP:conf/acsw/VerityP17}.
-
-
 The existing certificate-producing implementations of vote counting
 mainly formalise a voting protocol inside the Coq theorem prover
 and then prove some desired properties about the formalised
