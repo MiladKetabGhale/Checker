@@ -582,7 +582,7 @@ Additionally, the function \HOLtm{Valid_PileTally_dec2} determines if each eleme
 \noindent\emph{Side Conditions.} Item 7 of the protocol on Page 5 specifies when and how a candidate shall be eliminated from the election. It stipulates that
 %\vspace*{-0.4cm}
 \begin{itemize}
-  \item[a.]  there still seats to fill
+  \item[a.]  there are still seats to fill
  \item[b.] there are no votes to count at this stage and there are
  no pending transfers
 \item[c.] the candidate $c$ has the least tally 
@@ -992,7 +992,7 @@ CakeML and the process of extracting a verified executable remains mostly unaffe
 
 \section{Related Work}
 
-Given that our main concern with is the count-as-recorded property,
+Given that our main concern is with the count-as-recorded property,
 we provide an overview of existing work from the perspective of
 their tally verification methods. We also compare with related work
 that combines theorem proving and certified computation.
